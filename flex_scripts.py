@@ -9,11 +9,17 @@ from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron
 from flextegrity import Tetrahedron, InvTetrahedron, RD, Icosahedron, Struts
 from flextegrity import twelve_around_one, draw_poly, draw_vert
 from qrays import Qvector
+from itertools import cycle
 
 import os
 import numpy as np
 import math
 
+from itertools import permutations
+g = permutations((2,1,1,0))
+UNIQUE = {p for p in g}  # set comprehension
+
+IVM_DIRS = {Qvector(x) for x in UNIQUE}
 PHI = (1 + math.sqrt(5))/2
 
 def ch():
@@ -211,12 +217,119 @@ def animation4(targdir="anim4"):
             draw_poly(ico, target)
             draw_poly(cube, target)
             draw_poly(s, target)
+            
+def one_hop_away(thirteen_balls):
+    the_ball, *twelve_balls = thirteen_balls
+    newlist = [the_ball]
+    while True:
+        for idx, ball in enumerate(twelve_balls):
+            if (the_ball - ball).length() == 1.0:
+                newlist.append(ball)
+                the_ball = ball
+                break
+        del twelve_balls[idx]
+        if not twelve_balls:
+            break
+    return newlist
     
+def animation5(targdir="anim5"):
+    targdir = os.path.join(".",targdir)
+    if not os.path.isdir(targdir):
+        os.mkdir(targdir)
+
+    thirteen_balls = [Qvector((0,0,0,0))] + list(IVM_DIRS)
+     
+    neighbors = one_hop_away(thirteen_balls)
+    
+    for frame_id in range(13):
+        filename = f"balls{frame_id:03}.pov"
+            
+        with open(os.path.join(targdir,filename), "w") as target:
+            target.write(pov_header) 
+            rd = RD()
+            draw_poly(rd, target)
+
+            for idx, p in enumerate(twelve_around_one(rd)):
+                if idx == frame_id:
+                    draw_vert(neighbors[idx], 
+                              c="rgb <1,0,0>", 
+                              r=0.5, t=target)
+                draw_poly(p, target)
+                
+            if 12 == frame_id:
+                draw_vert(neighbors[12], 
+                          c="rgb <1,0,0>", 
+                          r=0.5, t=target)
+
+def animation10(targdir="anim10"):
+    targdir = os.path.join(".",targdir)
+    if not os.path.isdir(targdir):
+        os.mkdir(targdir)
+
+    thirteen_balls = [Qvector((0,0,0,0))] + list(IVM_DIRS)
+     
+    neighbors = one_hop_away(thirteen_balls)
+    
+    for frame_id in range(13):
+        filename = f"balls{frame_id:03}.pov"
+            
+        with open(os.path.join(targdir,filename), "w") as target:
+            target.write(pov_header) 
+            rd = RD()
+            draw_poly(rd, target)
+
+            for idx, p in enumerate(twelve_around_one(rd)):
+                if idx <= frame_id:
+                    draw_vert(neighbors[idx], 
+                              c="rgb <1,0,0>", 
+                              r=0.5, t=target)
+                draw_poly(p, target)
+                
+            if 12 == frame_id:
+                draw_vert(neighbors[12], 
+                          c="rgb <1,0,0>", 
+                          r=0.5, t=target)
+ 
+def animation11(targdir="anim11"):
+    targdir = os.path.join(".",targdir)
+    if not os.path.isdir(targdir):
+        os.mkdir(targdir)
+
+    thirteen_balls = [Qvector((0,0,0,0))] + list(IVM_DIRS)
+     
+    neighbors = one_hop_away(thirteen_balls)
+    
+    colors = cycle(["rgb <1,0,0>", "rgb <.8,0,.2>", "rgb <.6,0,.4>", 
+                    "rgb <.4,0,.6>", "rgb <.2,0,.8>", "rgb <0,.5,.2>", 
+                    "rgb <0,.7,.2>"])
+    
+    rainbow = [next(colors) for _ in range(13)]
+    
+    for frame_id in range(13):
+        filename = f"balls{frame_id:03}.pov"
+            
+        with open(os.path.join(targdir,filename), "w") as target:
+            target.write(pov_header) 
+            rd = RD()
+            draw_poly(rd, target)
+
+            for idx, p in enumerate(twelve_around_one(rd)):
+                if idx <= frame_id:
+                    draw_vert(neighbors[idx], 
+                              rainbow[idx],
+                              r=0.4, t=target)
+                draw_poly(p, target)
+                
+            if 12 == frame_id:
+                draw_vert(neighbors[12],
+                          rainbow[12],
+                          r=0.4, t=target)
 if __name__ == "__main__":
-    ch()
+    # animation5()
     # sphere_packing()
     # jitterbug()
     # animation()
-    # animation4()
+    # animation10()
+    animation11()
     # logo()
     
