@@ -1,10 +1,13 @@
 import bpy
-from qrays import Qvector
 import sys
-from functools import partial
 
 sys.path.append("C:\\Users\\Kirby\\School_of_Tomorrow")
+from qrays import Qvector
+
+
+from functools import partial
 from itertools import permutations
+
 g = permutations((2,1,1,0))
 
 ORIGIN_IVM = Qvector((0,0,0,0))
