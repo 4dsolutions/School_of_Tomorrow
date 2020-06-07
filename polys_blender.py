@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Mar  8 11:40:54 2020
+Created on Sat June 6, 2020
 
 @author: Kirby Urner
 """
 
 import bpy
-from math import hypot, acos, radians
+from math import radians
 
 class Polyhedron:
     """
@@ -78,7 +78,11 @@ def draw_vert(v, c, r):
     x,y,z = v.x, v.y, v.z
     bpy.ops.mesh.primitive_ico_sphere_add(radius=r, enter_editmode=False, 
                                           location=(x, y, z))
-
+    obj = bpy.context.active_object
+    mymat = bpy.data.materials.new("color_mat")
+    mymat.diffuse_color = c
+    obj.data.materials.append(mymat)
+    
 def draw_face(f, c): pass
 
 def blender_edge(etuple):
@@ -89,51 +93,12 @@ def blender_edge(etuple):
           
     # used to translate from origin
     data[0]  = midpoint.xyz()
-    print("midpoint:", data[0])
 
     # tip = translated endpoint (w/ midpoint at 0,0,0)
     tip = etuple[1]-midpoint
 
     # length of cylinder
     hyp = tip.length()
-    print("hypot:", hyp)
-    data[1]=2*hyp
-
-    print("Spherical:", tip.xyz().spherical())
-    # height above Y plane             
-    xzhyp = hypot(tip.xyz().x,tip.xyz().z)
-
-    # rotate zx plane around north/south (y) axis to
-    # have xy plane intersect tip
-    if xzhyp!=0:
-      mval = tip.xyz().z/xzhyp           
-      data[2] = acos(mval)
-
-    if tip.xyz().x<=0: data[2] = -data[2]
-
-    # rotate about x axis, tilting y axis to tip
-    if hyp!=0: 
-       mval = tip.xyz().y/hyp
-       data[3] = acos(mval)
-      
-    return data #object handle for array w/ new data
-
-def blender_edge2(etuple):
-    data  = [(0,0,0),0,0,0]
-
-    # midpoint of edge between vert0 and vert1
-    midpoint = (etuple[0]+etuple[1])*(1/2.0)
-          
-    # used to translate from origin
-    data[0]  = midpoint.xyz()
-    print("midpoint:", data[0])
-
-    # tip = translated endpoint (w/ midpoint at 0,0,0)
-    tip = etuple[1]-midpoint
-
-    # length of cylinder
-    hyp = tip.length()
-    print("hypot:", hyp)
     data[1]=2*hyp
 
     r, phi, theta = tip.xyz().spherical()        
@@ -143,21 +108,22 @@ def blender_edge2(etuple):
     return data #object handle for array w/ new data
     
 def draw_edge(e, c, r=0.03):
-    bl_data = blender_edge2((e.v0, e.v1))
-    print("bl_data[0]", bl_data[0].xyz)
-    print("bl_data[1]", bl_data[1])
-    print("bl_data[2]", bl_data[2])
-    print("bl_data[3]", bl_data[3])
+    bl_data = blender_edge((e.v0, e.v1))
     
     length,roty,rotz = (bl_data[1], bl_data[2], bl_data[3])
 
     bpy.ops.mesh.primitive_cylinder_add(radius=r, depth=length, 
+                                        end_fill_type = 'NOTHING',
                                         location=(0, 0, 0))
 
     bpy.ops.transform.rotate(value=-roty, orient_axis='Y')    
     bpy.ops.transform.rotate(value=-rotz, orient_axis='Z')
     bpy.ops.transform.translate(value=bl_data[0].xyz)
-
+    obj = bpy.context.active_object
+    mymat = bpy.data.materials.new("color_mat")
+    mymat.diffuse_color = c
+    obj.data.materials.append(mymat)
+    
 def draw_poly(p, v=True, f=False, e=True):
     
     ec = p.edge_color
@@ -236,11 +202,11 @@ class Tetrahedron(Polyhedron):
     
     def __init__(self):
         # POV-Ray
-        self.edge_color = "rgb <{}, {}, {}>".format(1, 165/255, 0) # orange
+        self.edge_color = (1, 165/255, 0, 1) # orange
         self.edge_radius= 0.03
-        self.vert_color = "rgb <{}, {}, {}>".format(1, 165/255, 0) # orange
+        self.vert_color = (1, 165/255, 0, 1) # orange
         self.vert_radius= 0.03
-        self.face_color = "rgb <0, 0, 0>" # not used 
+        self.face_color = (0, 0, 0, 1) # not used 
         
         verts = dict(a = Qvector((1,0,0,0)), #A
                      b = Qvector((0,1,0,0)), #B
@@ -267,9 +233,9 @@ class InvTetrahedron(Polyhedron):
     
     def __init__(self):
         # POV-Ray
-        self.edge_color = "rgb <{}, {}, {}>".format(0, 0, 0) # black
+        self.edge_color = (0, 0, 0, 1) # black
         self.edge_radius= 0.03
-        self.vert_color = "rgb <{}, {}, {}>".format(0, 0, 0) # black
+        self.vert_color = (0, 0, 0, 1) # black
         self.vert_radius= 0.03
         self.face_color = "rgb <0, 0, 0>" # not used 
         
@@ -298,9 +264,9 @@ class Cube (Polyhedron):
 
     def __init__(self):
         # POV-Ray
-        self.edge_color = "rgb <0, 1, 0>"
+        self.edge_color = (0, 1, 0, 1)
         self.edge_radius= 0.03
-        self.vert_color = "rgb <0, 1, 0>"
+        self.vert_color = (0, 1, 0, 1)
         self.vert_radius= 0.03
         self.face_color = "rgb <0, 0, 0>"
 
@@ -331,9 +297,9 @@ class Octahedron (Polyhedron):
 
     def __init__(self):
         # POV-Ray
-        self.edge_color = "rgb <1, 0, 0>"
+        self.edge_color = (1, 0, 0, 1)
         self.edge_radius= 0.03
-        self.vert_color = "rgb <1, 0, 0>"
+        self.vert_color = (1, 0, 0, 1)
         self.vert_radius= 0.03
         self.face_color = "rgb <0, 0, 0>"
         
@@ -361,9 +327,9 @@ class RD (Polyhedron):
         """
 
         def __init__(self):
-            self.edge_color = "rgb <0, 0, 1>"
+            self.edge_color = (0, 0, 1, 1)
             self.edge_radius= 0.03
-            self.vert_color = "rgb <0, 0, 1>"
+            self.vert_color = (0, 0, 1, 1)
             self.vert_radius= 0.03
             self.face_color = "rgb <0, 0, 0>"
 
@@ -391,9 +357,9 @@ class Icosahedron (Polyhedron):
 
     def __init__(self):
         # 8 vertices
-        self.edge_color = "rgb <0, 1, 1>"
+        self.edge_color = (0, 1, 1, 1)
         self.edge_radius= 0.03
-        self.vert_color = "rgb <0, 1, 1>"
+        self.vert_color = (0, 1, 1, 1)
         self.vert_radius= 0.03
         self.face_color = "rgb <0, 0, 0>"
 
@@ -435,9 +401,9 @@ class Cuboctahedron (Polyhedron):
 
     def __init__(self):
         # 8 vertices
-        self.edge_color = "rgb <1, 1, 0>"
+        self.edge_color = (1, 1, 0, 1)
         self.edge_radius= 0.03
-        self.vert_color = "rgb <1, 1, 0>"
+        self.vert_color = (1, 1, 0, 1)
         self.vert_radius= 0.03
         self.face_color = "rgb <0, 0, 0>"
 
@@ -472,9 +438,9 @@ class Struts(Polyhedron):
     
     def __init__(self, c=None, ico=None, suppress=False):
 
-        self.edge_color = "rgb <1, 0, 0>"
+        self.edge_color = (1, 0, 0, 1)
         self.edge_radius= 0.02
-        self.vert_color = "rgb <1, 0, 0>"
+        self.vert_color = (1, 0, 0, 1)
         self.vert_radius= 0.02
         self.face_color = "rgb <0, 0, 0>"
         self.suppress = suppress
