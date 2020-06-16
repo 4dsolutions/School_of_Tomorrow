@@ -5,6 +5,7 @@ Created on Sun Mar  8 11:50:00 2020
 
 @author: mac
 """
+import polys_blender
 from polys_blender import Cuboctahedron, Cube, Octahedron
 from polys_blender import Tetrahedron, InvTetrahedron, RD, Icosahedron, Struts
 from polys_blender import twelve_around_one, draw_poly, draw_vert
@@ -76,10 +77,15 @@ def sphere_packing():
               r=cubocta.vert_radius)
 
 def struts():
+    IVM = {}
+    IVM[0] = [Qvector((0,0,0,0))]
+    IVM[1] = list(IVM_DIRS)
+    print(IVM)
+    polys_blender.IVM = IVM
     radius = 0.5
     cube = Cube()
     ico  = Icosahedron() * (1/PHI * math.sqrt(2)/2) * 1.2 * radius 
-    st   = Struts(cube, ico)
+    st   = Struts(cube, ico, True)
     draw_poly(ico)
     draw_poly(st)
     # draw_poly(cube, target)
@@ -88,4 +94,4 @@ def struts():
     # for c in twelve_around_one(cube):
         # draw_poly(c, target)
     for s in twelve_around_one(st):
-        draw_poly(s)    
+        draw_poly(s, v=False)    
