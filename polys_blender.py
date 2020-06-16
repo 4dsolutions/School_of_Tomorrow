@@ -444,6 +444,8 @@ class Struts(Polyhedron):
         self.vert_radius= 0.02
         self.face_color = "rgb <0, 0, 0>"
         self.suppress = suppress
+        if self.suppress and "IVM" not in globals():
+            raise Exception("No IVM global")
         
         if not c and not ico:
             c = Cube()
@@ -495,7 +497,7 @@ class Struts(Polyhedron):
         """
         A global IVM of integral Qray positions is expected for 
         the suppress feature to work. This could be an n-frequency
-        cuboctahedron or perhaps a layered tetrahedron of half-
+        cuboctahedron or perhaps a layered tetrahedron or half-
         octahedron of balls.
         """
         global IVM
