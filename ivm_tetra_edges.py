@@ -34,7 +34,6 @@ who derived the tet_edges result as well.
  970200,
  999900]
 """
-from typing import Callable
 
 def tri(n : int) -> int:
     "Triangular number n"
@@ -80,11 +79,11 @@ def make_table(n:int, nm:str = "edges_table.txt", s:str = "tetra") -> None:
     """
     n:   up to max frequency
     nm:  name of output file
-    s:   shape used for accumulate 
+    s:   shape used for accumulating 
          ("tetra", "hocta")
     
     prints a file as a side effect, using either 
-    tetra or half-octa edge accumulator as f=
+    tetra or half-octa edge accumulator as f:Callable = global function
     """
     template = "{:3}. {:10d}"
     f = tet_edges if s=="tetra" else half_oct_edges # globals 
