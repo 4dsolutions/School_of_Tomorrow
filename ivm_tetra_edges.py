@@ -10,10 +10,9 @@ in each edge. - Ignacio Larrosa Cañestro, Jan 07 2013
 
 With thanks to
 https://www.instagram.com/struppipohl/
-who derived this result as well.
+who derived the tet_edges result as well.
 
-[edges(n) for n in range(1, 100)]
-Out[21]: 
+>>> [tet_edges(n) for n in range(1, 100)] 
 [6,
  24,
  60,
@@ -37,11 +36,15 @@ def tri(n : int) -> int:
     "Triangular number n"
     return (n)*(n+1)//2
     
-def edges(f : int) -> int:
+def sqr(n : int) -> int:
+    "Square number n"
+    return n**2
+
+def tet_edges(f : int) -> int:
     """
     Each layer of tri(N) balls 3, 10, 15...
     spawns N tetrahedrons of 6 edges each, accumulating 
-    to give a next layer of Tri(N+1) balls, and so on.
+    to give a next layer of tri(N+1) balls, and so on.
     f = frequency (number of intervals along each edge)
     """
     cumm = 0
@@ -49,5 +52,22 @@ def edges(f : int) -> int:
         if layer == 1:  # initial frequency
             cumm = 6
         else:
-            cumm = cumm + tri(layer-1)*6
+            cumm = cumm + tri(layer)*6
     return cumm    
+
+def half_oct_edges(f : int) -> int:
+    """
+    Each layer of sqr(N) balls 4, 9, 16...
+    spawns N half-octahedrons, with 4*N edges
+    to the next layer of N+1 balls per edge, 
+    plus (layer+1)*layer*2 layer edges.
+    """
+    cumm = 0
+    for layer in range(1, f+1):
+        if layer == 1:  # initial frequency
+            cumm = 8
+        else:
+            cumm =  cumm + \
+                    sqr(layer)*4 + \
+                    (layer+1)*layer*2
+    return cumm 
