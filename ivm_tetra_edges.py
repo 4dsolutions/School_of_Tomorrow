@@ -12,6 +12,11 @@ Number of contact points between equal spheres
 arranged in a half octahedron with n - 1 spheres 
 in each edge. - Kirby Urner, Apr 27 2021
 
+https://oeis.org/A300758
+Number of contact points between equal spheres 
+arranged in an octahedron with n - 1 spheres 
+in each edge. - Kirby Urner, Apr 27 2021
+
 With thanks to
 https://www.instagram.com/struppipohl/
 who derived the tet_edges result as well.
@@ -75,18 +80,29 @@ def half_oct_edges(f : int) -> int:
                     (layer+1)*layer*2
     return cumm 
 
+def oct_edges(f : int) -> int:
+    """
+    Two half-octas minus the layer they have in common
+    """
+    return 2*half_oct_edges(f) - (f+1)*f*2
+
 def make_table(n:int, nm:str = "edges_table.txt", s:str = "tetra") -> None:
     """
     n:   up to max frequency
     nm:  name of output file
     s:   shape used for accumulating 
-         ("tetra", "hocta")
+         ("tetra", "hocta", "octa")
     
     prints a file as a side effect, using either 
     tetra or half-octa edge accumulator as f:Callable = global function
     """
     template = "{:3}. {:10d}"
-    f = tet_edges if s=="tetra" else half_oct_edges # globals 
+    if s=="tetra":
+        f = tet_edges
+    elif s=="hocta":
+        f = half_oct_edges # globals 
+    elif s=="octa":
+        f = oct_edges    
     with open(nm, "w") as output:
         print("Freq      Edges", file=output)
         print("---------------", file=output)
