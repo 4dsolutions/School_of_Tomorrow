@@ -108,3 +108,16 @@ def make_table(n:int, nm:str = "edges_table.txt", s:str = "tetra") -> None:
         print("---------------", file=output)
         for i in range(n):
             print(template.format(i, f(i)), file=output)
+
+            
+def a007531(n):
+    "tetra edges (ball contacts)"
+    return n*(n+1)*(n+2)
+
+def a035006(n):
+    "half octa edges (ball contacts)"
+    return n*2*(n+1)**2
+
+def a300758(n):
+    "octa edges (ball contacts)"
+    return 2*n*(n+1)*(2*n+1)
