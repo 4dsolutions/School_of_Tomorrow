@@ -17,6 +17,11 @@ Number of contact points between equal spheres
 arranged in an octahedron with n - 1 spheres 
 in each edge. - Kirby Urner, Apr 27 2021
 
+[0, 36, 216, 660, 1488, 2820, 4776, 7476, 11040, 15588]
+Number of contact points between equal spheres 
+arranged in cuboctahedron with n - 1 spheres 
+in each edge. - Kirby Urner, Apr 30 2021
+
 With thanks to
 https://www.instagram.com/struppipohl/
 who derived the tet_edges result as well.
@@ -86,6 +91,15 @@ def oct_edges(f : int) -> int:
     """
     return 2*half_oct_edges(f) - (f+1)*f*2
 
+def cubocta_edges(f: int) -> int: 
+    """
+    Number of contact points between equal spheres 
+    arranged in a cuboctahedron with f i.e. n-1 
+    intervals between balls along in each edge.
+    """
+    x = f+1 
+    return 20*x**3 - 48*x**2 + 40*x - 12 
+
 def make_table(n:int, nm:str = "edges_table.txt", s:str = "tetra") -> None:
     """
     n:   up to max frequency
@@ -102,7 +116,9 @@ def make_table(n:int, nm:str = "edges_table.txt", s:str = "tetra") -> None:
     elif s=="hocta":
         f = half_oct_edges # globals 
     elif s=="octa":
-        f = oct_edges    
+        f = oct_edges 
+    elif s=="cubocta":
+        f = cubocta_edges
     with open(nm, "w") as output:
         print("Freq      Edges", file=output)
         print("---------------", file=output)
