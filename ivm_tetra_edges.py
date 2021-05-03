@@ -22,6 +22,11 @@ Number of contact points between equal spheres
 arranged in cuboctahedron with n - 1 spheres 
 in each edge. - Kirby Urner, Apr 30 2021
 
+https://oeis.org/A069074
+Number of contact points between equal spheres 
+arranged in layer n of a cuboctahedron with n 
+intervals between balls along in each edge.. - Kirby Urner, Apr 30 2021
+
 With thanks to
 https://www.instagram.com/struppipohl/
 who derived the tet_edges result as well.
@@ -100,12 +105,21 @@ def cubocta_edges(f: int) -> int:
     x = f+1 
     return 20*x**3 - 48*x**2 + 40*x - 12 
 
+def cubocta_layer(f: int) -> int:
+    """
+    Number of contact points between equal spheres 
+    arranged in layer n of a cuboctahedron with n 
+    intervals between balls along in each edge.
+    """
+    x = f-1
+    return 8*x**3 + 36*x**2 + 52*x + 24 
+
 def make_table(n:int, nm:str = "edges_table.txt", s:str = "tetra") -> None:
     """
     n:   up to max frequency
     nm:  name of output file
     s:   shape used for accumulating 
-         ("tetra", "hocta", "octa")
+         ("tetra", "hocta", "octa", "cubocta", "layer")
     
     prints a file as a side effect, using either 
     tetra or half-octa edge accumulator as f:Callable = global function
@@ -119,6 +133,8 @@ def make_table(n:int, nm:str = "edges_table.txt", s:str = "tetra") -> None:
         f = oct_edges 
     elif s=="cubocta":
         f = cubocta_edges
+    elif s=="layer":
+        f = cubocta_layer
     with open(nm, "w") as output:
         print("Freq      Edges", file=output)
         print("---------------", file=output)
