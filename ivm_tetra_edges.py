@@ -19,13 +19,14 @@ in each edge. - Kirby Urner, Apr 27 2021
 
 [0, 36, 216, 660, 1488, 2820, 4776, 7476, 11040, 15588]
 Number of contact points between equal spheres 
-arranged in cuboctahedron with n - 1 spheres 
+arranged in cuboctahedron with n spheres 
 in each edge. - Kirby Urner, Apr 30 2021
 
 https://oeis.org/A069074
 Number of contact points between equal spheres 
 arranged in layer n of a cuboctahedron with n 
-intervals between balls along in each edge.. - Kirby Urner, Apr 30 2021
+intervals between balls along each edge. 
+- Kirby Urner, Apr 30 2021
 
 With thanks to
 https://www.instagram.com/struppipohl/
