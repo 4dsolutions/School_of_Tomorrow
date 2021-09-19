@@ -4,6 +4,9 @@
 Created on Sun Mar  8 11:40:54 2020
 
 @author: Kirby Urner
+
+Sept 19, 2021:  altered to work with new qray.py 
+                wherein Qvector.xyz is a property
 """
 
 class Polyhedron:
@@ -71,7 +74,7 @@ class Edge:
         return 'Edge from %s to %s' % (self.v0, self.v1)
 
 def draw_vert(v, c, r, t): 
-    v = v.xyz()
+    v = v.xyz
     x,y,z = v.x, v.y, v.z
     data = "< %s, %s, %s >" % (x,y,z), r, c
     template = ("sphere { %s, %s texture "
@@ -81,9 +84,9 @@ def draw_vert(v, c, r, t):
 def draw_face(f, c, t): pass
 
 def draw_edge(e, c, r, t):
-    v = e.v0.xyz()
+    v = e.v0.xyz
     v0 = "< %s, %s, %s >" % (v.x, v.y, v.z)
-    v = e.v1.xyz()
+    v = e.v1.xyz
     v1 = "< %s, %s, %s >" % (v.x, v.y, v.z)
     data = (v0, v1, r, c)
     template = ("cylinder { %s, %s, %s texture "
@@ -112,7 +115,7 @@ def draw_poly(p, the_file, v=True, f=False, e=True):
             draw_edge(e, ec, er, the_file)
      
 import math
-from qrays import Qvector
+from qrays import Qvector, Vector
 PHI = (1 + math.sqrt(5))/2.0
 
 ORIGIN = Qvector((0,0,0,0))
@@ -256,7 +259,43 @@ class Cube (Polyhedron):
 
         self.edges = self._distill()
         
+class Cuboid (Polyhedron):
+    """
+    Cuboid with height, width, depth = sqrt(1), sqrt(2), sqrt(4)
+    """
 
+    def __init__(self):
+        # POV-Ray
+        self.edge_color = "rgb <255/255, 20/255, 147/255>"
+        self.edge_radius= 0.03
+        self.vert_color = "rgb <255/255, 20/255, 147/255>"
+        self.vert_radius= 0.03
+        self.face_color = "rgb <0, 0, 0>"
+
+        verts = {}
+        verts['A'] = Vector(( 1,  0.5,  math.sqrt(2)/2))
+        verts['B'] = Vector(( 1, -0.5,  math.sqrt(2)/2))       
+        verts['C'] = Vector(( 1, -0.5, -math.sqrt(2)/2))        
+        verts['D'] = Vector(( 1,  0.5, -math.sqrt(2)/2))
+        verts['E'] = Vector((-1,  0.5,  math.sqrt(2)/2))
+        verts['F'] = Vector((-1, -0.5,  math.sqrt(2)/2))
+        verts['G'] = Vector((-1, -0.5, -math.sqrt(2)/2))
+        verts['H'] = Vector((-1,  0.5, -math.sqrt(2)/2))
+                
+        self.name = "Cuboid"
+        self.volume = 8  # per Concentric Hierarchy
+        self.center = ORIGIN
+        
+        # 8 vertices
+        self.vertexes = verts
+        
+        # 6 faces
+        self.faces = (('A','B','C','D'),('E','F','G','H'),
+                      ('A','E','F','B'),('D','H','G','C'),
+                      ('A','E','H','D'),('B','F','G','C'))
+
+        self.edges = self._distill()
+        
 class Octahedron (Polyhedron):
     """
     Octahedron
@@ -531,8 +570,8 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <6, 0.1, 0.2>
-  rotate    <45, 45, 10.0>
+  location  <4, 0.1, 0.2>
+  rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
 }
