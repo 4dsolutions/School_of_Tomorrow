@@ -13,7 +13,10 @@ and triangles for IVM units of volume and area.  See
 the docstring for more details.
 
 @author:  K. Urner, 4D Solutions, (M) MIT License
-
+ 
+ Jun 20, 2022: add sympy dependency
+ Oct  8, 2021: remove gmpy2 dependency
+ Sep 19, 2021: remove autoconvert to floating point when initializing Vector
  Sep 19, 2021: make xyz Vector a property of Qvector vs. a method
  Sep 06, 2019: have type(self)() instead of Qvector() return outcomes
  May 25, 2019: add area methods based on cross product
@@ -37,15 +40,17 @@ the docstring for more details.
  June 6, 2020: spherical coordinates debug, working on blender integration
 """
 
-from math import radians, degrees, cos, sin, acos
+from sympy import cos, sin, acos, sqrt, atan
+from mpmath import radians, degrees
 import math
+import sympy as sp
 from operator import add, sub, mul, neg
 from collections import namedtuple
 
 XYZ = namedtuple("xyz_vector", "x y z")
 IVM = namedtuple("ivm_vector", "a b c d")
 
-root2   = 2.0**0.5
+root2   = sp.sqrt(2)
 
 class Vector:
 
@@ -68,11 +73,6 @@ class Vector:
     def z(self):
         return self.xyz.z
         
-    def xyz(self):
-        """"dummy method in case Vector is asked 
-        to convert to xyz Vector"""
-        return self
-    
     def __mul__(self, scalar):
         """Return vector (self) * scalar."""
         newcoords = [scalar * dim for dim in self.xyz]
@@ -126,12 +126,12 @@ class Vector:
         return self.dot(self) ** 0.5
 
     def angle(self,v1):
-       """
-       Return angle between self and v1, in decimal degrees
-       """
-       costheta = round(self.dot(v1)/(self.length() * v1.length()),10)
-       theta = degrees(acos(costheta))
-       return round(theta,10)
+        """
+        Return angle between self and v1, in decimal degrees
+        """
+        costheta = self.dot(v1)/(self.length() * v1.length())
+        theta = degrees(acos(costheta))
+        return theta
 
     def rotaxis(self,vAxis,deg):
         """
@@ -180,7 +180,7 @@ class Vector:
             
         else:  
             
-            theta = degrees(math.atan(self.y/self.x))
+            theta = degrees(atan(self.y/self.x))
             if   self.x < 0 and self.y == 0:   theta = 180
             # theta is positive so turn more than 180
             elif self.x < 0 and self.y <  0:   theta = 180 + theta
@@ -197,11 +197,18 @@ class Vector:
     def quadray(self):
         """return (a, b, c, d) quadray based on current (x, y, z)"""
         x, y, z = self.xyz
-        k = 2/root2
-        a = k * ((x >= 0)* ( x) + (y >= 0) * ( y) + (z >= 0) * ( z))
-        b = k * ((x <  0)* (-x) + (y <  0) * (-y) + (z >= 0) * ( z))
-        c = k * ((x <  0)* (-x) + (y >= 0) * ( y) + (z <  0) * (-z))
-        d = k * ((x >= 0)* ( x) + (y <  0) * (-y) + (z <  0) * (-z))
+        k = root2
+        x_ge_0 = 1 if x >=0 else 0
+        y_ge_0 = 1 if y >=0 else 0
+        z_ge_0 = 1 if z >=0 else 0
+        x_lt_0 = 1 if x < 0 else 0
+        y_lt_0 = 1 if y < 0 else 0
+        z_lt_0 = 1 if z < 0 else 0
+
+        a = k * (x_ge_0 *  x + y_ge_0 *  y + z_ge_0 *  z)
+        b = k * (x_lt_0 * -x + y_lt_0 * -y + z_ge_0 *  z)
+        c = k * (x_lt_0 * -x + y_ge_0 *  y + z_lt_0 * -z)
+        d = k * (x_ge_0 *  x + y_lt_0 * -y + z_lt_0 * -z)
         return Qvector((a, b, c, d))
 
         
@@ -299,7 +306,7 @@ class Qvector:
         D = type(self)((0,0,0,1))
         a1,b1,c1,d1 = v1.coords
         a2,b2,c2,d2 = self.coords
-        k= (2.0**0.5)/4.0
+        k= root2/4.0
         the_sum =   (A*c1*d2 - A*d1*c2 - A*b1*d2 + A*b1*c2
                + A*b2*d1 - A*b2*c1 - B*c1*d2 + B*d1*c2 
                + b1*C*d2 - b1*D*c2 - b2*C*d1 + b2*D*c1 
@@ -315,8 +322,8 @@ class Qvector:
         return self.cross(v1).length() * 2/(3**0.5)
 
     def angle(self, v1):
-        return self.xyz().angle(v1.xyz())
-    
+        return self.xyz.angle(v1.xyz)
+        
     @property
     def xyz(self):
         a,b,c,d     =  self.coords
@@ -330,18 +337,18 @@ class Svector(Vector):
     """Subclass of Vector that takes spherical coordinate args."""
     
     def __init__(self,arg):
+        """
+        initialize a vector at an (r,phi,theta) tuple (= arg)        
+        """
         # if returning from Vector calc method, spherical is true
-        arg = Vector(arg).spherical()
-            
-        # initialize a vector at an (r,phi,theta) tuple (= arg)
+        # arg = Vector(arg).spherical()
         r     = arg[0]
         phi   = radians(arg[1])
         theta = radians(arg[2])
-        self.coords = tuple(map(lambda x:round(x,15),
-                      (r * cos(theta) * sin(phi),
-                       r * sin(theta) * sin(phi),
-                       r * cos(phi))))
-        self.xyz = self.coords
+        self.xyz = XYZ(
+                      r * cos(theta) * sin(phi),
+                      r * sin(theta) * sin(phi),
+                      r * cos(phi))
 
     def __repr__(self):
         return "Svector " + str(self.spherical())
@@ -350,6 +357,9 @@ def dot(a,b):
     return a.dot(b)
 
 def cross(a,b):
+    """
+    cross product
+    """
     return a.cross(b)
 
 def angle(a,b):

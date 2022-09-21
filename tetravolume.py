@@ -29,16 +29,18 @@ for explanation of quadrays, used for some unit tests
 from math import sqrt as rt2
 from qrays import Qvector, Vector
 import sys
+import sympy as sym
 
-R =0.5
-D =1.0
+R = sym.Float(1/2)
+D = sym.Float(1)
+rt2   = sym.sqrt
 
-S3    = pow(9/8, 0.5)
+S3    = rt2(sym.Rational(9,8))
 root2 = rt2(2)
 root3 = rt2(3)
 root5 = rt2(5)
 root6 = rt2(6)
-PHI = (1 + root5)/2.0
+PHI = (1 + root5)/2
 
 class Tetrahedron:
     """
@@ -57,9 +59,9 @@ class Tetrahedron:
         self.f, self.f2 = f, f**2
 
     def ivm_volume(self):
-        ivmvol = ((self._addopen() 
+        ivmvol = sym.sqrt((self._addopen() 
                     - self._addclosed() 
-                    - self._addopposite())/2) ** 0.5
+                    - self._addopposite())/2)
         return ivmvol
 
     def xyz_volume(self):
@@ -121,7 +123,8 @@ class Triangle:
         Heron's Formula, without the 1/4
         """
         a,b,c = self.a, self.b, self.c
-        xyzarea = rt2((a+b+c) * (-a+b+c) * (a-b+c) * (a+b-c))
+        the_sum = (a+b+c) * (-a+b+c) * (a-b+c) * (a+b-c)
+        xyzarea = sym.sqrt(the_sum)
         return xyzarea
     
 def make_tri(v0,v1):
@@ -131,8 +134,8 @@ def make_tri(v0,v1):
     tri = Triangle(v0.length(), v1.length(), (v1-v0).length())
     return tri.ivm_area(), tri.xyz_area()
 
-R = 0.5
-D = 1.0
+R = sym.Rational(1, 2)
+D = sym.Integer(1)
 
 import unittest
 class Test_Tetrahedron(unittest.TestCase):
@@ -254,13 +257,13 @@ class Test_Tetrahedron(unittest.TestCase):
         q = Qvector((2,1,1,0))
         r = Qvector((2,0,1,1))
         result = make_tet(PHI*q, (1/PHI)*p, r)
-        self.assertAlmostEqual(result[0], 1, 7)
+        self.assertAlmostEqual(result[0].evalf(), 1, 7)
         
     def test_phi_tet_3(self):
-        T = Tetrahedron(PHI, 1/PHI, 1.0, 
+        T = Tetrahedron(PHI, 1/PHI, 1, 
                         root2, root2/PHI, root2)
-        result = T.ivm_volume()
-        self.assertAlmostEqual(result, 1, 7)
+        result = T.ivm_volume().evalf()
+        self.assertEqual(result, 1)
 
     def test_koski(self):
         a = 1 
@@ -277,11 +280,11 @@ class Test_Triangle(unittest.TestCase):
     
     def test_unit_area1(self):
         tri = Triangle(D, D, D)
-        self.assertEqual(tri.ivm_area(), 1)
+        self.assertEqual(tri.ivm_area().evalf(), 1)
         
     def test_unit_area2(self):
         tri = Triangle(2, 2, 2)
-        self.assertEqual(tri.ivm_area(), 4)
+        self.assertEqual(tri.ivm_area().evalf(), 4)
         
     def test_xyz_area3(self):
         tri = Triangle(D, D, D)
@@ -291,7 +294,7 @@ class Test_Triangle(unittest.TestCase):
         v1 = Vector((D, 0, 0))
         v2 = Vector((0, D, 0))
         xyz_area = make_tri(v1, v2)[1]
-        self.assertAlmostEqual(xyz_area, 2)
+        self.assertAlmostEqual(xyz_area.evalf(), 2)
 
     def test_xyz_area5(self):
         tri = Triangle(R, R, R)
