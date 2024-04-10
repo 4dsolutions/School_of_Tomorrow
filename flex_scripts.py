@@ -22,6 +22,11 @@ UNIQUE = {p for p in g}  # set comprehension
 IVM_DIRS = {Qvector(x) for x in UNIQUE}
 PHI = (1 + math.sqrt(5))/2
 
+Svol = (PHI **-5)/2  
+Evol = (math.sqrt(2)/8) * (PHI ** -3)
+
+sfactor = Svol/Evol
+
 def ch():
     with open("concentric_hierarchy.pov", "w") as target:
         target.write(pov_header)
@@ -36,6 +41,16 @@ def ch():
         draw_poly(rd, target)
         draw_poly(cub, target)
         draw_poly(tet, target)
+        draw_poly(octa, target)
+
+def iw():
+    with open("icosa_within.pov", "w") as target:
+        target.write(pov_header)
+        ico = 2 * Icosahedron() * 0.8
+        cubo = 2 * Cuboctahedron() * 0.8
+        octa = 2 * Octahedron() * 0.8
+        draw_poly(ico, target)
+        draw_poly(cubo, target)
         draw_poly(octa, target)
         
 def jitterbug():
@@ -330,6 +345,7 @@ if __name__ == "__main__":
     # jitterbug()
     # animation()
     # animation10()
-    animation11()
+    # animation11()
     # logo()
+    iw()
     
