@@ -54,13 +54,13 @@ shapes = pd.Series(
               "Bmod",
               "Smod3",
               "Smod",
-              "smod3"], dtype=np.unicode),
+              "smod3"], dtype=np.unicode_),
     name="Shapes")
 
 zeros         = pd.Series(np.zeros((21,)), dtype=np.float64)
 volumes_table = pd.DataFrame({"Volumes" : zeros,
                               "Comments": pd.Series(['']*21, 
-                                            dtype=np.unicode)
+                                            dtype=np.unicode_)
                              })
 volumes_table.index = shapes
 #%%
