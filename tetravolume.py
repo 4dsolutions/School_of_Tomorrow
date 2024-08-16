@@ -1,7 +1,14 @@
 """
-Euler volume, modified by Gerald de Jong
-http://www.grunch.net/synergetics/quadvols.html
+tetravolume.py
 Kirby Urner (c) MIT License
+
+May    6, 2024: dihedral angles
+April  1, 2024: wire up all three volume-from-edges algorithms as options 
+April  1, 2024: add A, B subclasses of Tetrahedron, completing BEAST set
+
+March 30, 2024: tighten the unittests to rely more on sympy
+March 30, 2024: save edges and angles when initializing the Tetrahedron
+March 30, 2024: make_tet now returns Tetrahedon (not volumes tuple)
 
 The tetravolume.py methods make_tet and make_tri 
 assume that volume and area use R-edge cubes and 
@@ -22,90 +29,592 @@ sqrt(2) to the 3rd power.  One third of that volume
 is our unit tetrahedron of edges D (cube face diagonals).
 
 See:
-http://mathforum.org/kb/thread.jspa?threadID=2836546
+https://coda.io/d/Math4Wisdom_d0SvdI3KSto/ivm-xyz_suqdu#_luR7B
 for explanation of quadrays, used for some unit tests
+
+https://flic.kr/p/2pGmvWD (labeling system)
+
+https://github.com/4dsolutions/School_of_Tomorrow/blob/master/VolumeTalk.ipynb
+for background on adapting volume formulas and/or using GdJ's
+
+https://github.com/4dsolutions/School_of_Tomorrow/blob/master/Qvolume.ipynb
+for background on computing a tet volume from 4 quadrays
+
+A goal for this version of tetravolume.py + qrays.py
+is to keep computations symbolic, with precision 
+open-ended. A work in progress.  Mar 5, 2024.
+
+Another goal as of March-April 2024 is to flesh out
+the Tetrahedron instance with more specific info as
+to which segments are what length.
+
+Apex A goes to base B, C, D, creating edges:
+    a: AB
+    b: AC
+    c: AD
+    d: BC
+    e: CD
+    f: BD
+(alphabetized pairs)
+    
+And faces: 
+    ABC ACD ADB BCD (in terms of verts)
+or (in terms of lengths): 
+    (a, d, b), (b, e, c), (c, f, a), (d, e, f)
+    [ tuples any order, elements may cycle ]
+    
+Therefore we have three angles from each vertex:
+A: BAC CAD BAD
+B: ABC CBD ABD
+C: ACB ACD BCD
+D: ADC BDC ADB
+(middle letter is vertex angle, left and right letters alphabetized)
+
+When we get the six lengths as inputs, lets 
+assign them to edge names and compute the 
+twelve angles.
+
+Example resource:
+https://www.omnicalculator.com/math/triangle-angle
 """
 
-from math import sqrt as rt2
+from sympy import Rational, Integer, Matrix, acos, cos, sin, deg, N, Eq
+from sympy import sqrt as rt2
 from qrays import Qvector, Vector
 import sys
-import sympy as sym
 
-R = sym.Float(1/2)
-D = sym.Float(1)
-rt2   = sym.sqrt
+# ============[ GLOBAL CONSTANTS ]=================== 
 
-S3    = rt2(sym.Rational(9,8))
+R = Rational(1,2)
+D = Integer(1)
+
+Syn3  = rt2(Rational(9, 8))
 root2 = rt2(2)
 root3 = rt2(3)
 root5 = rt2(5)
 root6 = rt2(6)
+
 PHI = (1 + root5)/2
+
+Svol = (PHI **-5)/2  
+Evol = (root2/8) * (PHI ** -3)
+Avol = Bvol = Tvol = Rational(1,24)
+
+sfactor = Svol/Evol
+
+# ============[ TETRAHEDRON CLASS ]=================== 
 
 class Tetrahedron:
     """
     Takes six edges of tetrahedron with faces
     (a,b,d)(b,c,e)(c,a,f)(d,e,f) -- returns volume
-    if ivm and xyz
+    in ivm tvs and xyz cubic units, Syn3 ratio.
+    
+        Apex A goes to base B, C, D, creating edges:
+            a: AB
+            b: AC
+            c: AD
+            d: BC
+            e: CD
+            f: DB  
+            
+    https://flic.kr/p/2pGmvWD (labeling system)
     """
 
     def __init__(self, a, b, c, d, e, f):
-        # a,b,c,d,e,f = [Decimal(i) for i in (a,b,c,d,e,f)]
         self.a, self.a2 = a, a**2
         self.b, self.b2 = b, b**2
         self.c, self.c2 = c, c**2
         self.d, self.d2 = d, d**2
         self.e, self.e2 = e, e**2
         self.f, self.f2 = f, f**2
-
-    def ivm_volume(self):
-        ivmvol = sym.sqrt((self._addopen() 
-                    - self._addclosed() 
-                    - self._addopposite())/2)
-        return ivmvol
-
-    def xyz_volume(self):
-        xyzvol = 1/S3 * self.ivm_volume()
-        return xyzvol
-
-    def _addopen(self):
+   
+        # 2-letter edge labels
+        self.AB = a
+        self.AC = b
+        self.AD = c
+        self.BC = d
+        self.CD = e
+        self.BD = f
+        
+        # 3-letter face angles
         a2,b2,c2,d2,e2,f2 = self.a2, self.b2, self.c2, self.d2, self.e2, self.f2
-        sumval = f2*a2*b2
-        sumval +=  d2 * a2 * c2
-        sumval +=  a2 * b2 * e2
-        sumval +=  c2 * b2 * d2
-        sumval +=  e2 * c2 * a2
-        sumval +=  f2 * c2 * b2
-        sumval +=  e2 * d2 * a2
-        sumval +=  b2 * d2 * f2
-        sumval +=  b2 * e2 * f2
-        sumval +=  d2 * e2 * c2
-        sumval +=  a2 * f2 * e2
-        sumval +=  d2 * f2 * c2
-        return sumval
 
-    def _addclosed(self):
-        a2,b2,c2,d2,e2,f2 = self.a2, self.b2, self.c2, self.d2, self.e2, self.f2
-        sumval =   a2 * b2 * d2
-        sumval +=  d2 * e2 * f2
-        sumval +=  b2 * c2 * e2
-        sumval +=  a2 * c2 * f2
-        return sumval
+        self.BAC = acos( (a2 + b2 - d2)/(2 * a * b) )
+        self.CAD = acos( (b2 + c2 - e2)/(2 * b * c) )
+        self.BAD = acos( (a2 + c2 - f2)/(2 * a * c) )
+        
+        self.ABC = acos( (a2 + d2 - b2)/(2 * a * d) )
+        self.CBD = acos( (d2 + f2 - e2)/(2 * d * f) )
+        self.ABD = acos( (a2 + f2 - c2)/(2 * a * f) )
+        
+        self.ACB = acos( (b2 + d2 - a2)/(2 * b * d) )
+        self.ACD = acos( (b2 + e2 - c2)/(2 * b * e) ) 
+        self.BCD = acos( (d2 + e2 - f2)/(2 * d * e) )
+        
+        self.ADC = acos( (c2 + e2 - b2)/(2 * c * e) ) 
+        self.BDC = acos( (e2 + f2 - d2)/(2 * e * f) ) 
+        self.ADB = acos( (c2 + f2 - a2)/(2 * c * f) )
+        
+    def dihedral(self, edge):
+        if   edge == 'AB': 
+            r = (cos(self.CBD) - cos(self.ABD) * cos(self.ABC))/(sin(self.ABD) * sin(self.ABC))
+        elif edge == 'AC': 
+            r = (cos(self.BCD) - cos(self.ACD) * cos(self.ACB))/(sin(self.ACD) * sin(self.ACB))
+        elif edge == 'AD': 
+            r = (cos(self.BDC) - cos(self.ADB) * cos(self.ADC))/(sin(self.ADB) * sin(self.ADC))
+        elif edge == 'BC': 
+            r = (cos(self.ACD) - cos(self.BCD) * cos(self.ACB))/(sin(self.BCD) * sin(self.ACB))
+        elif edge == 'CD': 
+            r = (cos(self.ADB) - cos(self.ADC) * cos(self.BDC))/(sin(self.ADC) * sin(self.BDC))
+        elif edge == 'BD': 
+            r = (cos(self.ADC) - cos(self.BDC) * cos(self.ADB))/(sin(self.BDC) * sin(self.ADB))
+        return acos(r)
+    
+    def dihedrals(self, values=False, degrees=False, prec=15):
+        """
+            a: AB
+            b: AC
+            c: AD
+            d: BC
+            e: CD
+            f: BD 
+        """
+        if values:
+            the_dict = {
+                "AB": N(self.dihedral('AB'), prec),
+                "AC": N(self.dihedral('AC'), prec),
+                "AD": N(self.dihedral('AD'), prec),
+                "BC": N(self.dihedral('BC'), prec),
+                "CD": N(self.dihedral('CD'), prec),
+                "BD": N(self.dihedral('BD'), prec),
+                }
+        else:
+            the_dict = {
+                "AB": self.dihedral('AB'),
+                "AC": self.dihedral('AC'),
+                "AD": self.dihedral('AD'),
+                "BC": self.dihedral('BC'),
+                "CD": self.dihedral('CD'),
+                "BD": self.dihedral('BD'),
+                }    
+        
+        if degrees:
+        
+            output = {}  # empty dict
+            
+            if values:
+                for k,v in the_dict.items():
+                    output[k] = N(deg(v), prec) 
+            else:
+                for k,v in the_dict.items():
+                    output[k] = deg(v)
+        
+        else:
+            
+            output = the_dict  # radians or expressions
+                
+        return output
+        
+    def dump(self):
+        return self.a2, self.b2, self.c2
+    
+    def __mul__(self, other):
+        a = self.a * other
+        b = self.b * other
+        c = self.c * other
+        d = self.d * other
+        e = self.e * other
+        f = self.f * other
+        return Tetrahedron(a,b,c,d,e,f)
+        
+    __rmul__ = __mul__
+        
+    def edges(self, values=False, prec=15):
+        """
+            a: AB
+            b: AC
+            c: AD
+            d: BC
+            e: CD
+            f: BD 
+        """
+        if values:
+            return {
+                "AB": N(self.a, prec),
+                "AC": N(self.b, prec),
+                "AD": N(self.c, prec),
+                "BC": N(self.d, prec),
+                "CD": N(self.e, prec),
+                "BD": N(self.f, prec),
+                }
+        else:
+            return {
+                "AB": self.a,
+                "AC": self.b,
+                "AD": self.c,
+                "BC": self.d,
+                "CD": self.e,
+                "BD": self.f,
+                }            
+        
+    def angles(self, values=False, prec=15):
+        """
+        Three angles from each vertex:
+        A: BAC CAD BAD
+        B: ABC CBD ABD
+        C: ACB ACD BCD
+        D: ADC BDC ADB
+        (middle letter is vertex angle, left and right letters alphabetized)
+        """
+        if values:
+            return {
+                "BAC": N(self.BAC, prec),
+                "CAD": N(self.CAD, prec),
+                "BAD": N(self.BAD, prec),
+                "ABC": N(self.ABC, prec),
+                "CBD": N(self.CBD, prec),
+                "ABD": N(self.ABD, prec),
+                "ACB": N(self.ACB, prec),
+                "ACD": N(self.ACD, prec),
+                "BCD": N(self.BCD, prec),
+                "ADC": N(self.ADC, prec),
+                "BDC": N(self.BDC, prec),
+                "ADB": N(self.ADB, prec),
+                }            
+        else:
+            return {
+                "BAC": self.BAC,
+                "CAD": self.CAD,
+                "BAD": self.BAD,
+                "ABC": self.ABC,
+                "CBD": self.CBD,
+                "ABD": self.ABD,
+                "ACB": self.ACB,
+                "ACD": self.ACD,
+                "BCD": self.BCD,
+                "ADC": self.ADC,
+                "BDC": self.BDC,
+                "ADB": self.ADB
+                }
 
-    def _addopposite(self):
-        a2,b2,c2,d2,e2,f2 = self.a2, self.b2, self.c2, self.d2, self.e2, self.f2
-        sumval =  a2 * e2 * (a2 + e2)
-        sumval += b2 * f2 * (b2 + f2)
-        sumval += c2 * d2 * (c2 + d2)
-        return sumval
+    def degrees(self, values=False, prec=15):
+        output = {}
+        if values:
+            for k,v in self.angles().items():
+                output[k] = N(deg(v), prec) 
+        else:
+            for k,v in self.angles().items():
+                output[k] = deg(v)
+        return output
+            
+    def ivm_volume(self, value=False, prec=50):
+        """
+        Three options to compute volume from edges...
+        GdJ: Gerald de Jong, similar to Euler's, lost his notes, works
+        PdF: Piero della Francesca, modified by Syn3 (XYZ->IVM constant)
+        CM : Caley-Menger, modified by Syn3 (XYZ->IVM constant) 
+        """
+        
+        # ivmvol = GdJ(self.a, self.b, self.c, self.d, self.e, self.f)
+        ivmvol = PdF(self.a, self.b, self.c, self.d, self.e, self.f)
+        # ivmvol = CM(self.a, self.b, self.c, self.d, self.e, self.f)
+        
+        return ivmvol if not value else N(ivmvol, prec)
+
+    def xyz_volume(self, value=False, prec=50):
+        xyzvol = (1/Syn3) * self.ivm_volume()
+        return xyzvol if not value else N(xyzvol, prec)
+
+# ============[ VOLUME FORMULAE ]=================== 
+
+def GdJ(a, b, c, d, e, f):
+    "Gerald de Jong"
+    A,B,C,D,E,F = [x**2 for x in (a, b, c, d, e, f)] # 2nd power us
+
+    _open   = sum((A * B * E, A * B * F, A * C * D,  
+                   A * C * E, A * D * E, A * E * F,
+                   B * C * D, B * C * F, B * D * F, 
+                   B * E * F, C * D * E, C * D * F))
+    
+    _closed = sum((A * B * D, 
+                   A * C * F, 
+                   B * C * E, 
+                   D * E * F))
+
+    _oppo   = sum((A * E * (A + E),
+                   B * F * (B + F),
+                   C * D * (C + D)))
+    
+    return rt2((_open - _closed - _oppo)/2)
+
+def PdF(a,b,c,d,e,f):
+    """
+    Piero della Francesca
+    https://www.mathpages.com/home/kmath424/kmath424.htm
+    """
+    
+    def adapter(a, e, c, d, f, b):
+        "unscramble input's to match GdJ order"
+        return a, b, c, d, e, f
+
+    A,B,C,D,E,F = [x**2 for x in 
+                   adapter(2*a,2*b,2*c,2*d,2*e,2*f)] 
+    
+    comp_chunk =  ((A * F) * (-A + B + C + D + E - F)
+                 + (B * E) * ( A - B + C + D - E + F)
+                 + (C * D) * ( A + B - C - D + E + F)
+                 - (A + F) * (B + E) * (C + D)/2
+                 - (A - F) * (B - E) * (C - D)/2 )
+    
+    return rt2(2 * comp_chunk) / 16  # Syn3 is blended in here
+
+def CM(a, b, c, d, e, f):
+    """
+    Caley-Menger
+    https://en.wikipedia.org/wiki/Cayley%E2%80%93Menger_determinant
+    """
+    A,B,C,D,E,F = [(2*x)**2 for x in (a,b,c,d,e,f)]
+    
+    # Construct a 5x5 matrix per Caley-Menger
+    M = Matrix(
+        [[0, 1, 1, 1, 1],
+         [1, 0, A, B, C],
+         [1, A, 0, D, F],
+         [1, B, D, 0, E],
+         [1, C, F, E, 0]])
+    return rt2(M.det())/16  # Syn3 factored in 
 
 def make_tet(v0,v1,v2):
     """
     three edges from any corner, remaining three edges computed
     """
-    tet = Tetrahedron(v0.length(), v1.length(), v2.length(), 
+    return Tetrahedron(v0.length(), v1.length(), v2.length(), 
                       (v0-v1).length(), (v1-v2).length(), (v2-v0).length())
-    return tet.ivm_volume(), tet.xyz_volume()
+
+def qvolume(q0, q1, q2, q3):
+    """
+    Construct a 5x5 matrix per Tom Ace
+    """
+    M = Matrix([
+        q0.coords + (1,),
+        q1.coords + (1,),
+        q2.coords + (1,),
+        q3.coords + (1,),
+        [1,1,1,1,0]])
+    return abs(M.det())/4 # that's it!
+
+# ============[ BEAST Modules ]=================== 
+
+class B(Tetrahedron):
+    """
+    Developed from Fig 916.01
+    http://rwgrayprojects.com/synergetics/s09/figs/f1601.html
+    """
+    
+    def __init__(self):
+        a = D
+        BA = a * root2/2
+        BE = a * root6/4
+        BG = a/2
+        AE = a * root6/12
+        EG = a * root2/4
+        AG = a/2
+        super().__init__(BA, BE, BG, AE, EG, AG)
+        
+    def fig986_421(self, value = False, prec = 15):
+        """
+        http://rwgrayprojects.com/synergetics/s09/figs/f86421.html
+        """
+        a = D
+        figdata = {
+            "BA" : a * root2/2,
+            "BE" : a * root6/4,
+            "BG" : a/2,
+            "AE" : a * root6/12,
+            "EG" : a * root2/4,
+            "AG" : a/2,}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
+        
+    def fig916_01(self, value = False, prec = 15):
+        """
+        http://rwgrayprojects.com/synergetics/s09/figs/f1601.html
+        """
+        a = D
+        figdata = {
+            "AB" : a * root6/4,
+            "AC" : a/2,
+            "AE" : a * root2/2,
+            "BC" : a * root2/4,
+            "CE" : a/2,
+            "BE" : a * root6/12}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
+        
+        
+class E(Tetrahedron):
+    
+    def __init__(self):
+        e0 = D/2
+        e1 = root3 * PHI**-1 /2
+        e2 = rt2((5 - root5)/2)/2
+        e3 = (3 - root5)/2/2
+        e4 = rt2(5 - 2*root5)/2
+        e5 = 1/PHI/2        
+        super().__init__(e0, e1, e2, e3, e4, e5)
+        
+    def fig986_411(self, value = False, prec = 15):
+        h = Rational(1,2) 
+        figdata = {
+            "CA" : (h/2) * (3 - root5),
+            "CB" : (h/2) * (root5 - 1),
+            "CO" : h,
+            "AB" : h * rt2(5 - 2 * root5),
+            "AO" : h * rt2((5 - root5)/2),
+            "BO" : h * rt2((9 - 3 * root5)/2),}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
+
+class A(Tetrahedron):
+    """
+    Developed using Qvectors
+    """
+    
+    def __init__(self):
+        
+        one = Integer(1)
+        two = Integer(2)
+        three = Integer(3)
+        a = Qvector((one,0,0,0))
+        b = Qvector((0,one,0,0))
+        c = Qvector((0,0,one,0))
+        d = Qvector((0,0,0,one))
+        
+        # vertexes
+        # amod_E  = Qvector((0,0,0,0))  # origin = center of home base tetrahedron
+        amod_C  = b                     # to vertex (C), choose Qvector b
+        amod_D  = (b + c)/two           # to mid-edge D of CC on tetra base 
+        amod_F  = (b + c + d)/three     # to face-center of base F
+        
+        # apex E to base F, C, D
+        amod_EF = amod_F
+        amod_CE = b
+        amod_DE = amod_D
+        
+        # around the base, C, D, E
+        amod_CF = amod_C - amod_F
+        amod_CD = amod_C - amod_D
+        amod_DF = amod_D - amod_F
+        
+        a,b,c,d,e,f = [v.length() for v in (amod_EF, amod_CE, amod_DE, 
+                                            amod_CF, amod_CD, amod_DF)]
+        
+        super().__init__(a,b,c,d,e,f) 
+        
+    def fig986_421(self, value = False, prec = 15):
+        """
+        http://rwgrayprojects.com/synergetics/s09/figs/f86421.html
+        """
+        a = Integer(1)
+        figdata = {
+            "BF" : a * root3/3,
+            "BE" : a * root6/4,
+            "BG" : a/2,
+            "EF" : a * root6/12,
+            "EG" : a * root2/4,
+            "FG" : a * root3/6,}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
+
+    def fig913_01(self, value = False, prec = 15):
+        """
+        http://rwgrayprojects.com/synergetics/s09/figs/f1301.html
+        """
+        a = Integer(1)
+        figdata = {
+            "CE" : a * root6/4,
+            "CF" : a * root3/3,
+            "CD" : a/2,
+            "EF" : a * root6/12,
+            "DF" : a * root3/6,
+            "DE" : a * root2/4,}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
+
+class S(Tetrahedron):
+    
+    def __init__(self):
+        e0 = 1/PHI
+        e1 = sfactor/2
+        e2 = root3 * e1/2
+        e3 = (3 - root5)/2
+        e4 = e1/2
+        e5 = e4
+        super().__init__(e0, e1, e2, e3, e4, e5)   
+
+    def fig988_13(self, value = False, prec = 15):
+        a = Integer(1)
+        figdata = {
+            "GH" : (a/2) * rt2(7 - 3*root5),
+            "EG" : (a/2) * rt2(7 - 3*root5),
+            "EH" : (a/2) * (3 - root5),
+            "FG" : (a/2) * root3 * rt2(7 - 3*root5),
+            "FE" : a * rt2(7 - 3*root5),
+            "FH" : (a/2) * (root5 - 1),}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
+        
+class T(Tetrahedron):
+    
+    def __init__(self):
+        E2T = (Rational(1,24) / E().ivm_volume()).simplify()
+        h = E2T ** Rational(1,3)
+        e0 = D/2
+        e1 = root3 * PHI**-1 /2
+        e2 = rt2((5 - root5)/2)/2
+        e3 = (3 - root5)/2/2
+        e4 = rt2(5 - 2*root5)/2
+        e5 = 1/PHI/2  
+        
+        e0 *= h
+        e1 *= h
+        e2 *= h
+        e3 *= h
+        e4 *= h
+        e5 *= h
+ 
+        super().__init__(e0, e1, e2, e3, e4, e5)        
+
+    def fig986_411(self, value = False, prec = 15):
+        E2T = (Rational(1,24) / E().ivm_volume()).simplify()
+        h = (E2T ** Rational(1,3))/2       
+        figdata = {
+            "CA" : (h/2) * (3 - root5),
+            "CB" : (h/2) * (root5 - 1),
+            "CO" : h,
+            "AB" : h * rt2(5 - 2 * root5),
+            "AO" : h * rt2((5 - root5)/2),
+            "BO" : h * rt2((9 - 3 * root5)/2),}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
+        
+
+# ============[ TRIANGLE CLASS ]===================
 
 class Triangle:
     
@@ -123,8 +632,7 @@ class Triangle:
         Heron's Formula, without the 1/4
         """
         a,b,c = self.a, self.b, self.c
-        the_sum = (a+b+c) * (-a+b+c) * (a-b+c) * (a+b-c)
-        xyzarea = sym.sqrt(the_sum)
+        xyzarea = rt2((a+b+c) * (-a+b+c) * (a-b+c) * (a+b-c))
         return xyzarea
     
 def make_tri(v0,v1):
@@ -134,136 +642,157 @@ def make_tri(v0,v1):
     tri = Triangle(v0.length(), v1.length(), (v1-v0).length())
     return tri.ivm_area(), tri.xyz_area()
 
-R = sym.Rational(1, 2)
-D = sym.Integer(1)
 
+# ============[ TESTS ]===================        
 import unittest
+
 class Test_Tetrahedron(unittest.TestCase):
 
     def test_unit_volume(self):
         tet = Tetrahedron(D, D, D, D, D, D)
-        self.assertEqual(tet.ivm_volume(), 1, "Volume not 1")
+        self.assertEqual(tet.ivm_volume(), Integer(1), "Volume not 1")
 
-    def test_e_module(self):
-        e0 = D
-        e1 = root3 * PHI**-1
-        e2 = rt2((5 - root5)/2)
-        e3 = (3 - root5)/2
-        e4 = rt2(5 - 2*root5)
-        e5 = 1/PHI
-        tet = Tetrahedron(e0, e1, e2, e3, e4, e5)
-        self.assertTrue(1/23 > tet.ivm_volume()/8 > 1/24, "Wrong E-mod")
-        
+    def test_B_module(self):
+        tet = B()
+        self.assertEqual(tet.ivm_volume(), Rational(1,24), "Volume not 1/24")
+
+    def test_E_module(self):
+        tet = E()
+        self.assertTrue(Eq(tet.ivm_volume(), 
+                           (root2/8) * (PHI ** -3)))
+                        
+    def test_A_module(self):
+        tet = A()
+        self.assertEqual(tet.ivm_volume(), Rational(1,24), "Volume not 1/24")
+
+    def test_S_module(self):
+        tet = S()
+        self.assertTrue(Eq(tet.ivm_volume(), 
+                               (PHI ** -5)/2))
+
+    def test_T_module(self):
+        tet = T()
+        self.assertTrue(Eq(tet.ivm_volume(), Rational(1,24)), "Volume not 1/24")
+                
     def test_unit_volume2(self):
         tet = Tetrahedron(R, R, R, R, R, R)
-        self.assertAlmostEqual(tet.xyz_volume(), 0.117851130)
+        self.assertEqual(tet.xyz_volume(), root2/12)
 
     def test_unit_volume3(self):
         tet = Tetrahedron(R, R, R, R, R, R)
-        self.assertAlmostEqual(tet.ivm_volume(), 0.125)
+        self.assertEqual(tet.ivm_volume(), Rational(1,8))
         
     def test_phi_edge_tetra(self):
         tet = Tetrahedron(D, D, D, D, D, PHI)
-        self.assertAlmostEqual(float(tet.ivm_volume()), 0.70710678)
+        self.assertTrue(Eq(tet.ivm_volume(), root2/2))
 
     def test_right_tetra(self):
-        e = pow((root3/2)**2 + (root3/2)**2, 0.5)  # right tetrahedron
+        e = rt2((root3/2)**2 + (root3/2)**2)  # right tetrahedron
         tet = Tetrahedron(D, D, D, D, D, e)
-        self.assertAlmostEqual(tet.xyz_volume(), 1)
+        self.assertEqual(tet.xyz_volume(), D)
 
     def test_quadrant(self):
-        qA = Qvector((1,0,0,0))
-        qB = Qvector((0,1,0,0))
-        qC = Qvector((0,0,1,0))
+        one = Integer(1)
+        qA = Qvector((one,0,0,0))
+        qB = Qvector((0,one,0,0))
+        qC = Qvector((0,0,one,0))
         tet = make_tet(qA, qB, qC) 
-        self.assertAlmostEqual(tet[0], 0.25) 
+        self.assertEqual(tet.ivm_volume(), Rational(1,4)) 
 
     def test_octant(self):
         x = Vector((R, 0, 0))
         y = Vector((0, R, 0))
         z = Vector((0, 0, R))
         tet = make_tet(x,y,z)
-        self.assertAlmostEqual(tet[1], 1/6, 5) # good to 5 places
+        self.assertEqual(tet.xyz_volume(), Rational(1,6))
 
     def test_quarter_octahedron(self):
         a = Vector((D,0,0))
         b = Vector((0,D,0))
         c = Vector((R,R,root2/2))
         tet = make_tet(a, b, c)
-        self.assertAlmostEqual(tet[0], 1, 5) # good to 5 places  
+        self.assertEqual(tet.ivm_volume(), D) 
 
     def test_xyz_cube(self):
-        a = Vector((R, 0.0, 0.0))
-        b = Vector((0.0, R, 0.0))
-        c = Vector((0.0, 0.0, R))
+        a = Vector((R,0,0))
+        b = Vector((0,R,0))
+        c = Vector((0,0,R))
         R_octa = make_tet(a,b,c) 
-        self.assertAlmostEqual(6 * R_octa[1], 1, 4) # good to 4 places  
+        self.assertEqual(6 * R_octa.xyz_volume(), D) # good to 4 places  
 
     def test_s3(self):
         D_tet = Tetrahedron(D, D, D, D, D, D)
-        a = Vector((R, 0.0, 0.0))
-        b = Vector((0.0, R, 0.0))
-        c = Vector((0.0, 0.0, R))
-        R_cube = 6 * make_tet(a,b,c)[1]
-        self.assertAlmostEqual(D_tet.xyz_volume() * S3, R_cube, 4)
+        a = Vector((R,0,0))
+        b = Vector((0,R,0))
+        c = Vector((0,0,R))
+        R_cube = 6 * make_tet(a,b,c).xyz_volume()
+        self.assertEqual(D_tet.xyz_volume() * Syn3, R_cube)
 
     def test_martian(self):
-        p = Qvector((2,1,0,1))
-        q = Qvector((2,1,1,0))
-        r = Qvector((2,0,1,1))
+        two = Integer(2)
+        one = Integer(1)
+        p = Qvector((two,one,0,one))
+        q = Qvector((two,one,one,0))
+        r = Qvector((two,0,one,one))
         result = make_tet(5*q, 2*p, 2*r)
-        self.assertAlmostEqual(result[0], 20, 7)
+        self.assertEqual(result.ivm_volume(), Integer(20))
         
     def test_area_martian1(self):
-        p = Qvector((2,1,0,1))
-        q = Qvector((2,1,1,0))
+        two = Integer(2)
+        one = Integer(1)
+        p = Qvector((two,one,0,one))
+        q = Qvector((two,one,one,0))
         result = p.area(q)
-        self.assertAlmostEqual(result, 1)        
+        self.assertEqual(result, D)        
  
     def test_area_martian2(self):
-        p = 3 * Qvector((2,1,0,1))
-        q = 4 * Qvector((2,1,1,0))
+        two = Integer(2)
+        one = Integer(1)
+        p = 3 * Qvector((two,one,0,one))
+        q = 4 * Qvector((two,one,one,0))
         result = p.area(q)
-        self.assertAlmostEqual(result, 12)
+        self.assertEqual(result, 12)
 
     def test_area_martian3(self):
         qx = Vector((D,0,0)).quadray()
         qy = Vector((R,rt2(3)/2,0)).quadray()
         result = qx.area(qy)
-        self.assertAlmostEqual(result, 1, 7)
+        self.assertEqual(result, D)
         
     def test_area_earthling1(self):
         vx = Vector((1,0,0))
         vy = Vector((0,1,0))
         result = vx.area(vy)
-        self.assertAlmostEqual(result, 1)        
+        self.assertEqual(result, 1)        
 
     def test_area_earthling2(self):
         vx = Vector((2,0,0))
         vy = Vector((1,rt2(3),0))
         result = vx.area(vy)
-        self.assertAlmostEqual(result, 2*rt2(3))    
+        self.assertEqual(result, 2*rt2(3))    
         
     def test_phi_tet(self):
         "edges from common vertex: phi, 1/phi, 1"
         p = Vector((1, 0, 0))
-        q = Vector((1, 0, 0)).rotz(60) * PHI
-        r = Vector((0.5, root3/6, root6/3)) * 1/PHI
+        q = Vector((1, 0, 0)).rotz(60) * PHI 
+        r = Vector((Rational(1,2), root3/6, root6/3)) * 1/PHI
         result = make_tet(p, q, r)
-        self.assertAlmostEqual(result[0], 1, 7)
+        self.assertTrue(Eq(result.ivm_volume(), D))
         
     def test_phi_tet_2(self):
-        p = Qvector((2,1,0,1))
-        q = Qvector((2,1,1,0))
-        r = Qvector((2,0,1,1))
+        two = Integer(2)
+        one = Integer(1)
+        p = Qvector((two,one,0,one))
+        q = Qvector((two,one,one,0))
+        r = Qvector((two,0,one,one))
         result = make_tet(PHI*q, (1/PHI)*p, r)
-        self.assertAlmostEqual(result[0].evalf(), 1, 7)
+        self.assertTrue(Eq(result.ivm_volume(), 1))
         
     def test_phi_tet_3(self):
         T = Tetrahedron(PHI, 1/PHI, 1, 
                         root2, root2/PHI, root2)
-        result = T.ivm_volume().evalf()
-        self.assertEqual(result, 1)
+        result = T.ivm_volume()
+        self.assertTrue(Eq(result, 1))
 
     def test_koski(self):
         a = 1 
@@ -272,19 +801,56 @@ class Test_Tetrahedron(unittest.TestCase):
         d = (root2) * PHI ** -1 
         e = (root2) * PHI ** -2
         f = (root2) * PHI ** -1       
-        T = Tetrahedron(a,b,c,d,e,f)
-        result = T.ivm_volume()
-        self.assertAlmostEqual(result, PHI ** -3, 7)       
+        tet = Tetrahedron(a,b,c,d,e,f)
+        self.assertTrue(Eq(tet.ivm_volume(), PHI ** -3))   
 
+    def test_qvolume(self):        
+        one = Integer(1)
+        two = Integer(2)
+        three = Integer(3)
+        # a = Qvector((one,0,0,0))
+        b = Qvector((0,one,0,0))
+        c = Qvector((0,0,one,0))
+        d = Qvector((0,0,0,one))
+        
+        # vertexes of the A module as Qvectors
+        amod_E  = Qvector((0,0,0,0))    # origin = center of home base tetrahedron
+        amod_C  = b                     # to vertex (C), choose Qvector b
+        amod_D  = (b + c)/two           # to mid-edge D of CC on tetra base 
+        amod_F  = (b + c + d)/three     # to face-center of base F
+        self.assertEqual(qvolume(amod_E, amod_C, amod_D, amod_F), Rational(1,24))
+
+class Test_Koski(unittest.TestCase):
+        
+    def test_Tetrahedron(self):
+        "Tetrahedron =   S6  +    S3 # (volume = 1)"
+        S6 = S() * PHI**2
+        S3 = S() * PHI
+        self.assertTrue(Eq(S6.ivm_volume() + S3.ivm_volume(), D))
+    
+    def test_Icosahedron(self):
+        "Icosahedron =100*E3 + 20*E  # (volume = ~18.51)"
+        E3 = E() * PHI
+        E0 = E()
+        self.assertEqual(N(100*(E3.ivm_volume()) + 20*(E0.ivm_volume())), 
+                         N(20 * 1/sfactor) )       
+
+    def test_RT5(self):
+        "RhTriac_T   =  5*S6 +  5*S3 # (volume = 5)"
+        S6 = S() * PHI**2
+        S3 = S() * PHI
+        self.assertTrue(Eq(5*(S6.ivm_volume()) + 5*(S3.ivm_volume()), 5))
+        
+        
 class Test_Triangle(unittest.TestCase):
     
     def test_unit_area1(self):
         tri = Triangle(D, D, D)
-        self.assertEqual(tri.ivm_area().evalf(), 1)
+        self.assertEqual(tri.ivm_area(), 1)
         
     def test_unit_area2(self):
         tri = Triangle(2, 2, 2)
-        self.assertEqual(tri.ivm_area().evalf(), 4)
+        self.assertEqual(tri.ivm_area(), 4)
         
     def test_xyz_area3(self):
         tri = Triangle(D, D, D)
@@ -294,11 +860,11 @@ class Test_Triangle(unittest.TestCase):
         v1 = Vector((D, 0, 0))
         v2 = Vector((0, D, 0))
         xyz_area = make_tri(v1, v2)[1]
-        self.assertAlmostEqual(xyz_area.evalf(), 2)
+        self.assertTrue(Eq(xyz_area, 2))
 
     def test_xyz_area5(self):
         tri = Triangle(R, R, R)
-        self.assertAlmostEqual(tri.xyz_area(), (root3)/4)
+        self.assertEqual(tri.xyz_area(), (root3)/4)
         
 def command_line():
     args = sys.argv[1:]
