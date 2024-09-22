@@ -843,6 +843,20 @@ def test5():
     draw_poly(cu, f, v=False, e=False, f=True)
     f.close()
     
+def test6():
+    out = open("iw_rt_123.pov", "w")
+    out.write(pov_header)
+    # Icosa with edges sfactor = S/E
+    icosaWithin = Icosahedron() * sfactor # edges 1.08...
+    octa = Octahedron() * 2    # corresponding octa edges 2R
+    rt = RT() * sfactor * PHI  # blow up corresponding RT by PHI
+    cu_2F = Cube() * 4         # prime vector = 2R so 2F = 4R
+    draw_poly(icosaWithin, out)
+    draw_poly(octa, out)
+    draw_poly(cu_2F, out)
+    draw_poly(rt, out)
+    out.close()
+    
 if __name__ == "__main__":
-    test5()
+    test6()
     
