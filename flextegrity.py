@@ -5,7 +5,7 @@ Created on Sun Mar  8 11:40:54 2020
 
 @author: Kirby Urner
 
-Sept 21, 2024:  added PD
+Sept 21, 2024:  added PD, RT, implemented faces as polygons
 Sept 19, 2021:  altered to work with new qray.py 
                 wherein Qvector.xyz is a property
 """
