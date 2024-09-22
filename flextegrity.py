@@ -170,8 +170,12 @@ def draw_face(p, f, c, t):
         x,y,z = coords.x, coords.y, coords.z
         data += "< %s, %s, %s > " % (x, y, z)
         
+    #template = ("polygon { %s, %s texture "
+    #            "{ pigment { color %s } } no_shadow }")  
+    #print(template % (num_points, data, c), file=t)
+    
     template = ("polygon { %s, %s texture "
-                "{ pigment { color %s } } no_shadow }")        
+                "{ %s } no_shadow }")      
     print(template % (num_points, data, c), file=t)        
 
 def draw_edge(e, c, r, t):
@@ -752,7 +756,7 @@ pov_header = \
 // include "glass.inc"      // Glass textures/interiors
 // include "golds.inc"      // Gold textures
 // include "metals.inc"     // Metallic pigments, finishes, and textures
-// include "stones.inc"     // Binding include-file for STONES1 and STONES2
+#include "stones.inc"     // Binding include-file for STONES1 and STONES2
 // include "stones1.inc"    // Great stone-textures created by Mike Miller
 // include "stones2.inc"    // More, done by Dan Farmer and Paul Novak
 // include "woodmaps.inc"   // Basic wooden colormaps
@@ -763,7 +767,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <4, 0.1, 0.2>
+  location  <6, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -831,10 +835,12 @@ def test4():
 def test5():
     f = open("testing123.pov", "w")
     f.write(pov_header)
-    rt = RT() * sfactor * PHI
+    rt = RT() * sfactor * PHI * 1.01 # push out faces a bit more
+    rt.face_color = "T_Stone18"
     cu = 4 * Cube()
-    draw_poly(rt, f, f=True)
-    draw_poly(cu, f, f=True)
+    cu.face_color = "T_Stone17"
+    draw_poly(rt, f, v=False, e=False, f=True)
+    draw_poly(cu, f, v=False, e=False, f=True)
     f.close()
     
 if __name__ == "__main__":
