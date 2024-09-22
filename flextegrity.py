@@ -5,9 +5,65 @@ Created on Sun Mar  8 11:40:54 2020
 
 @author: Kirby Urner
 
+Sept 21, 2024:  added PD
 Sept 19, 2021:  altered to work with new qray.py 
                 wherein Qvector.xyz is a property
 """
+
+import math
+from math import sqrt as rt2
+from qrays import Qvector, Vector
+PHI = (1 + math.sqrt(5))/2.0
+
+ORIGIN = Qvector((0,0,0,0))
+A = Qvector((1,0,0,0))
+B = Qvector((0,1,0,0))
+C = Qvector((0,0,1,0))
+D = Qvector((0,0,0,1))
+
+# from Wikipedia (Quadray Coordinates)
+E,F,G,H     = B+C+D, A+C+D, A+B+D, A+B+C
+I,J,K,L,M,N = A+B, A+C, A+D, B+C, B+D, C+D
+O,P,Q,R,S,T = I+J, I+K, I+L, I+M, N+J, N+K
+U,V,W,X,Y,Z = N+L, N+M, J+L, L+M, M+K, K+J
+
+sfactor = 20/(5*rt2(10)/2 + 15*rt2(2)/2) # VE/icosa vol ratio
+
+# OPPOSITE DIAGONALS
+# ZY WX
+# RV OS
+# TU PQ
+control = (Z - T).length()
+
+midface = (Z + Y)
+gold    = 0.5 * PHI * midface/midface.length()
+Zi = gold + J/J.length() * control/2
+Yi = gold + M/M.length() * control/2
+
+midface = (W + X)
+gold    = 0.5 * PHI * midface/midface.length()
+Wi = gold + J/J.length() * control/2
+Xi = gold + M/M.length() * control/2
+
+midface = (R + V)
+gold    = 0.5 * PHI * midface/midface.length()
+Ri = gold + I/I.length() * control/2
+Vi = gold + N/N.length() * control/2
+
+midface = (O + S)
+gold    = 0.5 * PHI * midface/midface.length()
+Oi = gold + I/I.length() * control/2
+Si = gold + N/N.length() * control/2
+
+midface = (T + U)
+gold    = 0.5 * PHI * midface/midface.length()
+Ti = gold + K/K.length() * control/2
+Ui = gold + L/L.length() * control/2
+
+midface = (P + Q)
+gold    = 0.5 * PHI * midface/midface.length()
+Pi = gold + K/K.length() * control/2
+Qi = gold + L/L.length() * control/2
 
 class Polyhedron:
     """
@@ -73,6 +129,8 @@ class Edge:
     def __repr__(self):
         return 'Edge from %s to %s' % (self.v0, self.v1)
 
+#=== DRAW ROUTINES ===
+
 def draw_vert(v, c, r, t): 
     v = v.xyz
     x,y,z = v.x, v.y, v.z
@@ -81,7 +139,40 @@ def draw_vert(v, c, r, t):
                 "{ pigment { color %s } } no_shadow }")
     print(template % data, file=t)
     
-def draw_face(f, c, t): pass
+def draw_face(p, f, c, t):
+    """
+    POLYGON:
+    polygon
+    {
+        Number_Of_Points, <Point_1> <Point_2>... <Point_n>
+        [OBJECT_MODIFIER...]
+    }
+    
+    Parameters
+    ----------
+    f : tuple of tuples
+        vertexes around a face
+    f : tuple of strings
+        labels of verts around a face
+    c : string
+        color info
+    t : file object
+
+    Returns
+    -------
+    None.
+
+    """
+    data = ""
+    num_points = len(f)
+    for v in f:
+        coords = p.vertexes[v].xyz
+        x,y,z = coords.x, coords.y, coords.z
+        data += "< %s, %s, %s > " % (x, y, z)
+        
+    template = ("polygon { %s, %s texture "
+                "{ pigment { color %s } } no_shadow }")        
+    print(template % (num_points, data, c), file=t)        
 
 def draw_edge(e, c, r, t):
     v = e.v0.xyz
@@ -103,67 +194,23 @@ def draw_poly(p, the_file, v=True, f=False, e=True):
     fc = p.face_color
     
     if v:
-        for v in p.vertexes.values():
-            draw_vert(v, vc, vr, the_file)
+        alt_color  = "rgb <{}, {}, {}>".format(1, 0, 0) # red
+        alt_radius = 0.05
+        for label, v in p.vertexes.items():
+            if label == None: # replace None with exceptional v e.g. 'z'
+                draw_vert(v, alt_color, alt_radius, the_file)
+            else:
+                draw_vert(v, vc, vr, the_file)
 
     if f:
         for f in p.faces:
-            draw_face(f, fc, the_file)
+            draw_face(p, f, fc, the_file)
 
     if e:
         for e in p.edges:
             draw_edge(e, ec, er, the_file)
      
-import math
-from qrays import Qvector, Vector
-PHI = (1 + math.sqrt(5))/2.0
 
-ORIGIN = Qvector((0,0,0,0))
-A = Qvector((1,0,0,0))
-B = Qvector((0,1,0,0))
-C = Qvector((0,0,1,0))
-D = Qvector((0,0,0,1))
-
-E,F,G,H     = B+C+D, A+C+D, A+B+D, A+B+C
-I,J,K,L,M,N = A+B, A+C, A+D, B+C, B+D, C+D
-O,P,Q,R,S,T = I+J, I+K, I+L, I+M, N+J, N+K
-U,V,W,X,Y,Z = N+L, N+M, J+L, L+M, M+K, K+J
-
-# OPPOSITE DIAGONALS
-# ZY WX
-# RV OS
-# TU PQ
-control = (Z - T).length()
-
-midface = (Z + Y)
-gold    = 0.5 * PHI * midface/midface.length()
-Zi = gold + J/J.length() * control/2
-Yi = gold + M/M.length() * control/2
-
-midface = (W + X)
-gold    = 0.5 * PHI * midface/midface.length()
-Wi = gold + J/J.length() * control/2
-Xi = gold + M/M.length() * control/2
-
-midface = (R + V)
-gold    = 0.5 * PHI * midface/midface.length()
-Ri = gold + I/I.length() * control/2
-Vi = gold + N/N.length() * control/2
-
-midface = (O + S)
-gold    = 0.5 * PHI * midface/midface.length()
-Oi = gold + I/I.length() * control/2
-Si = gold + N/N.length() * control/2
-
-midface = (T + U)
-gold    = 0.5 * PHI * midface/midface.length()
-Ti = gold + K/K.length() * control/2
-Ui = gold + L/L.length() * control/2
-
-midface = (P + Q)
-gold    = 0.5 * PHI * midface/midface.length()
-Pi = gold + K/K.length() * control/2
-Qi = gold + L/L.length() * control/2
 
 class Tetrahedron(Polyhedron):
     """
@@ -238,7 +285,7 @@ class Cube (Polyhedron):
         self.edge_radius= 0.03
         self.vert_color = "rgb <0, 1, 0>"
         self.vert_radius= 0.03
-        self.face_color = "rgb <0, 0, 0>"
+        self.face_color = "rgb <0, 1, 0>"
 
         verts = {}
         for vert_label in "abcdefgh":
@@ -362,7 +409,7 @@ class RD (Polyhedron):
 class Icosahedron (Polyhedron):
 
     def __init__(self):
-        # 8 vertices
+        # 20 vertices
         self.edge_color = "rgb <0, 1, 1>"
         self.edge_radius= 0.03
         self.vert_color = "rgb <0, 1, 1>"
@@ -400,6 +447,152 @@ class Icosahedron (Polyhedron):
                       ('y','p','r'),('r','q','x'),
                       ('x','u','v'),('u','s','w'),
                       ('w','q','o'),('o','z','p'))
+
+        self.edges = self._distill()
+
+class PD (Polyhedron):  
+# Pentagonal Dodecahedron
+
+    def __init__(self):
+        # Sienna Brown rgb(160,82,45)
+        self.edge_color = "rgb <%s, %s, %s>" % (160/255, 82/255, 45/255)
+        self.edge_radius= 0.03
+        self.vert_color = self.edge_color
+        self.vert_radius= 0.03
+        self.face_color = "rgb <0, 0, 0>"
+        
+        # 20 vertexes
+        # V + F = E + 2; 20 + 12 = 30 + 2
+        L = ((Wi + Qi + Oi)/3 - (Pi + Oi + Qi)/3).length()
+        sk = (1/L) * (1/PHI)
+        self.vertexes = dict(osw = sk * (Oi + Wi + Si)/3,
+                             osz = sk * (Oi + Zi + Si)/3,
+                             pyz = sk * (Zi + Pi + Yi)/3,
+                             tyz = sk * (Zi + Ti + Yi)/3,
+                             tuv = sk * (Ti + Vi + Ui)/3,
+                             stu = sk * (Ti + Si + Ui)/3,
+                             qwx = sk * (Wi + Qi + Xi)/3,
+                             uwx = sk * (Wi + Ui + Xi)/3,
+                             opq = sk * (Pi + Oi + Qi)/3,
+                             pqr = sk * (Pi + Ri + Qi)/3,
+                             rvy = sk * (Ri + Yi + Vi)/3,
+                             rvx = sk * (Ri + Xi + Vi)/3,
+                             stz = sk * (Zi + Si + Ti)/3,
+                             tvy = sk * (Ti + Yi + Vi)/3,
+                             pry = sk * (Yi + Pi + Ri)/3,
+                             qrx = sk * (Ri + Qi + Xi)/3,
+                             uvx = sk * (Xi + Ui + Vi)/3,
+                             suw = sk * (Ui + Si + Wi)/3,
+                             oqw = sk * (Wi + Qi + Oi)/3,
+                             opz = sk * (Oi + Zi + Pi)/3)
+                             
+        self.name = "PD"
+        self.volume = 15.3500
+        self.center = ORIGIN
+        # 12 faces
+        self.faces = (('oqw', 'opq', 'opz', 'osz', 'osw'), # o
+                      ('opq', 'pqr', 'pry', 'pyz', 'opz'), # p
+                      ('opq', 'pqr', 'qrx', 'qwx', 'oqw'), # q
+                      ('qrx', 'pqr', 'pry', 'rvy', 'rvx'), # r
+                      ('stu', 'suw', 'osw', 'osz', 'stz'), # s
+                      ('stu', 'stz', 'tyz', 'tvy', 'tuv'), # t
+                      ('suw', 'uwx', 'uvx', 'tuv', 'stu'), # u
+                      ('tvy', 'tuv', 'uvx', 'rvx', 'rvy'), # v
+                      ('osw', 'oqw', 'qwx', 'uwx', 'suw'), # w  
+                      ('uwx', 'qwx', 'qrx', 'rvx', 'uvx'), # x
+                      ('pyz', 'pry', 'rvy', 'tvy', 'tyz'), # y
+                      ('osz', 'opz', 'pyz', 'tyz', 'stz'), # z
+                      )
+        
+
+        self.edges = self._distill()
+
+class RT (Polyhedron):
+# Rhombic Triacontahedron
+
+    def __init__(self):
+        # Purple Heart rgb(105,53,156)
+        self.edge_color = "rgb <%s, %s, %s>" % (105/255, 53/255, 156/255)
+        self.edge_radius= 0.03
+        self.vert_color = self.edge_color
+        self.vert_radius= 0.03
+        self.face_color = self.edge_color
+        
+        # 32 vertexes
+        # V + F = E + 2; 32 + 30 = 60 + 2
+        L = ((Wi + Qi + Oi)/3 - (Pi + Oi + Qi)/3).length()
+        sk = (1/L) * (1/PHI)
+        self.vertexes = dict(osw = sk * (Oi + Wi + Si)/3,
+                             osz = sk * (Oi + Zi + Si)/3,
+                             pyz = sk * (Zi + Pi + Yi)/3,
+                             tyz = sk * (Zi + Ti + Yi)/3,
+                             tuv = sk * (Ti + Vi + Ui)/3,
+                             stu = sk * (Ti + Si + Ui)/3,
+                             qwx = sk * (Wi + Qi + Xi)/3,
+                             uwx = sk * (Wi + Ui + Xi)/3,
+                             opq = sk * (Pi + Oi + Qi)/3,
+                             pqr = sk * (Pi + Ri + Qi)/3,
+                             rvy = sk * (Ri + Yi + Vi)/3,
+                             rvx = sk * (Ri + Xi + Vi)/3,
+                             stz = sk * (Zi + Si + Ti)/3,
+                             tvy = sk * (Ti + Yi + Vi)/3,
+                             pry = sk * (Yi + Pi + Ri)/3,
+                             qrx = sk * (Ri + Qi + Xi)/3,
+                             uvx = sk * (Xi + Ui + Vi)/3,
+                             suw = sk * (Ui + Si + Wi)/3,
+                             oqw = sk * (Wi + Qi + Oi)/3,
+                             opz = sk * (Oi + Zi + Pi)/3)
+        
+        self.vertexes.update(dict(
+                             o =  Oi,
+                             p =  Pi,
+                             q =  Qi,
+                             r =  Ri,
+                             s =  Si,
+                             t =  Ti,
+                             u =  Ui,
+                             v =  Vi,
+                             w =  Wi,
+                             x =  Xi,
+                             y =  Yi,
+                             z =  Zi))                    
+        self.name = "RT"
+        self.volume = 21.21
+        self.center = ORIGIN
+        # 30 faces
+        self.faces = (('s', 'stz', 'z', 'osz'),
+                      ('s', 'osz', 'o', 'osw'),
+                      ('s', 'suw', 'w', 'osw'),
+                      ('s', 'suw', 'u', 'stu'),
+                      ('s', 'stu', 't', 'stz'),
+                      ('r', 'qrx', 'q', 'pqr'),
+                      ('r', 'pry', 'p', 'pqr'),
+                      ('r', 'pry', 'y', 'rvy'),
+                      ('r', 'rvx', 'v', 'rvy'),
+                      ('r', 'qrx', 'x', 'rvx'),
+                      ('v', 'tuv', 't', 'tvy'),
+                      ('t', 'tyz', 'y', 'tvy'),
+                      ('y', 'tyz', 'z', 'pyz'),
+                      ('z', 'pyz', 'p', 'opz'),
+                      ('p', 'opz', 'o', 'opq'),
+                      ('o', 'oqw', 'q', 'opq'),
+                      ('q', 'oqw', 'w', 'qwx'),
+                      ('w', 'uwx', 'x', 'qwx'),
+                      ('x', 'uwx', 'u', 'uvx'),
+                      ('u', 'tuv', 'v', 'uvx'),
+                      ('v', 'tvy', 'y', 'rvy'),
+                      ('y', 'pry', 'p', 'pyz'),
+                      ('p', 'pqr', 'q', 'opq'),
+                      ('q', 'qwx', 'x', 'qrx'),
+                      ('x', 'uvx', 'v', 'rvx'),
+                      ('t', 'stz', 'z', 'tyz'),
+                      ('z', 'osz', 'o', 'opz'),
+                      ('o', 'osw', 'w', 'oqw'),
+                      ('w', 'suw', 'u', 'uwx'),
+                      ('u', 'stu', 't', 'tuv'),
+                      )
+        
+        
 
         self.edges = self._distill()
 
@@ -592,3 +785,58 @@ light_source {
 
 background { color rgb <1.0, 1.0, 1.0> }
 """
+
+def test1():
+    f = open("testing123.pov", "w")
+    f.write(pov_header)
+    ico = Icosahedron()
+    pd = PD()
+    draw_poly(ico, f)
+    draw_poly(pd, f)
+    f.close()
+    
+def test2():
+    f = open("testing123.pov", "w")
+    f.write(pov_header)
+    ico = Icosahedron()
+    pd = PD()
+    rt = RT()
+    draw_poly(ico, f)
+    draw_poly(pd, f)
+    draw_poly(rt, f)
+    f.close()
+    
+def test3():
+    f = open("testing123.pov", "w")
+    f.write(pov_header)
+    # ico = Icosahedron()
+    rt = RT()
+    draw_poly(rt, f)
+    # draw_poly(ico, f)
+    f.close()
+    
+def test4():
+    f = open("testing123.pov", "w")
+    f.write(pov_header)
+    octa = 2 * Octahedron()
+    ico = Icosahedron() * sfactor
+    rt = RT() * sfactor * PHI
+    cu = 4 * Cube()
+    draw_poly(ico, f)
+    draw_poly(octa, f)
+    draw_poly(cu, f)
+    draw_poly(rt, f)
+    f.close()
+    
+def test5():
+    f = open("testing123.pov", "w")
+    f.write(pov_header)
+    rt = RT() * sfactor * PHI
+    cu = 4 * Cube()
+    draw_poly(rt, f, f=True)
+    draw_poly(cu, f, f=True)
+    f.close()
+    
+if __name__ == "__main__":
+    test5()
+    
