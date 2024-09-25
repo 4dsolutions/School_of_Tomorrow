@@ -131,15 +131,19 @@ class Edge:
 
 #=== DRAW ROUTINES ===
 
-def draw_vert(v, c, r, t): 
+def draw_vert(v, c, r, t, *, texture = False): 
     v = v.xyz
     x,y,z = v.x, v.y, v.z
     data = "< %s, %s, %s >" % (x,y,z), r, c
-    template = ("sphere { %s, %s texture "
-                "{ pigment { color %s } } no_shadow }")
-    print(template % data, file=t)
+    if not texture:
+        template = ("sphere { %s, %s texture "
+                    "{ pigment { color %s } } no_shadow }")
+    else:
+        template = ("sphere { %s, %s texture "
+                    "{ %s } no_shadow }")    
+    print(template % data, file=t)    
     
-def draw_face(p, f, c, t):
+def draw_face(p, f, c, t, *, texture = False):
     """
     POLYGON:
     polygon
@@ -169,27 +173,32 @@ def draw_face(p, f, c, t):
         coords = p.vertexes[v].xyz
         x,y,z = coords.x, coords.y, coords.z
         data += "< %s, %s, %s > " % (x, y, z)
-        
-    #template = ("polygon { %s, %s texture "
-    #            "{ pigment { color %s } } no_shadow }")  
-    #print(template % (num_points, data, c), file=t)
     
-    template = ("polygon { %s, %s texture "
-                "{ %s } no_shadow }")      
+    if not texture:
+        template = ("polygon { %s, %s texture "
+                    "{ pigment { color %s } } no_shadow }")  
+        print(template % (num_points, data, c), file=t)
+    else: 
+        template = ("polygon { %s, %s texture "
+                    "{ %s } no_shadow }")      
     print(template % (num_points, data, c), file=t)        
 
-def draw_edge(e, c, r, t):
+def draw_edge(e, c, r, t, *, texture=False):
     v = e.v0.xyz
     v0 = "< %s, %s, %s >" % (v.x, v.y, v.z)
     v = e.v1.xyz
     v1 = "< %s, %s, %s >" % (v.x, v.y, v.z)
     data = (v0, v1, r, c)
-    template = ("cylinder { %s, %s, %s texture "
-                        "{pigment { color %s } } no_shadow }")
+    if not texture:
+        template = ("cylinder { %s, %s, %s texture "
+                            "{pigment { color %s } } no_shadow }")
+    else:
+        template = ("cylinder { %s, %s, %s texture "
+                            "{ %s } no_shadow }")        
     print(template % data, file=t)
     
 
-def draw_poly(p, the_file, v=True, f=False, e=True):
+def draw_poly(p, the_file, v=True, f=False, e=True, *, texture=False):
     
     ec = p.edge_color
     er = p.edge_radius
@@ -202,17 +211,17 @@ def draw_poly(p, the_file, v=True, f=False, e=True):
         alt_radius = 0.05
         for label, v in p.vertexes.items():
             if label == None: # replace None with exceptional v e.g. 'z'
-                draw_vert(v, alt_color, alt_radius, the_file)
+                draw_vert(v, alt_color, alt_radius, the_file, texture=texture)
             else:
-                draw_vert(v, vc, vr, the_file)
+                draw_vert(v, vc, vr, the_file, texture=texture)
 
     if f:
         for f in p.faces:
-            draw_face(p, f, fc, the_file)
+            draw_face(p, f, fc, the_file, texture=texture)
 
     if e:
         for e in p.edges:
-            draw_edge(e, ec, er, the_file)
+            draw_edge(e, ec, er, the_file, texture=texture)
      
 
 
@@ -366,7 +375,7 @@ class Octahedron (Polyhedron):
             verts[vert_label] = eval(vert_label.upper())
 
         self.name = "Octahedron"
-        self.volume = 4  # per Concentric Hierarchy
+        self.volume = 4  # per Concentric Hierarchy (84S + 20S)
         self.center = ORIGIN
         
         # 6 vertices
@@ -747,7 +756,7 @@ pov_header = \
 // to parse!
 // --- general include files ---
 // include "chars.inc"      // A complete library of character objects, by Ken Maeno
-// include "skies.inc"      // Ready defined sky spheres
+#include "skies.inc"      // Ready defined sky spheres
 // include "stars.inc"      // Some star fields
 // include "strings.inc"    // macros for generating and manipulating text strings
 
@@ -755,7 +764,7 @@ pov_header = \
 // include "finish.inc"     // Some basic finishes
 // include "glass.inc"      // Glass textures/interiors
 // include "golds.inc"      // Gold textures
-// include "metals.inc"     // Metallic pigments, finishes, and textures
+#include "metals.inc"     // Metallic pigments, finishes, and textures
 #include "stones.inc"     // Binding include-file for STONES1 and STONES2
 // include "stones1.inc"    // Great stone-textures created by Mike Miller
 // include "stones2.inc"    // More, done by Dan Farmer and Paul Novak
@@ -767,7 +776,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <6, 0.1, 0.2>
+  location  <2, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -786,6 +795,8 @@ light_source {
   color rgb <1,1,1>    // light's color
   translate <20, -15, -10>
 }
+
+sky_sphere { S_Cloud2 scale 2 translate -1}
 
 background { color rgb <1.0, 1.0, 1.0> }
 """
@@ -833,21 +844,21 @@ def test4():
     f.close()
     
 def test5():
-    f = open("testing123.pov", "w")
+    f = open("marble_polys.pov", "w")
     f.write(pov_header)
     rt = RT() * sfactor * PHI * 1.01 # push out faces a bit more
     rt.face_color = "T_Stone18"
     cu = 4 * Cube()
     cu.face_color = "T_Stone17"
-    draw_poly(rt, f, v=False, e=False, f=True)
-    draw_poly(cu, f, v=False, e=False, f=True)
+    draw_poly(rt, f, v=False, e=False, f=True, texture=True)
+    draw_poly(cu, f, v=False, e=False, f=True, texture=True)
     f.close()
-    
+
 def test6():
     out = open("iw_rt_123.pov", "w")
     out.write(pov_header)
     # Icosa with edges sfactor = S/E
-    icosaWithin = Icosahedron() * sfactor # edges 1.08...
+    icosaWithin = Icosahedron() * sfactor # edges 1.08... (volume 60S + 20s3)
     octa = Octahedron() * 2    # corresponding octa edges 2R
     rt = RT() * sfactor * PHI  # blow up corresponding RT by PHI
     cu_2F = Cube() * 4         # prime vector = 2R so 2F = 4R
@@ -857,6 +868,53 @@ def test6():
     draw_poly(rt, out)
     out.close()
     
+def test7():
+    out = open("ico_pd.pov", "w")
+    out.write(pov_header)
+    #ico = Icosahedron()*2
+    #pd = PD()*2
+    rt = RT()*2
+    #draw_poly(ico, out)
+    #draw_poly(pd, out)
+    draw_poly(rt, out)
+    out.close()
+    
+def test8():
+    out = open("ball_rt.pov", "w")
+    out.write(pov_header) 
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    rt = RT() * (1/PHI)  # SuperRT scaled down to wrap uniradius ball
+    rt.edge_radius = 0.02
+    rt.vert_radius = 0.04
+    rt.vert_color = 'T_Copper_1A'
+    rt.edge_color = 'T_Chrome_1A'
+    draw_poly(rt, out, v=True, e=True, f=False, texture=True)
+    out.close()
+    
+def test9():
+    out = open("ball_rt_rd.pov", "w")
+    out.write(pov_header) 
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    rt = RT() * (1/PHI)  # SuperRT scaled down to wrap uniradius ball
+    rt.edge_radius = 0.02
+    rt.vert_radius = 0.04
+    rt.vert_color = 'T_Copper_1A'
+    rt.edge_color = 'T_Chrome_1A'
+    
+    rt2 = RT() * (1/PHI) * 0.9994 * (3/2)**(1/3) # 7.5 RT_K
+    rt2.edge_radius = 0.02
+    
+    rd = RD()
+    rd.edge_radius = 0.02
+    rd.vert_radius = 0.04
+    rd.vert_color = 'T_Copper_1A'
+    rd.edge_color = 'T_Silver_1A'
+    
+    draw_poly(rd, out, v=True, e=True, f=False, texture=True)
+    draw_poly(rt, out, v=True, e=True, f=False, texture=True)
+    draw_poly(rt2, out, v=False, e=True, f=False)
+    out.close()
+    
 if __name__ == "__main__":
-    test6()
+    test9()
     
