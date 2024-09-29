@@ -776,7 +776,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <2, 0.1, 0.2>
+  location  <1.5, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -914,7 +914,44 @@ def test9():
     draw_poly(rt, out, v=True, e=True, f=False, texture=True)
     draw_poly(rt2, out, v=False, e=True, f=False)
     out.close()
+
+def test10():
+    out = open("ball_in_rt_t.pov", "w")
+    out.write(pov_header) 
+    draw_vert(ORIGIN, "rgb <1, 0, 0>", 0.5, out)
+    rt = RT() * (1/PHI) * 0.9994  # RT_T
+    rt.face_color = "T_Stone17"
+    draw_poly(rt, out, v=False, e=False, f=True, texture=True)
+    out.close()
+
+def test11():
+    out = open("rt_spokes.pov", "w")
+    out.write(pov_header) 
     
+    rt_t = RT() * (1/PHI) * 0.9994  # RT_T
+    for face in rt_t.faces:
+        spoke = ORIGIN
+        for i in range(4):
+            spoke += rt_t.vertexes[face[i]] 
+        spoke = spoke * 0.25
+        edge = Edge(ORIGIN, spoke)
+        draw_edge(edge, "rgb <0, 0, 1>", 0.02, out)
+    rt_t.edge_radius = 0.01
+    draw_poly(rt_t, out, v=False, e=True, f=False)
+
+    rt_e = RT() * (1/PHI)   # RT_E
+    for face in rt_e.faces:
+        spoke = ORIGIN
+        for i in range(4):
+            spoke += rt_e.vertexes[face[i]] 
+        spoke = spoke * 0.25
+        edge = Edge(ORIGIN, spoke)
+        draw_edge(edge, "rgb <1, 0, 0>", 0.01, out)
+    rt_t.face_color = "T_Stone17"
+    draw_poly(rt_t, out, v=False, e=False, f=True, texture=True)
+    
+    out.close()
+        
 if __name__ == "__main__":
-    test9()
+    test11()
     
