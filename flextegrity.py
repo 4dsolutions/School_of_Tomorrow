@@ -232,11 +232,12 @@ class Tetrahedron(Polyhedron):
     
     def __init__(self):
         # POV-Ray
-        self.edge_color = "rgb <{}, {}, {}>".format(1, 165/255, 0) # orange
+        RGB: (255,173,0)
+        self.edge_color = "rgb <{}, {}, {}>".format(1, 173/255, 0) # orange
         self.edge_radius= 0.03
-        self.vert_color = "rgb <{}, {}, {}>".format(1, 165/255, 0) # orange
+        self.vert_color = "rgb <{}, {}, {}>".format(1, 173/255, 0) # orange
         self.vert_radius= 0.03
-        self.face_color = "rgb <0, 0, 0>" # not used 
+        self.face_color = self.edge_color # often not used 
         
         verts = dict(a = Qvector((1,0,0,0)), #A
                      b = Qvector((0,1,0,0)), #B
@@ -263,11 +264,12 @@ class InvTetrahedron(Polyhedron):
     
     def __init__(self):
         # POV-Ray
-        self.edge_color = "rgb <{}, {}, {}>".format(0, 0, 0) # black
+        self.edge_color = "rgb <{}, {}, {}>".format(67/255, 70/255, 75/255) # black
         self.edge_radius= 0.03
-        self.vert_color = "rgb <{}, {}, {}>".format(0, 0, 0) # black
+        self.vert_color = self.edge_color
         self.vert_radius= 0.03
         self.face_color = "rgb <0, 0, 0>" # not used 
+        self.face_color = self.edge_color # often not used 
         
         verts = dict(e = -Qvector((1,0,0,0)), #E
                      f = -Qvector((0,1,0,0)), #F
@@ -776,7 +778,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <1.5, 0.1, 0.2>
+  location  <2.5, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -951,7 +953,42 @@ def test11():
     draw_poly(rt_t, out, v=False, e=False, f=True, texture=True)
     
     out.close()
+
+def test12():
+    out = open("stella_octangula.pov", "w")
+    out.write(pov_header)
+    tet = Tetrahedron()
+    tet.edge_radius = 0.01
+    invtet = InvTetrahedron()
+    invtet.edge_radius = 0.01
+    octa = Octahedron() * (1/2)
+    octa.vert_radius = 0.01
+    octa.edge_radius = 0.01
+    cu = Cube()
+    cu.vert_radius = 0.01
+    cu.edge_radius = 0.01
+    draw_poly(tet, out, v=False, e=True, f=False)
+    draw_poly(invtet, out, v=False, e=True, f=False)
+    draw_poly(octa, out, v=True, e=True, f=False)
+    draw_poly(cu,   out, v=True, e=True, f=False)
+    out.close()
+    
+def test13():
+    out = open("stella_octangula_2.pov", "w")
+    out.write(pov_header)
+    tet = Tetrahedron()
+    tet.edge_radius = 0.01
+    RGB: (255,173,0)
+    invtet = InvTetrahedron()
+    invtet.edge_radius = 0.01
+    cu = Cube()
+    cu.vert_radius = 0.01
+    cu.edge_radius = 0.01
+    draw_poly(tet, out, v=False, e=True, f=True)
+    draw_poly(invtet, out, v=False, e=True, f=True)
+    draw_poly(cu,   out, v=True, e=True, f=False)
+    out.close()
         
 if __name__ == "__main__":
-    test11()
+    test13()
     
