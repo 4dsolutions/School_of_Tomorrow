@@ -988,7 +988,119 @@ def test13():
     draw_poly(invtet, out, v=False, e=True, f=True)
     draw_poly(cu,   out, v=True, e=True, f=False)
     out.close()
-        
+
+def test14():
+    out = open("tet_cu_octa_dodeca.pov", "w")
+    out.write(pov_header)
+    tet = Tetrahedron()
+    tet.edge_radius = 0.01
+    invtet = InvTetrahedron()
+    invtet.edge_radius = 0.01
+    octa = Octahedron()
+    octa.vert_radius = 0.01
+    octa.edge_radius = 0.01
+    cu = Cube()
+    cu.vert_radius = 0.01
+    cu.edge_radius = 0.01
+    rd = RD()
+    rd.vert_radius = 0.02
+    rd.edge_radius = 0.02
+    # draw_poly(tet, out, v=False, e=True, f=False)
+    # draw_poly(invtet, out, v=False, e=True, f=False)
+    draw_poly(octa, out, v=True, e=True, f=False)
+    draw_poly(cu,   out, v=True, e=True, f=False)
+    draw_poly(rd,   out, v=True, e=True, f=False)
+    out.close()
+
+def test15():
+    out = open("gif1.pov", "w")
+    out.write(pov_header)
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    out.close()
+    
+    out = open("gif2.pov", "w") 
+    out.write(pov_header)   
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    tet = Tetrahedron()
+    tet.vert_radius = tet.edge_radius
+    invtet = InvTetrahedron()
+    invtet.vert_radius = invtet.edge_radius
+    draw_poly(tet, out, v=True, e=True, f=False)
+    draw_poly(invtet, out, v=True, e=True, f=False)
+    out.close()    
+
+    out = open("gif3.pov", "w") 
+    out.write(pov_header) 
+    tet = Tetrahedron()
+    tet.vert_radius = tet.edge_radius
+    invtet = InvTetrahedron()
+    invtet.vert_radius = invtet.edge_radius
+    draw_poly(tet, out, v=True, e=True, f=False)
+    draw_poly(invtet, out, v=True, e=True, f=False)
+    
+    out = open("gif4.pov", "w")
+    out.write(pov_header)   
+    tet = Tetrahedron()
+    tet.vert_radius = tet.edge_radius
+    invtet = InvTetrahedron()
+    invtet.vert_radius = invtet.edge_radius
+    cu = Cube()
+    cu.vert_radius = cu.edge_radius
+    draw_poly(tet, out, v=True, e=True, f=False)
+    draw_poly(invtet, out, v=True, e=True, f=False)
+    draw_poly(cu,   out, v=True, e=True, f=False)
+    out.close()
+    
+    out = open("gif5.pov", "w")
+    out.write(pov_header)   
+    cu = Cube()
+    cu.vert_radius = cu.edge_radius
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius
+    draw_poly(cu,   out, v=True, e=True, f=False)
+    draw_poly(octa,   out, v=True, e=True, f=False)
+    out.close()
+    
+    out = open("gif6.pov", "w")
+    out.write(pov_header)  
+    cu = Cube()
+    cu.vert_radius = cu.edge_radius
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius
+    rd = RD()
+    rd.vert_radius = rd.edge_radius
+    draw_poly(cu,   out, v=True, e=True, f=False)
+    draw_poly(octa,   out, v=True, e=True, f=False)
+    draw_poly(rd,   out, v=True, e=True, f=False)
+    out.close()
+    
+    out = open("gif7.pov", "w")
+    out.write(pov_header)   
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    rd = RD()
+    rd.vert_radius = rd.edge_radius
+    draw_poly(rd,   out, v=True, e=True, f=False)
+    out.close()
+    
+    out = open("gif8.pov", "w")
+    out.write(pov_header)   
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    rd = RD()
+    rd.vert_radius = rd.edge_radius
+    rt = RT() * (1/PHI) * 0.9995 * (3/2)**(1/3)
+    rt.vert_radius = rt.edge_radius
+    draw_poly(rd,   out, v=True, e=True, f=False)
+    draw_poly(rt,   out, v=True, e=True, f=False)
+    out.close()
+
+    out = open("gif9.pov", "w")
+    out.write(pov_header)   
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    rt = RT() * (1/PHI)
+    rt.vert_radius = rt.edge_radius
+    draw_poly(rt,   out, v=True, e=True, f=False)
+    out.close()
+    
 if __name__ == "__main__":
-    test13()
+    test15()
     
