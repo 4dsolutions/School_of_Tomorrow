@@ -303,7 +303,7 @@ class Cube (Polyhedron):
         self.edge_radius= 0.03
         self.vert_color = "rgb <0, 1, 0>"
         self.vert_radius= 0.03
-        self.face_color = "rgb <0, 1, 0>"
+        self.face_color = self.edge_color 
 
         verts = {}
         for vert_label in "abcdefgh":
@@ -335,7 +335,7 @@ class Cuboid (Polyhedron):
         self.edge_radius= 0.03
         self.vert_color = "rgb <255/255, 20/255, 147/255>"
         self.vert_radius= 0.03
-        self.face_color = "rgb <0, 0, 0>"
+        self.face_color = "rgb <255/255, 20/255, 147/255>"
 
         verts = {}
         verts['A'] = Vector(( 1,  0.5,  math.sqrt(2)/2))
@@ -372,7 +372,7 @@ class Octahedron (Polyhedron):
         self.edge_radius= 0.03
         self.vert_color = "rgb <1, 0, 0>"
         self.vert_radius= 0.03
-        self.face_color = "rgb <0, 0, 0>"
+        self.face_color = "rgb <1, 0, 0>"
         
         verts = {}
         for vert_label in "ijklmn":
@@ -402,7 +402,7 @@ class RD (Polyhedron):
             self.edge_radius= 0.03
             self.vert_color = "rgb <0, 0, 1>"
             self.vert_radius= 0.03
-            self.face_color = "rgb <0, 0, 0>"
+            self.face_color = self.edge_color 
 
             verts = {}
             for vert_label in "abcdefghijklmn":
@@ -432,7 +432,7 @@ class Icosahedron (Polyhedron):
         self.edge_radius= 0.03
         self.vert_color = "rgb <0, 1, 1>"
         self.vert_radius= 0.03
-        self.face_color = "rgb <0, 0, 0>"
+        self.face_color = self.edge_color 
 
         self.vertexes = dict(o =  Oi,
                              p =  Pi,
@@ -477,7 +477,7 @@ class PD (Polyhedron):
         self.edge_radius= 0.03
         self.vert_color = self.edge_color
         self.vert_radius= 0.03
-        self.face_color = "rgb <0, 0, 0>"
+        self.face_color = self.edge_color 
         
         # 20 vertexes
         # V + F = E + 2; 20 + 12 = 30 + 2
@@ -622,7 +622,7 @@ class Cuboctahedron (Polyhedron):
         self.edge_radius= 0.03
         self.vert_color = "rgb <1, 1, 0>"
         self.vert_radius= 0.03
-        self.face_color = "rgb <0, 0, 0>"
+        self.face_color = self.edge_color 
 
         self.vertexes = dict(o =  O,
                              p =  P,
@@ -781,7 +781,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <2.5, 0.1, 0.2>
+  location  <1.5, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -981,7 +981,6 @@ def test13():
     out.write(pov_header)
     tet = Tetrahedron()
     tet.edge_radius = 0.01
-    RGB: (255,173,0)
     invtet = InvTetrahedron()
     invtet.edge_radius = 0.01
     cu = Cube()
@@ -1176,7 +1175,170 @@ def test16():
     co.vert_radius = co.edge_radius
     draw_poly(co, out, v=True, e=True, f=False)
     out.close()
+
+def test17():
+    out = open("gif1.pov", "w")
+    out.write(pov_header)
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    out.close()
+
+    out = open("gif2.pov", "w") 
+    out.write(pov_header) 
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius = 0.01
+    draw_poly(octa, out, v=True, e=True, f=False)
+    out.close()  
+    
+    out = open("gif3.pov", "w") 
+    out.write(pov_header)   
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius = 0.01
+    iw = Icosahedron() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    iw.vert_radius = iw.edge_radius = 0.01
+    draw_poly(iw, out, v=True, e=True, f=True)
+    draw_poly(octa, out, v=True, e=True, f=False)
+    out.close()  
+    
+    out = open("gif4.pov", "w") 
+    out.write(pov_header)   
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius= 0.01
+    iw = Icosahedron() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    iw.vert_radius = iw.edge_radius = 0.01
+    pd = PD() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    pd.vert_radius = pd.edge_radius = 0.01
+    rt = RT() * 0.5 * sfactor
+    rt.vert_radius = rt.edge_radius = 0.01
+    draw_poly(iw, out, v=True, e=True, f=True)
+    draw_poly(pd, out, v=True, e=True, f=False)
+    draw_poly(rt, out, v=True, e=True, f=False)
+    draw_poly(octa, out, v=True, e=True, f=False)
+    out.close() 
+    
+    out = open("gif5.pov", "w") 
+    out.write(pov_header)   
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius= 0.01
+    iw = Icosahedron() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    iw.vert_radius = iw.edge_radius = 0.01
+    pd = PD() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    pd.vert_radius = pd.edge_radius = 0.01
+    rt = RT() * 0.5 * sfactor
+    rt.vert_radius = rt.edge_radius = 0.01
+    draw_poly(iw, out, v=True, e=True, f=False)
+    draw_poly(pd, out, v=True, e=True, f=True)
+    draw_poly(octa, out, v=True, e=True, f=True)
+    draw_poly(rt, out, v=True, e=True, f=False)
+    out.close() 
+    
+    out = open("gif6.pov", "w") 
+    out.write(pov_header)      
+    rd = RD() * (2/PHI**2) 
+    rd.vert_radius = rd.edge_radius = 0.01
+    rt = RT() * 0.5 * sfactor
+    rt.vert_radius = rt.edge_radius = 0.01
+    draw_poly(rt, out, v=True, e=True, f=False)
+    draw_poly(rd, out, v=True, e=True, f=False)
+    out.close()
+    
+    out = open("gif7.pov", "w") 
+    out.write(pov_header)      
+    rd = RD() * (2/PHI**2) 
+    rd.vert_radius = rd.edge_radius = 0.01
+    cu = Cube() * (2/PHI**2)
+    cu.vert_radius = cu.edge_radius = 0.01
+    pd = PD() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    pd.vert_radius = pd.edge_radius = 0.01
+    draw_poly(cu, out, v=True, e=True, f=True)
+    draw_poly(pd, out, v=True, e=True, f=False)
+    draw_poly(rd, out, v=True, e=True, f=False)
+    out.close()
+
+    out = open("gif8.pov", "w") 
+    out.write(pov_header) 
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)     
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius= 0.01
+    rd = RD()
+    rd.vert_radius = rd.edge_radius = 0.01
+    rt = RT() * (1/PHI) * 0.9994 * (3/2)**(1/3)
+    rt.vert_radius = rt.edge_radius = 0.01
+    draw_poly(rd, out, v=True, e=True, f=False)
+    draw_poly(octa, out, v=True, e=True, f=False)
+    draw_poly(rt, out, v=True, e=True, f=False)
+    out.close()
+
+    out = open("gif9.pov", "w") 
+    out.write(pov_header) 
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)     
+    rd = RD()
+    rd.vert_radius = rd.edge_radius = 0.01
+    rt = RT() * (1/PHI) * 0.9994 * (3/2)**(1/3) # 7.5 RT
+    rt.vert_radius = rt.edge_radius = 0.01
+    draw_poly(rd, out, v=True, e=True, f=False)
+    draw_poly(rt, out, v=True, e=True, f=False)
+    out.close()
+    
+def test18():
+    global S_1, S_2, S_3, S_6, s_1, s_2, s_3, s_6
+    global RT_, IW_, RD_, PD_, OC_, CU_, TT_
+    S_1   = (PHI **-5)/2  
+    S_3  = S_1 * PHI**3
+    S_6  = S_3 * PHI**3
+    s_1  = S_1
+    s_3  = s_1 * PHI**-3
+    s_6  = s_3 * PHI**-3
+    
+    uv  =   1 # 8 * (S_1 + s_3) # unit volume
+    RT_ =  60 * (  S_1 + s_3)/uv
+    IW_ =  20 * (3*S_1 + s_3)/uv
+    RD_ =  48 * (  S_1 + s_3)/uv
+    PD_ =  24 * (2*S_1 + s_3)/uv 
+    OC_ =  32 * (  S_1 + s_3)/uv
+    CU_ =  24 * (  S_1 + s_3)/uv 
+    TT_ =   8 * (  S_1 + s_3)/uv 
+    print(f"RT = {RT_}")
+    print(f"IW = {IW_}")
+    print(f"RD = {RD_}")
+    print(f"PD = {PD_}")
+    print(f"OC = {OC_}")
+    print(f"CU = {CU_}")
+    print(f"TT = {TT_}")
+
+def test19():
+    out = open("little_ch.pov", "w") 
+    out.write(pov_header) 
+    rt = RT() * 0.5 * sfactor 
+    rt.edge_radius = 0.01
+    rt.vert_radius = 0.01
+    pd = PD() * 0.5 * sfactor
+    pd.edge_radius = 0.01
+    pd.vert_radius = 0.01
+    iw = Icosahedron()  * 0.5 * sfactor
+    iw.edge_radius = 0.01
+    iw.vert_radius = 0.01
+    octa = Octahedron()
+    octa.edge_radius = 0.01
+    octa.vert_radius = 0.01
+    cu = Cube() * (2/(PHI**2))
+    cu.edge_radius = 0.01
+    cu.vert_radius = 0.01
+    rd = RD() * (2/(PHI**2))
+    rd.edge_radius = 0.01
+    rd.vert_radius = 0.01
+    tt = Tetrahedron() * (2/(PHI**2))
+    tt.edge_radius = 0.01
+    tt.vert_radius = 0.01
+    draw_poly(rt, out, v=True, e=True, f=False)
+    draw_poly(pd, out, v=True, e=True, f=True)
+    #draw_poly(iw, out, v=True, e=True, f=False)
+    # draw_poly(rd, out, v=True, e=True, f=False)
+    #draw_poly(octa, out, v=True, e=True, f=True)
+    draw_poly(cu, out, v=True, e=True, f=False)
+    #draw_poly(tt, out, v=True, e=True, f=False)
+    out.close() 
       
 if __name__ == "__main__":
-    test16()
+    test17()
     
