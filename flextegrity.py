@@ -863,10 +863,10 @@ def test6():
     out = open("iw_rt_123.pov", "w")
     out.write(pov_header)
     # Icosa with edges sfactor = S/E
-    icosaWithin = Icosahedron() * sfactor # edges 1.08... (volume 60S + 20s3)
-    octa = Octahedron() * 2    # corresponding octa edges 2R
-    rt = RT() * sfactor * PHI  # blow up corresponding RT by PHI
-    cu_2F = Cube() * 4         # prime vector = 2R so 2F = 4R
+    icosaWithin = Icosahedron() * 0.5 * sfactor # D=1 (volume 60S + 20s3)
+    octa = Octahedron()              # corresponding octa edges D
+    rt = RT() * 0.5 * sfactor * PHI  # blow up corresponding RT by PHI
+    cu_2F = Cube() * 2               # 2F Cube
     draw_poly(icosaWithin, out)
     draw_poly(octa, out)
     draw_poly(cu_2F, out)
@@ -924,7 +924,7 @@ def test10():
     out = open("ball_in_rt_t.pov", "w")
     out.write(pov_header) 
     draw_vert(ORIGIN, "rgb <1, 0, 0>", 0.5, out)
-    rt = RT() * (1/PHI) * 0.9994  # RT_T
+    rt = RT() * (1/(3*rt2(2)))**(1/3)  # RT_T
     rt.face_color = "T_Stone17"
     draw_poly(rt, out, v=False, e=False, f=True, texture=True)
     out.close()
@@ -933,7 +933,7 @@ def test11():
     out = open("rt_spokes.pov", "w")
     out.write(pov_header) 
     
-    rt_t = RT() * (1/PHI) * 0.9994  # RT_T
+    rt_t = RT() * (1/(3*rt2(2)))**(1/3)  # RT_T
     for face in rt_t.faces:
         spoke = ORIGIN
         for i in range(4):
@@ -1089,7 +1089,7 @@ def test15():
     draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
     rd = RD()
     rd.vert_radius = rd.edge_radius
-    rt = RT() * (1/PHI) * 0.9995 * (3/2)**(1/3)
+    rt = RT() * (1/rt2(2)) # 7.5 RT
     rt.vert_radius = rt.edge_radius
     draw_poly(rd,   out, v=True, e=True, f=False)
     draw_poly(rt,   out, v=True, e=True, f=False)
@@ -1262,7 +1262,7 @@ def test17():
     octa.vert_radius = octa.edge_radius= 0.01
     rd = RD()
     rd.vert_radius = rd.edge_radius = 0.01
-    rt = RT() * (1/PHI) * 0.9994 * (3/2)**(1/3)
+    rt = RT() * (1/rt2(2)) # 7.5 RT
     rt.vert_radius = rt.edge_radius = 0.01
     draw_poly(rd, out, v=True, e=True, f=False)
     draw_poly(octa, out, v=True, e=True, f=False)
@@ -1274,7 +1274,7 @@ def test17():
     draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)     
     rd = RD()
     rd.vert_radius = rd.edge_radius = 0.01
-    rt = RT() * (1/PHI) * 0.9994 * (3/2)**(1/3) # 7.5 RT
+    rt = RT() * (1/rt2(2)) # 7.5 RT
     rt.vert_radius = rt.edge_radius = 0.01
     draw_poly(rd, out, v=True, e=True, f=False)
     draw_poly(rt, out, v=True, e=True, f=False)
@@ -1340,5 +1340,5 @@ def test19():
     out.close() 
       
 if __name__ == "__main__":
-    test17()
+    test6()
     
