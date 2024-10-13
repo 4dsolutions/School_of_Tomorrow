@@ -5,6 +5,7 @@ Created on Sun Mar  8 11:40:54 2020
 
 @author: Kirby Urner
 
+Oct  13, 2024:  write new tests, rewrite test6, simplify constants
 Oct  06, 2024:  test16 for 7-frame animated GIF
 Oct  05, 2024:  test15 for 9-frame animated GIF 
 Sept-Oct,2024:  keep adding new tests (scenarios) to make povs
