@@ -17,7 +17,10 @@ Sept 19, 2021:  altered to work with new qray.py
 import math
 from math import sqrt as rt2
 from qrays import Qvector, Vector
-PHI = (1 + rt2(5))/2.0
+import sympy as sy  
+# from sympy import sqrt as rt2
+
+PHI = (1 + rt2(5))/2
 
 ORIGIN = Qvector((0,0,0,0))
 A = Qvector((1,0,0,0))
@@ -782,7 +785,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <1.5, 0.1, 0.2>
+  location  <2.5, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -808,6 +811,10 @@ background { color rgb <1.0, 1.0, 1.0> }
 """
 
 def test1():
+    """
+    minimalist, uses default Icosahedron and PD
+    no fidling with attributes, no rescaling.
+    """
     f = open("testing123.pov", "w")
     f.write(pov_header)
     ico = Icosahedron()
@@ -817,6 +824,12 @@ def test1():
     f.close()
     
 def test2():
+    """
+    same as test1 but adding a Rhombic Triacontahedron
+    ico and pd are duals of each other, sized by default
+    to criss-cross at mid-edges thereby forming verts
+    of the correspondingly sized RT
+    """    
     f = open("testing123.pov", "w")
     f.write(pov_header)
     ico = Icosahedron()
@@ -828,6 +841,11 @@ def test2():
     f.close()
     
 def test3():
+    """
+    Remember you can edit these by turning shapes on and off.
+    You have control over the filename if you wish to stop
+    overwriting the same testing123 over and over
+    """
     f = open("testing123.pov", "w")
     f.write(pov_header)
     # ico = Icosahedron()
@@ -837,6 +855,13 @@ def test3():
     f.close()
     
 def test4():
+    """
+    Taking default Icosahedron to have R=1 edges (vs D=1),
+    such scaling by sfactor gives IcosaWithin (IW), which,
+    when further scaled up by PHI, becomes faces flush 
+    with 2F SuperCube. 4 * Cube() because everything's 
+    doubled when R=1 vs 0.5.
+    """
     f = open("testing123.pov", "w")
     f.write(pov_header)
     octa = 2 * Octahedron()
@@ -850,6 +875,12 @@ def test4():
     f.close()
     
 def test5():
+    """
+    Same as above, but once RT is faces flush with 
+    containing cube, enlarge is very slightly to 
+    force its diamond faces to protrude and show 
+    up clearly against the 2F cube faces background
+    """
     f = open("marble_polys.pov", "w")
     f.write(pov_header)
     rt = RT() * sfactor * PHI * 1.01 # push out faces a bit more
@@ -861,6 +892,13 @@ def test5():
     f.close()
 
 def test6():
+    """
+    Back to D=1. Shrink initial D edge Icosa by half then
+    scale up by sfactor, known to be edges of the icosa
+    inscribing in the corresponding Octa. Include the 
+    2F Cube with faces-flush RT in addition to IW faces
+    flush with Octa.
+    """
     out = open("iw_rt_123.pov", "w")
     out.write(pov_header)
     # Icosa with edges sfactor = S/E
@@ -1284,28 +1322,30 @@ def test17():
 def test18():
     global S_1, S_2, S_3, S_6, s_1, s_2, s_3, s_6
     global RT_, IW_, RD_, PD_, OC_, CU_, TT_
-    S_1   = (PHI **-5)/2  
+    
+    PHI  = sy.Symbol("PHI")
+    
+    S_1  = (PHI **-5)/2  
     S_3  = S_1 * PHI**3
     S_6  = S_3 * PHI**3
     s_1  = S_1
     s_3  = s_1 * PHI**-3
     s_6  = s_3 * PHI**-3
     
-    uv  =   1 # 8 * (S_1 + s_3) # unit volume
-    RT_ =  60 * (  S_1 + s_3)/uv
-    IW_ =  20 * (3*S_1 + s_3)/uv
-    RD_ =  48 * (  S_1 + s_3)/uv
-    PD_ =  24 * (2*S_1 + s_3)/uv 
-    OC_ =  32 * (  S_1 + s_3)/uv
-    CU_ =  24 * (  S_1 + s_3)/uv 
-    TT_ =   8 * (  S_1 + s_3)/uv 
-    print(f"RT = {RT_}")
-    print(f"IW = {IW_}")
-    print(f"RD = {RD_}")
-    print(f"PD = {PD_}")
-    print(f"OC = {OC_}")
-    print(f"CU = {CU_}")
-    print(f"TT = {TT_}")
+    RT_ =  60 * (  S_1 + s_3)
+    IW_ =  20 * (3*S_1 + s_3)
+    RD_ =  48 * (  S_1 + s_3)
+    PD_ =  24 * (2*S_1 + s_3)
+    OC_ =  32 * (  S_1 + s_3)
+    CU_ =  24 * (  S_1 + s_3)
+    TT_ =   8 * (  S_1 + s_3) 
+    print(f"RT = {RT_} = {RT_.evalf(subs={PHI: (1+rt2(5))/2})}")
+    print(f"IW = {IW_} = {IW_.evalf(subs={PHI: (1+rt2(5))/2})}")
+    print(f"RD = {RD_} = {RD_.evalf(subs={PHI: (1+rt2(5))/2})}")
+    print(f"PD = {PD_} = {PD_.evalf(subs={PHI: (1+rt2(5))/2})}")
+    print(f"OC = {OC_} = {OC_.evalf(subs={PHI: (1+rt2(5))/2})}")
+    print(f"CU = {CU_} = {CU_.evalf(subs={PHI: (1+rt2(5))/2})}")
+    print(f"TT =  {TT_}  = {TT_.evalf(subs={PHI: (1+rt2(5))/2})}")
 
 def test19():
     out = open("little_ch.pov", "w") 
@@ -1338,8 +1378,93 @@ def test19():
     #draw_poly(octa, out, v=True, e=True, f=True)
     draw_poly(cu, out, v=True, e=True, f=False)
     #draw_poly(tt, out, v=True, e=True, f=False)
-    out.close() 
-      
+    out.close()
+    
+def test20():
+    out = open("gif1.pov", "w")
+    out.write(pov_header)
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius= 0.01
+    draw_poly(octa, out, v=True, e=True, f=False)
+    out.close()
+     
+    out = open("gif2.pov", "w")
+    out.write(pov_header)
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    rt = RT() # SuperRT
+    rt.vert_radius = rt.edge_radius = 0.01
+    draw_poly(rt, out, v=True, e=True, f=False)
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius= 0.01
+    draw_poly(octa, out, v=True, e=True, f=False)
+    out.close()
+
+    out = open("gif3.pov", "w")
+    out.write(pov_header)
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    rt = RT() * (1/PHI)
+    rt.vert_radius = rt.edge_radius = 0.01
+    draw_poly(rt, out, v=True, e=True, f=False)
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius= 0.01
+    draw_poly(octa, out, v=True, e=True, f=False)
+    out.close()    
+    
+    out = open("gif4.pov", "w")
+    out.write(pov_header)
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    rt_t = RT() * (1/(3*rt2(2)))**(1/3)  # RT_T
+    rt_t.vert_radius = rt_t.edge_radius = 0.01
+    draw_poly(rt_t, out, v=True, e=True, f=False)
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius= 0.01
+    draw_poly(octa, out, v=True, e=True, f=False)
+    out.close()
+    
+    out = open("gif5.pov", "w")
+    out.write(pov_header)
+    rt_iw = RT() * 0.5 * sfactor  # RT_IW
+    rt_iw.vert_radius = rt_iw.edge_radius = 0.01
+    iw = Icosahedron() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    iw.vert_radius = iw.edge_radius = 0.01
+    draw_poly(rt_iw, out, v=True, e=True, f=False)
+    draw_poly(iw, out, v=True, e=True, f=True)
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius= 0.01
+    draw_poly(octa, out, v=True, e=True, f=False)
+    out.close()
+
+    out = open("gif6.pov", "w")
+    out.write(pov_header)
+    rt =  RT() * (1/rt2(2)) # 7.5 RT
+    rt.vert_radius = rt.edge_radius = 0.01
+    rd = RD()
+    rd.vert_radius = rd.edge_radius = 0.01
+    draw_poly(rt, out, v=True, e=True, f=False)
+    draw_poly(rd, out, v=True, e=True, f=False)
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius= 0.01
+    draw_poly(octa, out, v=True, e=True, f=True)
+    out.close()
+
+    out = open("gif7.pov", "w")
+    out.write(pov_header)
+    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    rt =  RT() 
+    rt.vert_radius = rt.edge_radius = 0.01
+    icosa = Icosahedron()
+    icosa.vert_radius = icosa.edge_radius = 0.01
+    pd = PD()
+    pd.vert_radius = pd.edge_radius = 0.01
+    draw_poly(rt, out, v=True, e=True, f=False)
+    draw_poly(icosa, out, v=True, e=True, f=False)
+    draw_poly(pd, out, v=True, e=True, f=False)
+    octa = Octahedron()
+    octa.vert_radius = octa.edge_radius= 0.01
+    draw_poly(octa, out, v=True, e=True, f=False)
+    out.close()
+    
 if __name__ == "__main__":
-    test6()
+    test20()
     
