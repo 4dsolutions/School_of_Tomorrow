@@ -14,19 +14,20 @@ Sept 19, 2021:  altered to work with new qray.py
                 wherein Qvector.xyz is a property
 """
 
-import math
-from math import sqrt as rt2
 from qrays import Qvector, Vector
 import sympy as sy  
-# from sympy import sqrt as rt2
+from sympy import sqrt as rt2
 
 PHI = (1 + rt2(5))/2
 
-ORIGIN = Qvector((0,0,0,0))
-A = Qvector((1,0,0,0))
-B = Qvector((0,1,0,0))
-C = Qvector((0,0,1,0))
-D = Qvector((0,0,0,1))
+one  = sy.Integer(1)
+zero = sy.Integer(0)
+
+ORIGIN = Qvector((zero, zero, zero, zero))
+A = Qvector((one, zero, zero, zero))
+B = Qvector((zero, one, zero, zero))
+C = Qvector((zero, zero, one, zero))
+D = Qvector((zero, zero, zero ,one))
 
 # from Wikipedia (Quadray Coordinates)
 E,F,G,H     = B+C+D, A+C+D, A+B+D, A+B+C
@@ -35,6 +36,7 @@ O,P,Q,R,S,T = I+J, I+K, I+L, I+M, N+J, N+K
 U,V,W,X,Y,Z = N+L, N+M, J+L, L+M, M+K, K+J
 
 sfactor = 20/(5 * rt2(2) * PHI**2) # VE/icosa vol ratio
+half = sy.Rational(1,2)
 
 # OPPOSITE DIAGONALS
 # ZY WX
@@ -43,34 +45,34 @@ sfactor = 20/(5 * rt2(2) * PHI**2) # VE/icosa vol ratio
 control = (Z - T).length()
 
 midface = (Z + Y)
-gold    = 0.5 * PHI * midface/midface.length()
-Zi = gold + J/J.length() * control/2
-Yi = gold + M/M.length() * control/2
+gold    = half * PHI * midface/midface.length()
+Zi = gold + J/J.length() * (control/2)
+Yi = gold + M/M.length() * (control/2)
 
 midface = (W + X)
-gold    = 0.5 * PHI * midface/midface.length()
-Wi = gold + J/J.length() * control/2
-Xi = gold + M/M.length() * control/2
+gold    = half * PHI * midface/midface.length()
+Wi = gold + J/J.length() * (control/2)
+Xi = gold + M/M.length() * (control/2)
 
 midface = (R + V)
-gold    = 0.5 * PHI * midface/midface.length()
-Ri = gold + I/I.length() * control/2
-Vi = gold + N/N.length() * control/2
+gold    = half * PHI * midface/midface.length()
+Ri = gold + I/I.length() * (control/2)
+Vi = gold + N/N.length() * (control/2)
 
 midface = (O + S)
-gold    = 0.5 * PHI * midface/midface.length()
-Oi = gold + I/I.length() * control/2
-Si = gold + N/N.length() * control/2
+gold    = half * PHI * midface/midface.length()
+Oi = gold + I/I.length() * (control/2)
+Si = gold + N/N.length() * (control/2)
 
 midface = (T + U)
-gold    = 0.5 * PHI * midface/midface.length()
-Ti = gold + K/K.length() * control/2
-Ui = gold + L/L.length() * control/2
+gold    = half * PHI * midface/midface.length()
+Ti = gold + K/K.length() * (control/2)
+Ui = gold + L/L.length() * (control/2)
 
 midface = (P + Q)
-gold    = 0.5 * PHI * midface/midface.length()
-Pi = gold + K/K.length() * control/2
-Qi = gold + L/L.length() * control/2
+gold    = half * PHI * midface/midface.length()
+Pi = gold + K/K.length() * (control/2)
+Qi = gold + L/L.length() * (control/2)
 
 class Polyhedron:
     """
@@ -141,8 +143,8 @@ class Edge:
 
 def draw_vert(v, c, r, t, *, texture = False): 
     v = v.xyz
-    x,y,z = v.x, v.y, v.z
-    data = "< %s, %s, %s >" % (x,y,z), r, c
+    x,y,z = float(v.x), float(v.y), float(v.z)
+    data = "< %s, %s, %s >" % (x,y,z), float(r), c
     if not texture:
         template = ("sphere { %s, %s texture "
                     "{ pigment { color %s } } no_shadow }")
@@ -179,7 +181,7 @@ def draw_face(p, f, c, t, *, texture = False):
     num_points = len(f)
     for v in f:
         coords = p.vertexes[v].xyz
-        x,y,z = coords.x, coords.y, coords.z
+        x,y,z = float(coords.x), float(coords.y), float(coords.z)
         data += "< %s, %s, %s > " % (x, y, z)
     
     if not texture:
@@ -193,10 +195,10 @@ def draw_face(p, f, c, t, *, texture = False):
 
 def draw_edge(e, c, r, t, *, texture=False):
     v = e.v0.xyz
-    v0 = "< %s, %s, %s >" % (v.x, v.y, v.z)
+    v0 = "< %s, %s, %s >" % (float(v.x), float(v.y), float(v.z))
     v = e.v1.xyz
-    v1 = "< %s, %s, %s >" % (v.x, v.y, v.z)
-    data = (v0, v1, r, c)
+    v1 = "< %s, %s, %s >" % (float(v.x), float(v.y), float(v.z))
+    data = (v0, v1, float(r), c)
     if not texture:
         template = ("cylinder { %s, %s, %s texture "
                             "{pigment { color %s } } no_shadow }")
@@ -246,10 +248,10 @@ class Tetrahedron(Polyhedron):
         self.vert_radius= 0.03
         self.face_color = self.edge_color # often not used 
         
-        verts = dict(a = Qvector((1,0,0,0)), #A
-                     b = Qvector((0,1,0,0)), #B
-                     c = Qvector((0,0,1,0)), #C
-                     d = Qvector((0,0,0,1))) #D
+        verts = {}
+        for vert_label in "abcd":
+            # keep the uppercase A-Z universe (namespace) unobstructed
+            verts[vert_label] = eval(vert_label.upper())
         
         self.name = "Tetrahedron"
         self.volume = 1  # per Concentric Hierarchy
@@ -278,10 +280,10 @@ class InvTetrahedron(Polyhedron):
         self.face_color = "rgb <0, 0, 0>" # not used 
         self.face_color = self.edge_color # often not used 
         
-        verts = dict(e = -Qvector((1,0,0,0)), #E
-                     f = -Qvector((0,1,0,0)), #F
-                     g = -Qvector((0,0,1,0)), #G
-                     h = -Qvector((0,0,0,1))) #H
+        verts = {}
+        for vert_label in "efgh":
+            # keep the uppercase A-Z universe (namespace) unobstructed
+            verts[vert_label] = eval(vert_label.upper())
         
         self.name = "InvTetrahedron"
         self.volume = 1  # per Concentric Hierarchy
@@ -342,14 +344,14 @@ class Cuboid (Polyhedron):
         self.face_color = "rgb <255/255, 20/255, 147/255>"
 
         verts = {}
-        verts['A'] = Vector(( 1,  0.5,  math.sqrt(2)/2))
-        verts['B'] = Vector(( 1, -0.5,  math.sqrt(2)/2))       
-        verts['C'] = Vector(( 1, -0.5, -math.sqrt(2)/2))        
-        verts['D'] = Vector(( 1,  0.5, -math.sqrt(2)/2))
-        verts['E'] = Vector((-1,  0.5,  math.sqrt(2)/2))
-        verts['F'] = Vector((-1, -0.5,  math.sqrt(2)/2))
-        verts['G'] = Vector((-1, -0.5, -math.sqrt(2)/2))
-        verts['H'] = Vector((-1,  0.5, -math.sqrt(2)/2))
+        verts['A'] = Vector(( one,  half,  rt2(2)/2))
+        verts['B'] = Vector(( one, -half,  rt2(2)/2))       
+        verts['C'] = Vector(( one, -half, -rt2(2)/2))        
+        verts['D'] = Vector(( one,  half, -rt2(2)/2))
+        verts['E'] = Vector((-one,  half,  rt2(2)/2))
+        verts['F'] = Vector((-one, -half,  rt2(2)/2))
+        verts['G'] = Vector((-one, -half, -rt2(2)/2))
+        verts['H'] = Vector((-one,  half, -rt2(2)/2))
                 
         self.name = "Cuboid"
         self.volume = 8  # per Concentric Hierarchy
@@ -641,7 +643,7 @@ class Cuboctahedron (Polyhedron):
                              y =  Y,
                              z =  Z)
         self.name = "Cuboctahedron"
-        self.volume = 20
+        self.volume = sy.Integer(20)
         self.center = ORIGIN
         
         # 6 faces
@@ -785,7 +787,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <2.5, 0.1, 0.2>
+  location  <3.5, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -865,13 +867,15 @@ def test4():
     f = open("testing123.pov", "w")
     f.write(pov_header)
     octa = 2 * Octahedron()
+    co = Cuboctahedron()
     ico = Icosahedron() * sfactor
-    rt = RT() * sfactor * PHI
-    cu = 4 * Cube()
+    #rt = RT() * sfactor * PHI
+    #cu = 4 * Cube()
     draw_poly(ico, f)
     draw_poly(octa, f)
-    draw_poly(cu, f)
-    draw_poly(rt, f)
+    draw_poly(co, f)
+    #draw_poly(cu, f)
+    #draw_poly(rt, f)
     f.close()
     
 def test5():
@@ -902,9 +906,9 @@ def test6():
     out = open("iw_rt_123.pov", "w")
     out.write(pov_header)
     # Icosa with edges sfactor = S/E
-    icosaWithin = Icosahedron() * 0.5 * sfactor # D=1 (volume 60S + 20s3)
+    icosaWithin = Icosahedron() * half * sfactor # D=1 (volume 60S + 20s3)
     octa = Octahedron()              # corresponding octa edges D
-    rt = RT() * 0.5 * sfactor * PHI  # blow up corresponding RT by PHI
+    rt = RT() * half * sfactor * PHI  # blow up corresponding RT by PHI
     cu_2F = Cube() * 2               # 2F Cube
     draw_poly(icosaWithin, out)
     draw_poly(octa, out)
@@ -926,7 +930,7 @@ def test7():
 def test8():
     out = open("ball_rt.pov", "w")
     out.write(pov_header) 
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     rt = RT() * (1/PHI)  # SuperRT scaled down to wrap uniradius ball
     rt.edge_radius = 0.02
     rt.vert_radius = 0.04
@@ -938,15 +942,15 @@ def test8():
 def test9():
     out = open("ball_rt_rd.pov", "w")
     out.write(pov_header) 
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     rt = RT() * (1/PHI)  # SuperRT scaled down to wrap uniradius ball
     rt.edge_radius = 0.02
     rt.vert_radius = 0.04
     rt.vert_color = 'T_Copper_1A'
     rt.edge_color = 'T_Chrome_1A'
     
-    rt2 = RT() * (1/PHI) * 0.9994 * (3/2)**(1/3) # 7.5 RT_K
-    rt2.edge_radius = 0.02
+    rt_2 = RT() * (1/PHI) * 0.9994 * (3/2)**(1/3) # 7.5 RT_K
+    rt_2.edge_radius = 0.02
     
     rd = RD()
     rd.edge_radius = 0.02
@@ -956,13 +960,13 @@ def test9():
     
     draw_poly(rd, out, v=True, e=True, f=False, texture=True)
     draw_poly(rt, out, v=True, e=True, f=False, texture=True)
-    draw_poly(rt2, out, v=False, e=True, f=False)
+    draw_poly(rt_2, out, v=False, e=True, f=False)
     out.close()
 
 def test10():
     out = open("ball_in_rt_t.pov", "w")
     out.write(pov_header) 
-    draw_vert(ORIGIN, "rgb <1, 0, 0>", 0.5, out)
+    draw_vert(ORIGIN, "rgb <1, 0, 0>", half, out)
     rt = RT() * (1/(3*rt2(2)))**(1/3)  # RT_T
     rt.face_color = "T_Stone17"
     draw_poly(rt, out, v=False, e=False, f=True, texture=True)
@@ -1056,12 +1060,12 @@ def test14():
 def test15():
     out = open("gif1.pov", "w")
     out.write(pov_header)
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     out.close()
     
     out = open("gif2.pov", "w") 
     out.write(pov_header)   
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     tet = Tetrahedron()
     tet.vert_radius = tet.edge_radius
     invtet = InvTetrahedron()
@@ -1117,7 +1121,7 @@ def test15():
     
     out = open("gif7.pov", "w")
     out.write(pov_header)   
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     rd = RD()
     rd.vert_radius = rd.edge_radius
     draw_poly(rd,   out, v=True, e=True, f=False)
@@ -1125,7 +1129,7 @@ def test15():
     
     out = open("gif8.pov", "w")
     out.write(pov_header)   
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     rd = RD()
     rd.vert_radius = rd.edge_radius
     rt = RT() * (1/rt2(2)) # 7.5 RT
@@ -1136,7 +1140,7 @@ def test15():
 
     out = open("gif9.pov", "w")
     out.write(pov_header)   
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     rt = RT() * (1/PHI)
     rt.vert_radius = rt.edge_radius
     draw_poly(rt,   out, v=True, e=True, f=False)
@@ -1145,13 +1149,13 @@ def test15():
 def test16():
     out = open("gif1.pov", "w")
     out.write(pov_header)
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     out.close()
 
     out = open("gif2.pov", "w") 
     out.write(pov_header)   
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
-    co = Cuboctahedron() * (0.5)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
+    co = Cuboctahedron() * half
     co.vert_radius = co.edge_radius
     octa = Octahedron()
     octa.vert_radius = octa.edge_radius
@@ -1161,7 +1165,7 @@ def test16():
     
     out = open("gif3.pov", "w") 
     out.write(pov_header)   
-    co = Cuboctahedron() * (0.5)
+    co = Cuboctahedron() * half
     co.vert_radius = co.edge_radius
     octa = Octahedron()
     octa.vert_radius = octa.edge_radius
@@ -1171,10 +1175,10 @@ def test16():
     
     out = open("gif4.pov", "w") 
     out.write(pov_header)   
-    co = Cuboctahedron() * (0.5)
+    co = Cuboctahedron() * half
     co.vert_radius = co.edge_radius
     # Icosa with edges sfactor = S/E
-    iw = Icosahedron() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    iw = Icosahedron() * half * sfactor # edges 1.08R... (volume 60S + 20s3)
     iw.vert_radius = iw.edge_radius
     draw_poly(co, out, v=True, e=True, f=False)
     draw_poly(iw, out, v=True, e=True, f=False)
@@ -1186,7 +1190,7 @@ def test16():
     out = open("gif5.pov", "w") 
     out.write(pov_header)   
     # Icosa with edges sfactor = S/E
-    iw = Icosahedron() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    iw = Icosahedron() * half * sfactor # edges 1.08R... (volume 60S + 20s3)
     iw.vert_radius = iw.edge_radius
     draw_poly(iw, out, v=True, e=True, f=False)
     octa = Octahedron()
@@ -1206,7 +1210,7 @@ def test16():
     
     out = open("gif7.pov", "w") 
     out.write(pov_header)   
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     ic = Icosahedron() 
     ic.vert_radius = ic.edge_radius
     draw_poly(ic, out, v=True, e=True, f=False)
@@ -1218,12 +1222,12 @@ def test16():
 def test17():
     out = open("gif1.pov", "w")
     out.write(pov_header)
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     out.close()
 
     out = open("gif2.pov", "w") 
     out.write(pov_header) 
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     octa = Octahedron()
     octa.vert_radius = octa.edge_radius = 0.01
     draw_poly(octa, out, v=True, e=True, f=False)
@@ -1233,7 +1237,7 @@ def test17():
     out.write(pov_header)   
     octa = Octahedron()
     octa.vert_radius = octa.edge_radius = 0.01
-    iw = Icosahedron() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    iw = Icosahedron() * half * sfactor # edges 1.08R... (volume 60S + 20s3)
     iw.vert_radius = iw.edge_radius = 0.01
     draw_poly(iw, out, v=True, e=True, f=True)
     draw_poly(octa, out, v=True, e=True, f=False)
@@ -1243,11 +1247,11 @@ def test17():
     out.write(pov_header)   
     octa = Octahedron()
     octa.vert_radius = octa.edge_radius= 0.01
-    iw = Icosahedron() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    iw = Icosahedron() * half * sfactor # edges 1.08R... (volume 60S + 20s3)
     iw.vert_radius = iw.edge_radius = 0.01
-    pd = PD() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    pd = PD() * half * sfactor # edges 1.08R... (volume 60S + 20s3)
     pd.vert_radius = pd.edge_radius = 0.01
-    rt = RT() * 0.5 * sfactor
+    rt = RT() * half * sfactor
     rt.vert_radius = rt.edge_radius = 0.01
     draw_poly(iw, out, v=True, e=True, f=True)
     draw_poly(pd, out, v=True, e=True, f=False)
@@ -1259,11 +1263,11 @@ def test17():
     out.write(pov_header)   
     octa = Octahedron()
     octa.vert_radius = octa.edge_radius= 0.01
-    iw = Icosahedron() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    iw = Icosahedron() * half * sfactor # edges 1.08R... (volume 60S + 20s3)
     iw.vert_radius = iw.edge_radius = 0.01
-    pd = PD() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    pd = PD() * half * sfactor # edges 1.08R... (volume 60S + 20s3)
     pd.vert_radius = pd.edge_radius = 0.01
-    rt = RT() * 0.5 * sfactor
+    rt = RT() * half * sfactor
     rt.vert_radius = rt.edge_radius = 0.01
     draw_poly(iw, out, v=True, e=True, f=False)
     draw_poly(pd, out, v=True, e=True, f=True)
@@ -1275,7 +1279,7 @@ def test17():
     out.write(pov_header)      
     rd = RD() * (2/PHI**2) 
     rd.vert_radius = rd.edge_radius = 0.01
-    rt = RT() * 0.5 * sfactor
+    rt = RT() * half * sfactor
     rt.vert_radius = rt.edge_radius = 0.01
     draw_poly(rt, out, v=True, e=True, f=False)
     draw_poly(rd, out, v=True, e=True, f=False)
@@ -1287,7 +1291,7 @@ def test17():
     rd.vert_radius = rd.edge_radius = 0.01
     cu = Cube() * (2/PHI**2)
     cu.vert_radius = cu.edge_radius = 0.01
-    pd = PD() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    pd = PD() * half * sfactor # edges 1.08R... (volume 60S + 20s3)
     pd.vert_radius = pd.edge_radius = 0.01
     draw_poly(cu, out, v=True, e=True, f=True)
     draw_poly(pd, out, v=True, e=True, f=False)
@@ -1296,7 +1300,7 @@ def test17():
 
     out = open("gif8.pov", "w") 
     out.write(pov_header) 
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)     
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)     
     octa = Octahedron()
     octa.vert_radius = octa.edge_radius= 0.01
     rd = RD()
@@ -1310,7 +1314,7 @@ def test17():
 
     out = open("gif9.pov", "w") 
     out.write(pov_header) 
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)     
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)     
     rd = RD()
     rd.vert_radius = rd.edge_radius = 0.01
     rt = RT() * (1/rt2(2)) # 7.5 RT
@@ -1350,13 +1354,13 @@ def test18():
 def test19():
     out = open("little_ch.pov", "w") 
     out.write(pov_header) 
-    rt = RT() * 0.5 * sfactor 
+    rt = RT() * half * sfactor 
     rt.edge_radius = 0.01
     rt.vert_radius = 0.01
-    pd = PD() * 0.5 * sfactor
+    pd = PD() * half * sfactor
     pd.edge_radius = 0.01
     pd.vert_radius = 0.01
-    iw = Icosahedron()  * 0.5 * sfactor
+    iw = Icosahedron()  * half * sfactor
     iw.edge_radius = 0.01
     iw.vert_radius = 0.01
     octa = Octahedron()
@@ -1383,7 +1387,7 @@ def test19():
 def test20():
     out = open("gif1.pov", "w")
     out.write(pov_header)
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     octa = Octahedron()
     octa.vert_radius = octa.edge_radius= 0.01
     draw_poly(octa, out, v=True, e=True, f=False)
@@ -1391,7 +1395,7 @@ def test20():
      
     out = open("gif2.pov", "w")
     out.write(pov_header)
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     rt = RT() # SuperRT
     rt.vert_radius = rt.edge_radius = 0.01
     draw_poly(rt, out, v=True, e=True, f=False)
@@ -1402,7 +1406,7 @@ def test20():
 
     out = open("gif3.pov", "w")
     out.write(pov_header)
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     rt = RT() * (1/PHI)
     rt.vert_radius = rt.edge_radius = 0.01
     draw_poly(rt, out, v=True, e=True, f=False)
@@ -1413,7 +1417,7 @@ def test20():
     
     out = open("gif4.pov", "w")
     out.write(pov_header)
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     rt_t = RT() * (1/(3*rt2(2)))**(1/3)  # RT_T
     rt_t.vert_radius = rt_t.edge_radius = 0.01
     draw_poly(rt_t, out, v=True, e=True, f=False)
@@ -1424,9 +1428,9 @@ def test20():
     
     out = open("gif5.pov", "w")
     out.write(pov_header)
-    rt_iw = RT() * 0.5 * sfactor  # RT_IW
+    rt_iw = RT() * half * sfactor  # RT_IW
     rt_iw.vert_radius = rt_iw.edge_radius = 0.01
-    iw = Icosahedron() * 0.5 * sfactor # edges 1.08R... (volume 60S + 20s3)
+    iw = Icosahedron() * half * sfactor # edges 1.08R... (volume 60S + 20s3)
     iw.vert_radius = iw.edge_radius = 0.01
     draw_poly(rt_iw, out, v=True, e=True, f=False)
     draw_poly(iw, out, v=True, e=True, f=True)
@@ -1450,7 +1454,7 @@ def test20():
 
     out = open("gif7.pov", "w")
     out.write(pov_header)
-    draw_vert(ORIGIN, "T_Stone18", 0.5, out, texture=True)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     rt =  RT() 
     rt.vert_radius = rt.edge_radius = 0.01
     icosa = Icosahedron()
@@ -1466,5 +1470,5 @@ def test20():
     out.close()
     
 if __name__ == "__main__":
-    test20()
+    test4()
     

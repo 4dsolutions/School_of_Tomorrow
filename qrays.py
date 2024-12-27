@@ -13,7 +13,7 @@ and triangles for IVM units of volume and area.  See
 the docstring for more details.
 
 @author:  K. Urner, 4D Solutions, (M) MIT License
- 
+ Dec 26, 2024: simplify Qvector <-> Vector conversion algs
  Sep 21, 2022: clean up, fix unittests
  Jun 20, 2022: add sympy dependency
  Oct  8, 2021: remove gmpy2 dependency
@@ -51,7 +51,8 @@ from collections import namedtuple
 XYZ = namedtuple("xyz_vector", "x y z")
 IVM = namedtuple("ivm_vector", "a b c d")
 
-root2   = sp.sqrt(2)
+root2   = sqrt(2)
+half    = sp.Rational(1,2)
 
 class Vector:
 
@@ -124,7 +125,7 @@ class Vector:
     
     def length(self):
         """Return this vector's length"""
-        return self.dot(self) ** 0.5
+        return sqrt(self.dot(self))
 
     def angle(self,v1):
         """
@@ -195,23 +196,17 @@ class Vector:
         
         return (r, phi, theta)
 
+
     def quadray(self):
-        """return (a, b, c, d) quadray based on current (x, y, z)"""
-        x, y, z = self.xyz
-        k = root2
-        x_ge_0 = 1 if x >=0 else 0
-        y_ge_0 = 1 if y >=0 else 0
-        z_ge_0 = 1 if z >=0 else 0
-        x_lt_0 = 1 if x < 0 else 0
-        y_lt_0 = 1 if y < 0 else 0
-        z_lt_0 = 1 if z < 0 else 0
+        """
+        Return self as a quadray Vector (Vector -> Qvector)
+        A linear combo of self.xyz and the xyz basis spokes as Qvectors
 
-        a = k * (x_ge_0 *  x + y_ge_0 *  y + z_ge_0 *  z)
-        b = k * (x_lt_0 * -x + y_lt_0 * -y + z_ge_0 *  z)
-        c = k * (x_lt_0 * -x + y_ge_0 *  y + z_lt_0 * -z)
-        d = k * (x_ge_0 *  x + y_lt_0 * -y + z_lt_0 * -z)
-        return Qvector((a, b, c, d))
-
+        Negative coefficients will create oppositely pointing Qvectors
+        """ 
+        return (self.x * Qvector((root2, 0, 0, root2)) + 
+                self.y * Qvector((root2, 0, root2, 0)) + 
+                self.z * Qvector((root2, root2, 0, 0)))
         
 class Qvector:
     """Quadray vector"""
@@ -225,12 +220,14 @@ class Qvector:
 
     def norm(self, arg):
         """Normalize such that 4-tuple all non-negative members."""
-        return IVM(*tuple(map(sub, arg, [min(arg)] * 4))) 
+        minarg = min(arg)
+        return IVM(arg[0] - minarg, arg[1] - minarg, arg[2] - minarg, arg[3] - minarg)
     
     def norm0(self):
         """Normalize such that sum of 4-tuple members = 0"""
-        q = self.coords
-        return IVM(*tuple(map(sub, q, [sum(q)/4.0] * 4))) 
+        q  = self.coords
+        av = (q[0] + q[1] + q[2] + q[3])/4
+        return IVM(q[0]-av, q[1]-av, q[2]-av, q[3]-av)
 
     @property
     def a(self):
@@ -269,7 +266,7 @@ class Qvector:
 
     def __truediv__(self,scalar):
         """Return vector (self) * 1/scalar"""        
-        return self.__mul__(1.0/scalar)
+        return self.__mul__(1/scalar)
     
     def __add__(self,v1):
         """Add a vector to this vector, return a vector""" 
@@ -284,19 +281,12 @@ class Qvector:
         """Return a vector, the negative of this one."""
         return type(self)(tuple(map(neg, self.coords)))
                   
-    def dot(self,v1):
-        """Return the dot product of self with another vector.
-        return a scalar
-        
-        >>> s1 = a.dot(b)/(a.length() * b.length())
-        >>> degrees(acos(s1))
-        109.47122063449069
-        """
-        return 0.5 * sum(map(mul, self.norm0(), v1.norm0()))
-
     def length(self):
-        """Return this vector's length"""
-        return self.dot(self) ** 0.5
+        """
+        Uses norm0
+        """
+        t = self.norm0()
+        return sp.sqrt(half * (t[0]**2 + t[1]**2 + t[2]**2 + t[3]**2))
         
     def cross(self,v1):
         """Return the cross product of self with another vector.
@@ -307,7 +297,7 @@ class Qvector:
         D = type(self)((0,0,0,1))
         a1,b1,c1,d1 = v1.coords
         a2,b2,c2,d2 = self.coords
-        k= root2/4.0
+        k= root2/4
         the_sum =   (A*c1*d2 - A*d1*c2 - A*b1*d2 + A*b1*c2
                + A*b2*d1 - A*b2*c1 - B*c1*d2 + B*d1*c2 
                + b1*C*d2 - b1*D*c2 - b2*C*d1 + b2*D*c1 
@@ -320,19 +310,26 @@ class Qvector:
         """
         area in unit triangles of edges D
         """
-        return self.cross(v1).length() * 2/(3**0.5)
+        return self.cross(v1).length() * 2/(sqrt(3))
 
     def angle(self, v1):
         return self.xyz.angle(v1.xyz)
         
     @property
     def xyz(self):
-        a,b,c,d     =  self.coords
-        k           =  0.5/root2
-        xyz         = (k * (a - b - c + d),
-                       k * (a - b + c - d),
-                       k * (a + b - c - d))
-        return Vector(xyz)
+        """
+        Return self as an xyz Vector (Qvector -> Vector)
+        A linear combo of self.coords * the four basis qrays 
+        as xyz equivalents
+
+        Note: slightly asymmetrical with Vector where v.quadray() is
+        a method not an attribute i.e. method disguised with @property
+        """
+        return (self.a * Vector(( root2/4,  root2/4,  root2/4)) + 
+                self.b * Vector((-root2/4, -root2/4,  root2/4)) + 
+                self.c * Vector((-root2/4,  root2/4, -root2/4)) + 
+                self.d * Vector(( root2/4, -root2/4, -root2/4)))
+
         
 class Svector(Vector):
     """Subclass of Vector that takes spherical coordinate args."""
