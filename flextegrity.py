@@ -254,6 +254,7 @@ class Tetrahedron(Polyhedron):
             verts[vert_label] = eval(vert_label.upper())
         
         self.name = "Tetrahedron"
+        self.nick = "Tet"
         self.volume = 1  # per Concentric Hierarchy
         self.center = ORIGIN
 
@@ -285,7 +286,8 @@ class InvTetrahedron(Polyhedron):
             # keep the uppercase A-Z universe (namespace) unobstructed
             verts[vert_label] = eval(vert_label.upper())
         
-        self.name = "InvTetrahedron"
+        self.name = "Inverse Tetrahedron"
+        self.nick = "~Tet"
         self.volume = 1  # per Concentric Hierarchy
         self.center = ORIGIN
         
@@ -317,6 +319,7 @@ class Cube (Polyhedron):
             verts[vert_label] = eval(vert_label.upper())
                 
         self.name = "Cube"
+        self.nick = "Cube"
         self.volume = 3  # per Concentric Hierarchy
         self.center = ORIGIN
         
@@ -386,6 +389,7 @@ class Octahedron (Polyhedron):
             verts[vert_label] = eval(vert_label.upper())
 
         self.name = "Octahedron"
+        self.nick = "Oct"
         self.volume = 4  # per Concentric Hierarchy (84S + 20S)
         self.center = ORIGIN
         
@@ -414,8 +418,9 @@ class RD (Polyhedron):
             for vert_label in "abcdefghijklmn":
                 # keep the uppercase A-Z universe unobstructed
                 verts[vert_label] = eval(vert_label.upper())
-                
-            self.name = "RD"
+
+            self.name = "Rhombic Dodecahedron"
+            self.nick = "RD"
             self.volume = 6  # per Concentric Hierarchy
             self.center = ORIGIN
             
@@ -454,6 +459,7 @@ class Icosahedron (Polyhedron):
                              z =  Zi)
         
         self.name = "Icosahedron"
+        self.nick = "Ico"
         self.volume = 5 * rt2(2) * PHI**2
         self.center = ORIGIN
         # 20 faces
@@ -509,8 +515,9 @@ class PD (Polyhedron):
                              suw = sk * (Ui + Si + Wi)/3,
                              oqw = sk * (Wi + Qi + Oi)/3,
                              opz = sk * (Oi + Zi + Pi)/3)
-                             
-        self.name = "PD"
+        
+        self.name = "Pentagonal Dodecahedron"            
+        self.nick = "PD"
         self.volume = 3 * rt2(2) * (PHI**2 + 1)
         self.center = ORIGIN
         # 12 faces
@@ -580,7 +587,8 @@ class RT (Polyhedron):
                              x =  Xi,
                              y =  Yi,
                              z =  Zi))                    
-        self.name = "RT"
+        self.name = "Rhombic Triacontahedron"
+        self.nick = "RT"
         self.volume = 20 * rt2(9./8)
         self.center = ORIGIN
         # 30 faces
@@ -643,6 +651,7 @@ class Cuboctahedron (Polyhedron):
                              y =  Y,
                              z =  Z)
         self.name = "Cuboctahedron"
+        self.nick = "CO"
         self.volume = sy.Integer(20)
         self.center = ORIGIN
         
