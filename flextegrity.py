@@ -123,7 +123,8 @@ class Polyhedron:
         for edge in unique:
             edges.append( Edge(self.vertexes[edge[0]],
                                self.vertexes[edge[1]]) )
-
+            
+        self.unique = unique # hack to keep edges as symbolic pairs
         return edges 
 
 class Edge:

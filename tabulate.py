@@ -12,6 +12,7 @@ xyz coords (X, Y, Z).
 
 import flextegrity as fx
 import pandas as pd
+import numpy as np
 
 arrays = [
     coordsys := ["IVM", "IVM", "IVM", "IVM", "XYZ", "XYZ", "XYZ"],
@@ -55,6 +56,21 @@ def tabulate(shape, dec=False, n=8):
     df.columns = col_index
     return df
 
+def make_matrix(shape):
+    the_edges = shape.unique
+    labels = set()
+    for verts in the_edges:
+        labels.add(verts[0])
+        labels.add(verts[1])
+    labels = sorted(list(labels))
+    face_matrix = pd.DataFrame(data=np.zeros((len(labels), len(labels)), dtype=int), 
+                           index = labels,
+                           columns = labels)
+    for verts in the_edges:
+        face_matrix.loc[verts[0], verts[1]] = 1
+        face_matrix.loc[verts[1], verts[0]] = 1
+    return face_matrix
+
 if __name__ == "__main__":
     tet = tabulate(fx.Tetrahedron())
     invtet = tabulate(fx.InvTetrahedron())
@@ -64,4 +80,5 @@ if __name__ == "__main__":
     co   = tabulate(fx.Cuboctahedron())
     
     master_df = pd.concat((tet, invtet, cu, octa, rd, co), axis=0)
+    faces_cu = make_matrix(fx.Cube())
     
