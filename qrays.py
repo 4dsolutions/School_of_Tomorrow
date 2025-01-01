@@ -13,6 +13,7 @@ and triangles for IVM units of volume and area.  See
 the docstring for more details.
 
 @author:  K. Urner, 4D Solutions, (M) MIT License
+ Dec 31, 2024: DIAM=1; RAD=1/2 and DIAM=2; RAD=1 need to both work equally well
  Dec 26, 2024: simplify Qvector <-> Vector conversion algs
  Sep 21, 2022: clean up, fix unittests
  Jun 20, 2022: add sympy dependency
@@ -51,8 +52,17 @@ from collections import namedtuple
 XYZ = namedtuple("xyz_vector", "x y z")
 IVM = namedtuple("ivm_vector", "a b c d")
 
-root2   = sqrt(2)
-half    = sp.Rational(1,2)
+root2    = sqrt(2)
+
+zero     = sp.Integer(0)
+half = sp.Rational(1, 2)
+one  = sp.Integer(1)
+two  = sp.Rational(2)
+
+# DIAM = one
+
+DIAM = two
+RAD  = DIAM / 2
 
 class Vector:
 
@@ -100,7 +110,7 @@ class Vector:
         return type(self)(tuple(map(neg, self.xyz)))
 
     def unit(self):
-        return self.__mul__(1.0/self.length())
+        return self.__mul__(one/self.length())
 
     def dot(self,v1):
         """
@@ -125,7 +135,7 @@ class Vector:
     
     def length(self):
         """Return this vector's length"""
-        return sqrt(self.dot(self))
+        return sqrt(self.dot(self)) * RAD # radius = 1 or 1/2
 
     def angle(self,v1):
         """
@@ -286,7 +296,7 @@ class Qvector:
         Uses norm0
         """
         t = self.norm0()
-        return sp.sqrt(half * (t[0]**2 + t[1]**2 + t[2]**2 + t[3]**2))
+        return DIAM * sp.sqrt(half * (t[0]**2 + t[1]**2 + t[2]**2 + t[3]**2))
         
     def cross(self,v1):
         """Return the cross product of self with another vector.

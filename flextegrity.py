@@ -21,7 +21,9 @@ from sympy import sqrt as rt2
 PHI = (1 + rt2(5))/2
 
 one  = sy.Integer(1)
+half = sy.Rational(1, 2)
 zero = sy.Integer(0)
+
 
 ORIGIN = Qvector((zero, zero, zero, zero))
 A = Qvector((one, zero, zero, zero))
@@ -783,7 +785,7 @@ pov_header = \
 
 // --- textures ---
 // include "finish.inc"     // Some basic finishes
-// include "glass.inc"      // Glass textures/interiors
+#include "glass.inc"      // Glass textures/interiors
 // include "golds.inc"      // Gold textures
 #include "metals.inc"     // Metallic pigments, finishes, and textures
 #include "stones.inc"     // Binding include-file for STONES1 and STONES2
@@ -797,7 +799,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <3.5, 0.1, 0.2>
+  location  <5.5, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -1478,7 +1480,209 @@ def test20():
     octa.vert_radius = octa.edge_radius= 0.01
     draw_poly(octa, out, v=True, e=True, f=False)
     out.close()
+
+def test21():
+    f = open("ivm_xyz_cube.pov", "w")
+    f.write(pov_header)
+    cu  = Cube() * 2
+    tet = Tetrahedron() * 2
+    cu2 = Cube() * rt2(2)
+    cu2.edge_color = brown = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
+    orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    
+    origin = ORIGIN
+    r_edge_cube = {
+    'big_yellow'   : Vector((0,0,0)),
+    'small_yellow' : Vector((1,1,1)),
+    'small_blue'   : Vector((1,0,0)),
+    'big_blue'     : Vector((0,1,1)),
+    'small_green'  : Vector((0,1,0)),
+    'big_green'    : Vector((1,0,1)),
+    'small_red'    : Vector((0,0,1)),
+    'big_red'      : Vector((1,1,0)),
+    }  
+
+    edge = Edge(r_edge_cube['big_yellow'], r_edge_cube['small_green'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['big_yellow'], r_edge_cube['small_blue'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['big_yellow'], r_edge_cube['small_red'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_yellow'], r_edge_cube['big_red'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_yellow'], r_edge_cube['big_blue'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_yellow'], r_edge_cube['big_green'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_red'], r_edge_cube['big_blue'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_red'], r_edge_cube['big_green'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_green'], r_edge_cube['big_red'])
+    draw_edge(edge, brown, 0.01, f)    
+
+    edge = Edge(r_edge_cube['small_green'], r_edge_cube['big_blue'])
+    draw_edge(edge, brown, 0.01, f)  
+
+    edge = Edge(r_edge_cube['small_blue'], r_edge_cube['big_green'])
+    draw_edge(edge, brown, 0.01, f)    
+
+    edge = Edge(r_edge_cube['small_blue'], r_edge_cube['big_red'])
+    draw_edge(edge, brown, 0.01, f)  
+    
+    draw_vert(r_edge_cube['big_yellow'], c=' rgb <1,1,0>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_yellow'], c=' rgb <1,1,0>' , r=0.07, t=f)
+
+    draw_vert(r_edge_cube['big_green'], c=' rgb <0,1,0>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_green'], c=' rgb <0,1,0>' , r=0.07, t=f)
+
+    draw_vert(r_edge_cube['big_blue'], c=' rgb <0,0,1>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_blue'], c=' rgb <0,0,1>' , r=0.07, t=f)
+
+    draw_vert(r_edge_cube['big_red'], c=' rgb <1,0,0>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_red'], c=' rgb <1,0,0>' , r=0.07, t=f)
+
+    draw_vert(2*A, c = orange, r = 0.14, t=f) 
+    draw_vert(2*B, c = orange, r = 0.14, t=f) 
+    draw_vert(2*C, c = orange, r = 0.14, t=f) 
+    draw_vert(2*D, c = orange, r = 0.14, t=f) 
+    
+    draw_poly(cu, f)
+    draw_poly(tet, f)
+    # draw_poly(cu2, f)
+    f.close()
+
+def test22():
+    f = open("test22.pov", "w")
+    f.write(pov_header)
+    cu  = Cube() * 2
+    tet = Tetrahedron() * 2
+    orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    brown = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
+    
+    origin = ORIGIN
+    r_edge_cube = {
+    'big_yellow'   : Vector((0,0,0)),
+    'small_yellow' : Vector((1,1,1)),
+    'small_blue'   : Vector((1,0,0)),
+    'big_blue'     : Vector((0,1,1)),
+    'small_green'  : Vector((0,1,0)),
+    'big_green'    : Vector((1,0,1)),
+    'small_red'    : Vector((0,0,1)),
+    'big_red'      : Vector((1,1,0)),
+    }  
+
+    edge = Edge(r_edge_cube['big_yellow'], r_edge_cube['small_green'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['big_yellow'], r_edge_cube['small_blue'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['big_yellow'], r_edge_cube['small_red'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_yellow'], r_edge_cube['big_red'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_yellow'], r_edge_cube['big_blue'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_yellow'], r_edge_cube['big_green'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_red'], r_edge_cube['big_blue'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_red'], r_edge_cube['big_green'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_green'], r_edge_cube['big_red'])
+    draw_edge(edge, brown, 0.01, f)    
+
+    edge = Edge(r_edge_cube['small_green'], r_edge_cube['big_blue'])
+    draw_edge(edge, brown, 0.01, f)  
+
+    edge = Edge(r_edge_cube['small_blue'], r_edge_cube['big_green'])
+    draw_edge(edge, brown, 0.01, f)    
+
+    edge = Edge(r_edge_cube['small_blue'], r_edge_cube['big_red'])
+    draw_edge(edge, brown, 0.01, f)  
+    
+    draw_vert(r_edge_cube['big_yellow'], c=' rgb <1,1,0>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_yellow'], c=' rgb <1,1,0>' , r=0.07, t=f)
+
+    draw_vert(r_edge_cube['big_green'], c=' rgb <0,1,0>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_green'], c=' rgb <0,1,0>' , r=0.07, t=f)
+
+    draw_vert(r_edge_cube['big_blue'], c=' rgb <0,0,1>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_blue'], c=' rgb <0,0,1>' , r=0.07, t=f)
+
+    draw_vert(r_edge_cube['big_red'], c=' rgb <1,0,0>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_red'], c=' rgb <1,0,0>' , r=0.07, t=f)
+
+    texture1 = "pigment { Col_Glass_Bluish }"
+    texture2 = "pigment { Col_Glass_Dark_Green }"
+    texture3 = "pigment { Col_Glass_Yellow }"
+    texture4 = "pigment { Col_Glass_Ruby }"
+
+    draw_vert(2*A, c = orange, r = 0.14, t=f) 
+    draw_vert(2*B, c = orange, r = 0.14, t=f) 
+    draw_vert(2*C, c = orange, r = 0.14, t=f) 
+    draw_vert(2*D, c = orange, r = 0.14, t=f)
+    
+    #draw_vert(2*A, texture1, r = 1, t=f, texture = True) 
+    #draw_vert(2*B, texture2, r = 1, t=f, texture = True) 
+    #draw_vert(2*C, texture3, r = 1, t=f, texture = True) 
+    #draw_vert(2*D, texture4, r = 1, t=f, texture = True) 
+    
+    draw_poly(cu, f)
+    draw_poly(tet, f)
+    # draw_poly(cu2, f)
+    f.close()
+
+def test24():
+    f = open("test_24.pov", "w")
+    f.write(pov_header)
+    oc  = Octahedron() * 2
+    cu  = Cube() * 2
+    tet = Tetrahedron() * 2
+    rd = RD() * 2
+    
+    orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    brown = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
+
+    texture1 = "T_Copper_1A"
+    texture2 = "T_Stone18"
+    #texture2 = "pigment { Col_Glass_Dark_Green }"
+    #texture3 = "pigment { Col_Glass_Yellow }"
+    #texture4 = "pigment { Col_Glass_Ruby }"
+
+    draw_vert(2*A, c = orange, r = 0.14, t=f) 
+    draw_vert(2*B, c = orange, r = 0.14, t=f) 
+    draw_vert(2*C, c = orange, r = 0.14, t=f) 
+    draw_vert(2*D, c = orange, r = 0.14, t=f)
+    
+    draw_vert(ORIGIN, texture2, r = 1, t=f, texture = True) 
+    #draw_vert(2*A, texture1, r = 1, t=f, texture = True)
+    #draw_vert(2*B, texture2, r = 1, t=f, texture = True) 
+    #draw_vert(2*C, texture1, r = 1, t=f, texture = True) 
+    #draw_vert(2*D, texture2, r = 1, t=f, texture = True) 
+    
+    draw_poly(cu, f)
+    draw_poly(tet, f)
+    draw_poly(oc, f)
+    draw_poly(rd, f)
+    # draw_poly(cu2, f)
+    f.close()
     
 if __name__ == "__main__":
-    test4()
+    test22()
     

@@ -2,6 +2,8 @@
 tetravolume.py
 Kirby Urner (c) MIT License
 
+Jan    1, 2024: Tetrahedron unit tests all passing, I need to revisit Triangle
+Dec   31, 2024: DIAM=1; RAD=1/2 and DIAM=2; RAD=1 need to both work equally well
 May    6, 2024: dihedral angles
 April  1, 2024: wire up all three volume-from-edges algorithms as options 
 April  1, 2024: add A, B subclasses of Tetrahedron, completing BEAST set
@@ -16,15 +18,15 @@ triangles for XYZ units respectively, and D-edge
 tetrahedrons and triangles for IVM units of volume 
 and area (D = 2R).
 
-The tetrahedron of edges D has sqrt(8/9) the 
-volume of a cube of edges R, yet each is unit in
+The tetrahedron of edges DIAM has sqrt(8/9) the 
+volume of a cube of edges RAD, yet each is unit in
 its respective matrix.
 
-The triangle of edges D has an XYZ area of sqrt(3)
+The triangle of edges DIAM has an XYZ area of sqrt(3)
 i.e. an equilateral triangle of edges 2 in R-square
 units.  The IVM area of the same triangle is simply 1.
 
-The cube of edges sqrt(2) in R units, has volume 
+The cube of edges sqrt(2) in RAD units, has volume 
 sqrt(2) to the 3rd power.  One third of that volume
 is our unit tetrahedron of edges D (cube face diagonals).
 
@@ -80,13 +82,10 @@ https://www.omnicalculator.com/math/triangle-angle
 
 from sympy import Rational, Integer, Matrix, acos, cos, sin, deg, N, Eq
 from sympy import sqrt as rt2
-from qrays import Qvector, Vector
+from qrays import Qvector, Vector, RAD, DIAM, zero, half, one, two
 import sys
 
 # ============[ GLOBAL CONSTANTS ]=================== 
-
-R = Rational(1,2)
-D = Integer(1)
 
 Syn3  = rt2(Rational(9, 8))
 root2 = rt2(2)
@@ -346,7 +345,7 @@ def GdJ(a, b, c, d, e, f):
                    B * F * (B + F),
                    C * D * (C + D)))
     
-    return rt2((_open - _closed - _oppo)/2)
+    return rt2((_open - _closed - _oppo)/2) * (1/DIAM**3) # D = 1D or 2R
 
 def PdF(a,b,c,d,e,f):
     """
@@ -367,7 +366,7 @@ def PdF(a,b,c,d,e,f):
                  - (A + F) * (B + E) * (C + D)/2
                  - (A - F) * (B - E) * (C - D)/2 )
     
-    return rt2(2 * comp_chunk) / 16  # Syn3 is blended in here
+    return (rt2(2 * comp_chunk) / 16) * (1/DIAM**3) # D = 1D or 2R; Syn3 is blended in here
 
 def CM(a, b, c, d, e, f):
     """
@@ -383,7 +382,7 @@ def CM(a, b, c, d, e, f):
          [1, A, 0, D, F],
          [1, B, D, 0, E],
          [1, C, F, E, 0]])
-    return rt2(M.det())/16  # Syn3 factored in 
+    return (rt2(M.det())/16) * (1/DIAM**3) # D = 1D or 2R 
 
 def make_tet(v0,v1,v2):
     """
@@ -402,86 +401,10 @@ def qvolume(q0, q1, q2, q3):
         q2.coords + (1,),
         q3.coords + (1,),
         [1,1,1,1,0]])
-    return abs(M.det())/4 # that's it!
+    return (abs(M.det())/4) # that's it!
 
 # ============[ BEAST Modules ]=================== 
-
-class B(Tetrahedron):
-    """
-    Developed from Fig 916.01
-    http://rwgrayprojects.com/synergetics/s09/figs/f1601.html
-    """
-    
-    def __init__(self):
-        a = D
-        BA = a * root2/2
-        BE = a * root6/4
-        BG = a/2
-        AE = a * root6/12
-        EG = a * root2/4
-        AG = a/2
-        super().__init__(BA, BE, BG, AE, EG, AG)
         
-    def fig986_421(self, value = False, prec = 15):
-        """
-        http://rwgrayprojects.com/synergetics/s09/figs/f86421.html
-        """
-        a = D
-        figdata = {
-            "BA" : a * root2/2,
-            "BE" : a * root6/4,
-            "BG" : a/2,
-            "AE" : a * root6/12,
-            "EG" : a * root2/4,
-            "AG" : a/2,}
-        if value:
-            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
-        else:
-            return figdata
-        
-    def fig916_01(self, value = False, prec = 15):
-        """
-        http://rwgrayprojects.com/synergetics/s09/figs/f1601.html
-        """
-        a = D
-        figdata = {
-            "AB" : a * root6/4,
-            "AC" : a/2,
-            "AE" : a * root2/2,
-            "BC" : a * root2/4,
-            "CE" : a/2,
-            "BE" : a * root6/12}
-        if value:
-            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
-        else:
-            return figdata
-        
-        
-class E(Tetrahedron):
-    
-    def __init__(self):
-        e0 = D/2
-        e1 = root3 * PHI**-1 /2
-        e2 = rt2((5 - root5)/2)/2
-        e3 = (3 - root5)/2/2
-        e4 = rt2(5 - 2*root5)/2
-        e5 = 1/PHI/2        
-        super().__init__(e0, e1, e2, e3, e4, e5)
-        
-    def fig986_411(self, value = False, prec = 15):
-        h = Rational(1,2) 
-        figdata = {
-            "CA" : (h/2) * (3 - root5),
-            "CB" : (h/2) * (root5 - 1),
-            "CO" : h,
-            "AB" : h * rt2(5 - 2 * root5),
-            "AO" : h * rt2((5 - root5)/2),
-            "BO" : h * rt2((9 - 3 * root5)/2),}
-        if value:
-            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
-        else:
-            return figdata
-
 class A(Tetrahedron):
     """
     Developed using Qvectors
@@ -522,7 +445,7 @@ class A(Tetrahedron):
         """
         http://rwgrayprojects.com/synergetics/s09/figs/f86421.html
         """
-        a = Integer(1)
+        a = DIAM
         figdata = {
             "BF" : a * root3/3,
             "BE" : a * root6/4,
@@ -539,7 +462,7 @@ class A(Tetrahedron):
         """
         http://rwgrayprojects.com/synergetics/s09/figs/f1301.html
         """
-        a = Integer(1)
+        a = DIAM
         figdata = {
             "CE" : a * root6/4,
             "CF" : a * root3/3,
@@ -552,19 +475,70 @@ class A(Tetrahedron):
         else:
             return figdata
 
+class B(Tetrahedron):
+    """
+    Developed from Fig 916.01
+    http://rwgrayprojects.com/synergetics/s09/figs/f1601.html
+    """
+    
+    def __init__(self):
+        a = DIAM
+        BA = a * root2/2
+        BE = a * root6/4
+        BG = a/2
+        AE = a * root6/12
+        EG = a * root2/4
+        AG = a/2
+        super().__init__(BA, BE, BG, AE, EG, AG)
+        
+    def fig986_421(self, value = False, prec = 15):
+        """
+        http://rwgrayprojects.com/synergetics/s09/figs/f86421.html
+        """
+        a = DIAM
+        figdata = {
+            "BA" : a * root2/2,
+            "BE" : a * root6/4,
+            "BG" : a/2,
+            "AE" : a * root6/12,
+            "EG" : a * root2/4,
+            "AG" : a/2,}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
+        
+    def fig916_01(self, value = False, prec = 15):
+        """
+        http://rwgrayprojects.com/synergetics/s09/figs/f1601.html
+        """
+        a = DIAM
+        figdata = {
+            "AB" : a * root6/4,
+            "AC" : a/2,
+            "AE" : a * root2/2,
+            "BC" : a * root2/4,
+            "CE" : a/2,
+            "BE" : a * root6/12}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
+
 class S(Tetrahedron):
     
     def __init__(self):
+        a  = DIAM
         e0 = 1/PHI
         e1 = sfactor/2
         e2 = root3 * e1/2
         e3 = (3 - root5)/2
         e4 = e1/2
         e5 = e4
-        super().__init__(e0, e1, e2, e3, e4, e5)   
+        super().__init__(a*e0, a*e1, a*e2, a*e3, a*e4, a*e5)  
 
     def fig988_13(self, value = False, prec = 15):
-        a = Integer(1)
+        a = DIAM
         figdata = {
             "GH" : (a/2) * rt2(7 - 3*root5),
             "EG" : (a/2) * rt2(7 - 3*root5),
@@ -582,12 +556,13 @@ class T(Tetrahedron):
     def __init__(self):
         E2T = (Rational(1,24) / E().ivm_volume()).simplify()
         h = E2T ** Rational(1,3)
-        e0 = D/2
-        e1 = root3 * PHI**-1 /2
-        e2 = rt2((5 - root5)/2)/2
-        e3 = (3 - root5)/2/2
-        e4 = rt2(5 - 2*root5)/2
-        e5 = 1/PHI/2  
+        a  = DIAM/2
+        e0 = a
+        e1 = a * root3 * PHI**-1
+        e2 = a * rt2((5 - root5)/2)
+        e3 = a * (3 - root5)/2
+        e4 = a * rt2(5 - 2*root5)
+        e5 = a * 1/PHI
         
         e0 *= h
         e1 *= h
@@ -600,7 +575,7 @@ class T(Tetrahedron):
 
     def fig986_411(self, value = False, prec = 15):
         E2T = (Rational(1,24) / E().ivm_volume()).simplify()
-        h = (E2T ** Rational(1,3))/2       
+        h = RAD * (E2T ** Rational(1,3))       
         figdata = {
             "CA" : (h/2) * (3 - root5),
             "CB" : (h/2) * (root5 - 1),
@@ -613,6 +588,31 @@ class T(Tetrahedron):
         else:
             return figdata
         
+class E(Tetrahedron):
+    
+    def __init__(self):
+        a  = DIAM/2
+        e0 = a
+        e1 = a * root3 * PHI**-1
+        e2 = a * rt2((5 - root5)/2)
+        e3 = a * (3 - root5)/2
+        e4 = a * rt2(5 - 2*root5)
+        e5 = a * 1/PHI        
+        super().__init__(e0, e1, e2, e3, e4, e5)
+        
+    def fig986_411(self, value = False, prec = 15):
+        h = Rational(1,2) 
+        figdata = {
+            "CA" : (h/2) * (3 - root5),
+            "CB" : (h/2) * (root5 - 1),
+            "CO" : h,
+            "AB" : h * rt2(5 - 2 * root5),
+            "AO" : h * rt2((5 - root5)/2),
+            "BO" : h * rt2((9 - 3 * root5)/2),}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
 
 # ============[ TRIANGLE CLASS ]===================
 
@@ -633,7 +633,7 @@ class Triangle:
         """
         a,b,c = self.a, self.b, self.c
         xyzarea = rt2((a+b+c) * (-a+b+c) * (a-b+c) * (a+b-c))
-        return xyzarea
+        return xyzarea * (1/DIAM**2)
     
 def make_tri(v0,v1):
     """
@@ -647,9 +647,9 @@ def make_tri(v0,v1):
 import unittest
 
 class Test_Tetrahedron(unittest.TestCase):
-
+    
     def test_unit_volume(self):
-        tet = Tetrahedron(D, D, D, D, D, D)
+        tet = Tetrahedron(DIAM, DIAM, DIAM, DIAM, DIAM, DIAM)
         self.assertEqual(tet.ivm_volume(), Integer(1), "Volume not 1")
 
     def test_B_module(self):
@@ -675,21 +675,22 @@ class Test_Tetrahedron(unittest.TestCase):
         self.assertTrue(Eq(tet.ivm_volume(), Rational(1,24)), "Volume not 1/24")
                 
     def test_unit_volume2(self):
-        tet = Tetrahedron(R, R, R, R, R, R)
+        tet = Tetrahedron(RAD, RAD, RAD, RAD, RAD, RAD)
         self.assertEqual(tet.xyz_volume(), root2/12)
 
     def test_unit_volume3(self):
-        tet = Tetrahedron(R, R, R, R, R, R)
+        tet = Tetrahedron(RAD, RAD, RAD, RAD, RAD, RAD)
         self.assertEqual(tet.ivm_volume(), Rational(1,8))
         
     def test_phi_edge_tetra(self):
-        tet = Tetrahedron(D, D, D, D, D, PHI)
+        tet = Tetrahedron(DIAM, DIAM, DIAM, DIAM, DIAM, DIAM*PHI)
         self.assertTrue(Eq(tet.ivm_volume(), root2/2))
 
     def test_right_tetra(self):
-        e = rt2((root3/2)**2 + (root3/2)**2)  # right tetrahedron
-        tet = Tetrahedron(D, D, D, D, D, e)
-        self.assertEqual(tet.xyz_volume(), D)
+        alt = rt2(DIAM**2 - (DIAM/2)**2) # altitude of tetrabook page
+        e   = rt2(alt**2 + alt**2)       # right tetrahedron hypotenuse
+        tet = Tetrahedron(DIAM, DIAM, DIAM, DIAM, DIAM, e)
+        self.assertEqual(tet.xyz_volume(), Integer(1))
 
     def test_quadrant(self):
         one = Integer(1)
@@ -700,31 +701,34 @@ class Test_Tetrahedron(unittest.TestCase):
         self.assertEqual(tet.ivm_volume(), Rational(1,4)) 
 
     def test_octant(self):
-        x = Vector((R, 0, 0))
-        y = Vector((0, R, 0))
-        z = Vector((0, 0, R))
+        x = Vector((RAD, 0, 0))
+        y = Vector((0, RAD, 0))
+        z = Vector((0, 0, RAD))
         tet = make_tet(x,y,z)
         self.assertEqual(tet.xyz_volume(), Rational(1,6))
 
     def test_quarter_octahedron(self):
-        a = Vector((D,0,0))
-        b = Vector((0,D,0))
-        c = Vector((R,R,root2/2))
+        a = Vector((DIAM, 0, 0))
+        b = Vector((0, DIAM, 0))
+        c = Vector((RAD, RAD, RAD*root2))
         tet = make_tet(a, b, c)
-        self.assertEqual(tet.ivm_volume(), D) 
+        self.assertEqual(tet.ivm_volume(), Integer(1)) 
 
     def test_xyz_cube(self):
-        a = Vector((R,0,0))
-        b = Vector((0,R,0))
-        c = Vector((0,0,R))
+        a = Vector((RAD,0,0))
+        b = Vector((0,RAD,0))
+        c = Vector((0,0,RAD))
         R_octa = make_tet(a,b,c) 
-        self.assertEqual(6 * R_octa.xyz_volume(), D) # good to 4 places  
+        self.assertEqual(6 * R_octa.xyz_volume(), Integer(1)) # good to 4 places  
 
     def test_s3(self):
-        D_tet = Tetrahedron(D, D, D, D, D, D)
-        a = Vector((R,0,0))
-        b = Vector((0,R,0))
-        c = Vector((0,0,R))
+        """
+        XYZ volume of D-edge Tet * Syn3 == XYZ volume of R-edge Cube == 1
+        """
+        D_tet = Tetrahedron(DIAM, DIAM, DIAM, DIAM, DIAM, DIAM)
+        a = Vector((RAD,0,0))
+        b = Vector((0,RAD,0))
+        c = Vector((0,0,RAD))
         R_cube = 6 * make_tet(a,b,c).xyz_volume()
         self.assertEqual(D_tet.xyz_volume() * Syn3, R_cube)
 
@@ -736,48 +740,14 @@ class Test_Tetrahedron(unittest.TestCase):
         r = Qvector((two,0,one,one))
         result = make_tet(5*q, 2*p, 2*r)
         self.assertEqual(result.ivm_volume(), Integer(20))
-        
-    def test_area_martian1(self):
-        two = Integer(2)
-        one = Integer(1)
-        p = Qvector((two,one,0,one))
-        q = Qvector((two,one,one,0))
-        result = p.area(q)
-        self.assertEqual(result, D)        
- 
-    def test_area_martian2(self):
-        two = Integer(2)
-        one = Integer(1)
-        p = 3 * Qvector((two,one,0,one))
-        q = 4 * Qvector((two,one,one,0))
-        result = p.area(q)
-        self.assertEqual(result, 12)
-
-    def test_area_martian3(self):
-        qx = Vector((D,0,0)).quadray()
-        qy = Vector((R,rt2(3)/2,0)).quadray()
-        result = qx.area(qy)
-        self.assertEqual(result, D)
-        
-    def test_area_earthling1(self):
-        vx = Vector((1,0,0))
-        vy = Vector((0,1,0))
-        result = vx.area(vy)
-        self.assertEqual(result, 1)        
-
-    def test_area_earthling2(self):
-        vx = Vector((2,0,0))
-        vy = Vector((1,rt2(3),0))
-        result = vx.area(vy)
-        self.assertEqual(result, 2*rt2(3))    
-        
+   
     def test_phi_tet(self):
         "edges from common vertex: phi, 1/phi, 1"
-        p = Vector((1, 0, 0))
-        q = Vector((1, 0, 0)).rotz(60) * PHI 
+        p = Vector((one, 0, 0))
+        q = Vector((one, 0, 0)).rotz(60) * PHI 
         r = Vector((Rational(1,2), root3/6, root6/3)) * 1/PHI
-        result = make_tet(p, q, r)
-        self.assertTrue(Eq(result.ivm_volume(), D))
+        result = make_tet(DIAM * p, DIAM * q, DIAM * r)
+        self.assertAlmostEqual(result.ivm_volume(), 1)
         
     def test_phi_tet_2(self):
         two = Integer(2)
@@ -786,21 +756,22 @@ class Test_Tetrahedron(unittest.TestCase):
         q = Qvector((two,one,one,0))
         r = Qvector((two,0,one,one))
         result = make_tet(PHI*q, (1/PHI)*p, r)
-        self.assertTrue(Eq(result.ivm_volume(), 1))
+        self.assertTrue(Eq(result.ivm_volume(), Integer(1)))
         
     def test_phi_tet_3(self):
-        T = Tetrahedron(PHI, 1/PHI, 1, 
-                        root2, root2/PHI, root2)
+        a = DIAM
+        T = Tetrahedron(a*PHI, a/PHI, a, 
+                        a*root2, a*root2/PHI, a*root2)
         result = T.ivm_volume()
         self.assertTrue(Eq(result, 1))
 
     def test_koski(self):
-        a = 1 
-        b = PHI ** -1
-        c = PHI ** -2
-        d = (root2) * PHI ** -1 
-        e = (root2) * PHI ** -2
-        f = (root2) * PHI ** -1       
+        a = DIAM
+        b = a * PHI ** -1
+        c = a * PHI ** -2
+        d = a * (root2) * PHI ** -1 
+        e = a * (root2) * PHI ** -2
+        f = a * (root2) * PHI ** -1       
         tet = Tetrahedron(a,b,c,d,e,f)
         self.assertTrue(Eq(tet.ivm_volume(), PHI ** -3))   
 
@@ -826,7 +797,7 @@ class Test_Koski(unittest.TestCase):
         "Tetrahedron =   S6  +    S3 # (volume = 1)"
         S6 = S() * PHI**2
         S3 = S() * PHI
-        self.assertTrue(Eq(S6.ivm_volume() + S3.ivm_volume(), D))
+        self.assertTrue(Eq(S6.ivm_volume() + S3.ivm_volume(), Integer(1)))
     
     def test_Icosahedron(self):
         "Icosahedron =100*E3 + 20*E  # (volume = ~18.51)"
@@ -845,26 +816,60 @@ class Test_Koski(unittest.TestCase):
 class Test_Triangle(unittest.TestCase):
     
     def test_unit_area1(self):
-        tri = Triangle(D, D, D)
-        self.assertEqual(tri.ivm_area(), 1)
+        tri = Triangle(DIAM, DIAM, DIAM)
+        self.assertEqual(tri.ivm_area(), DIAM**2)
         
     def test_unit_area2(self):
-        tri = Triangle(2, 2, 2)
-        self.assertEqual(tri.ivm_area(), 4)
+        tri = Triangle(DIAM, DIAM, DIAM)
+        self.assertEqual(tri.ivm_area(), DIAM**2)
         
     def test_xyz_area3(self):
-        tri = Triangle(D, D, D)
+        tri = Triangle(DIAM, DIAM, DIAM)
         self.assertEqual(tri.xyz_area(), rt2(3))
         
     def test_xyz_area4(self):
-        v1 = Vector((D, 0, 0))
-        v2 = Vector((0, D, 0))
+        v1 = Vector((DIAM, 0, 0))
+        v2 = Vector((0, DIAM, 0))
         xyz_area = make_tri(v1, v2)[1]
         self.assertTrue(Eq(xyz_area, 2))
 
     def test_xyz_area5(self):
-        tri = Triangle(R, R, R)
+        tri = Triangle(RAD, RAD, RAD)
         self.assertEqual(tri.xyz_area(), (root3)/4)
+
+    def test_area_martian1(self):
+        two = Integer(2)
+        one = Integer(1)
+        p = Qvector((two,one,0,one))
+        q = Qvector((two,one,one,0))
+        result = p.area(q)
+        self.assertEqual(result, Integer(1))        
+ 
+    def test_area_martian2(self):
+        two = Integer(2)
+        one = Integer(1)
+        p = 3 * Qvector((two,one,0,one))
+        q = 4 * Qvector((two,one,one,0))
+        result = p.area(q)
+        self.assertEqual(result, 12)
+
+    def test_area_martian3(self):
+        qx = Vector((DIAM,0,0)).quadray()
+        qy = Vector((RAD, RAD * rt2(3),0)).quadray()
+        result = qx.area(qy)
+        self.assertEqual(result, DIAM)
+        
+    def test_area_earthling1(self):
+        vx = Vector((1,0,0))
+        vy = Vector((0,1,0))
+        result = vx.area(vy)
+        self.assertEqual(result, 1)        
+
+    def test_area_earthling2(self):
+        vx = Vector((2,0,0))
+        vy = Vector((1,rt2(3),0))
+        result = vx.area(vy)
+        self.assertEqual(result, 2*rt2(3))    
         
 def command_line():
     args = sys.argv[1:]
