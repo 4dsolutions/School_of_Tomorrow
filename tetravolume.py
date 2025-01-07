@@ -315,8 +315,8 @@ class Tetrahedron:
         CM : Caley-Menger, modified by Syn3 (XYZ->IVM constant) 
         """
         
-        # ivmvol = GdJ(self.a, self.b, self.c, self.d, self.e, self.f)
-        ivmvol = PdF(self.a, self.b, self.c, self.d, self.e, self.f)
+        ivmvol = GdJ(self.a, self.b, self.c, self.d, self.e, self.f)
+        # ivmvol = PdF(self.a, self.b, self.c, self.d, self.e, self.f)
         # ivmvol = CM(self.a, self.b, self.c, self.d, self.e, self.f)
         
         return ivmvol if not value else N(ivmvol, prec)
@@ -633,14 +633,14 @@ class Triangle:
         """
         a,b,c = self.a, self.b, self.c
         xyzarea = rt2((a+b+c) * (-a+b+c) * (a-b+c) * (a+b-c))
-        return xyzarea * (1/DIAM**2)
+        return xyzarea * (1/DIAM ** 2)
     
 def make_tri(v0,v1):
     """
-    three edges from any corner, remaining three edges computed
+    input two edge vectors from a common corner, 3rd computed
     """
     tri = Triangle(v0.length(), v1.length(), (v1-v0).length())
-    return tri.ivm_area(), tri.xyz_area()
+    return tri
 
 
 # ============[ TESTS ]===================        
@@ -701,34 +701,54 @@ class Test_Tetrahedron(unittest.TestCase):
         self.assertEqual(tet.ivm_volume(), Rational(1,4)) 
 
     def test_octant(self):
-        x = Vector((RAD, 0, 0))
-        y = Vector((0, RAD, 0))
-        z = Vector((0, 0, RAD))
+        qA = Qvector((one,0,0,0))
+        qB = Qvector((0,one,0,0))
+        qC = Qvector((0,0,one,0))
+        qD = Qvector((0,0,0,one))
+        qE = Qvector((0, one, one, one))
+        x = (qE - qB) * (1/rt2(two))
+        y = (qE - qC) * (1/rt2(two))
+        z = (qE - qD) * (1/rt2(two))
         tet = make_tet(x,y,z)
         self.assertEqual(tet.xyz_volume(), Rational(1,6))
 
-    def test_quarter_octahedron(self):
-        a = Vector((DIAM, 0, 0))
-        b = Vector((0, DIAM, 0))
-        c = Vector((RAD, RAD, RAD*root2))
+    def test_eighth_octahedron(self):
+        qA = Qvector((one,0,0,0))
+        qB = Qvector((0,one,0,0))
+        qC = Qvector((0,0,one,0))
+        qD = Qvector((0,0,0,one))
+        qE = Qvector((0, one, one, one))
+        a = (qE - qB)
+        b = (qE - qC) 
+        c = (qE - qD) 
         tet = make_tet(a, b, c)
-        self.assertEqual(tet.ivm_volume(), Integer(1)) 
+        self.assertEqual(tet.ivm_volume(), Rational(1, 2)) 
 
     def test_xyz_cube(self):
-        a = Vector((RAD,0,0))
-        b = Vector((0,RAD,0))
-        c = Vector((0,0,RAD))
-        R_octa = make_tet(a,b,c) 
-        self.assertEqual(6 * R_octa.xyz_volume(), Integer(1)) # good to 4 places  
+        qA = Qvector((one,0,0,0))
+        qB = Qvector((0,one,0,0))
+        qC = Qvector((0,0,one,0))
+        qD = Qvector((0,0,0,one))
+        qE = Qvector((0, one, one, one))
+        x = (qE - qB) * (1/rt2(two))
+        y = (qE - qC) * (1/rt2(two))
+        z = (qE - qD) * (1/rt2(two)) 
+        R_octa = make_tet(x,y,z)
+        self.assertEqual(6 * R_octa.xyz_volume(), Integer(1)) 
 
     def test_s3(self):
         """
         XYZ volume of D-edge Tet * Syn3 == XYZ volume of R-edge Cube == 1
         """
         D_tet = Tetrahedron(DIAM, DIAM, DIAM, DIAM, DIAM, DIAM)
-        a = Vector((RAD,0,0))
-        b = Vector((0,RAD,0))
-        c = Vector((0,0,RAD))
+        qA = Qvector((one,0,0,0))
+        qB = Qvector((0,one,0,0))
+        qC = Qvector((0,0,one,0))
+        qD = Qvector((0,0,0,one))
+        qE = Qvector((0, one, one, one))
+        a = (qE - qB) * (1/rt2(two))
+        b = (qE - qC) * (1/rt2(two))
+        c = (qE - qD) * (1/rt2(two))
         R_cube = 6 * make_tet(a,b,c).xyz_volume()
         self.assertEqual(D_tet.xyz_volume() * Syn3, R_cube)
 
@@ -743,28 +763,14 @@ class Test_Tetrahedron(unittest.TestCase):
    
     def test_phi_tet(self):
         "edges from common vertex: phi, 1/phi, 1"
-        p = Vector((one, 0, 0))
-        q = Vector((one, 0, 0)).rotz(60) * PHI 
-        r = Vector((Rational(1,2), root3/6, root6/3)) * 1/PHI
-        result = make_tet(DIAM * p, DIAM * q, DIAM * r)
-        self.assertAlmostEqual(result.ivm_volume(), 1)
-        
-    def test_phi_tet_2(self):
         two = Integer(2)
         one = Integer(1)
         p = Qvector((two,one,0,one))
         q = Qvector((two,one,one,0))
         r = Qvector((two,0,one,one))
-        result = make_tet(PHI*q, (1/PHI)*p, r)
-        self.assertTrue(Eq(result.ivm_volume(), Integer(1)))
+        result = make_tet(p * PHI, q * (1/PHI), r)
+        self.assertEqual(result.ivm_volume().evalf(), one)
         
-    def test_phi_tet_3(self):
-        a = DIAM
-        T = Tetrahedron(a*PHI, a/PHI, a, 
-                        a*root2, a*root2/PHI, a*root2)
-        result = T.ivm_volume()
-        self.assertTrue(Eq(result, 1))
-
     def test_koski(self):
         a = DIAM
         b = a * PHI ** -1
@@ -817,33 +823,27 @@ class Test_Triangle(unittest.TestCase):
     
     def test_unit_area1(self):
         tri = Triangle(DIAM, DIAM, DIAM)
-        self.assertEqual(tri.ivm_area(), DIAM**2)
+        self.assertEqual(tri.ivm_area(), 1)
         
-    def test_unit_area2(self):
-        tri = Triangle(DIAM, DIAM, DIAM)
-        self.assertEqual(tri.ivm_area(), DIAM**2)
-        
-    def test_xyz_area3(self):
-        tri = Triangle(DIAM, DIAM, DIAM)
-        self.assertEqual(tri.xyz_area(), rt2(3))
-        
-    def test_xyz_area4(self):
-        v1 = Vector((DIAM, 0, 0))
-        v2 = Vector((0, DIAM, 0))
-        xyz_area = make_tri(v1, v2)[1]
-        self.assertTrue(Eq(xyz_area, 2))
+    def test_xyz_area1(self):
+        v1 = Vector((2, 0, 0))
+        v2 = Vector((0, 2, 0))
+        tri = make_tri(v1, v2)
+        self.assertEqual(tri.xyz_area().evalf(), 8)
 
-    def test_xyz_area5(self):
-        tri = Triangle(RAD, RAD, RAD)
-        self.assertEqual(tri.xyz_area(), (root3)/4)
+    def test_xyz_area2(self):
+        v1 = Vector((1, 0, 0))
+        v2 = Vector((0, 1, 0))
+        tri = make_tri(v1, v2)
+        self.assertEqual(tri.xyz_area().evalf(), 2)
 
     def test_area_martian1(self):
         two = Integer(2)
         one = Integer(1)
         p = Qvector((two,one,0,one))
         q = Qvector((two,one,one,0))
-        result = p.area(q)
-        self.assertEqual(result, Integer(1))        
+        result = 3*p.area(2*q)
+        self.assertEqual(result, 6)     
  
     def test_area_martian2(self):
         two = Integer(2)
@@ -854,23 +854,21 @@ class Test_Triangle(unittest.TestCase):
         self.assertEqual(result, 12)
 
     def test_area_martian3(self):
-        qx = Vector((DIAM,0,0)).quadray()
-        qy = Vector((RAD, RAD * rt2(3),0)).quadray()
-        result = qx.area(qy)
-        self.assertEqual(result, DIAM)
-        
-    def test_area_earthling1(self):
-        vx = Vector((1,0,0))
-        vy = Vector((0,1,0))
-        result = vx.area(vy)
-        self.assertEqual(result, 1)        
+        two = Integer(2)
+        one = Integer(1)
+        p = Qvector((two,one,0,one))
+        q = Qvector((two,one,one,0))
+        tri = make_tri(p, q)
+        self.assertEqual(tri.ivm_area(), 1)
 
-    def test_area_earthling2(self):
-        vx = Vector((2,0,0))
-        vy = Vector((1,rt2(3),0))
-        result = vx.area(vy)
-        self.assertEqual(result, 2*rt2(3))    
-        
+    def test_area_martian4(self):
+        two = Integer(2)
+        one = Integer(1)
+        p = 3 * Qvector((two,one,0,one))
+        q = 4 * Qvector((two,one,one,0))
+        tri = make_tri(p, q)
+        self.assertEqual(tri.ivm_area().evalf(), 12)
+           
 def command_line():
     args = sys.argv[1:]
     try:

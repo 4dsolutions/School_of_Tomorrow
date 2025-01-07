@@ -60,7 +60,6 @@ one  = sp.Integer(1)
 two  = sp.Rational(2)
 
 # DIAM = one
-
 DIAM = two
 RAD  = DIAM / 2
 
@@ -131,11 +130,11 @@ class Vector:
         """
         xyz area of a parallelogram with these edge lengths
         """
-        return self.cross(v1).length()
+        return self.cross(v1).length() * (1/RAD)
     
     def length(self):
         """Return this vector's length"""
-        return sqrt(self.dot(self)) * RAD # radius = 1 or 1/2
+        return sqrt(self.dot(self)) * DIAM
 
     def angle(self,v1):
         """
@@ -148,7 +147,7 @@ class Vector:
     def rotaxis(self,vAxis,deg):
         """
         Rotate around vAxis by deg
-        realign rotation axis with Z-axis, realign self accordingly,
+        realign rotation axis with Z-axis, rea lign self accordingly,
         rotate by deg (counterclockwise) around Z, resume original
         orientation (undo realignment)
         """
@@ -297,6 +296,9 @@ class Qvector:
         """
         t = self.norm0()
         return DIAM * sp.sqrt(half * (t[0]**2 + t[1]**2 + t[2]**2 + t[3]**2))
+
+    def xlength(self):
+        return self.xyz.length()
         
     def cross(self,v1):
         """Return the cross product of self with another vector.
@@ -320,7 +322,7 @@ class Qvector:
         """
         area in unit triangles of edges D
         """
-        return self.cross(v1).length() * 2/(sqrt(3))
+        return self.cross(v1).length() * 1/(sqrt(3)*RAD)
 
     def angle(self, v1):
         return self.xyz.angle(v1.xyz)
