@@ -14,13 +14,13 @@ import flextegrity as fx
 import pandas as pd
 import numpy as np
 
-arrays = [
-    coordsys := ["IVM", "IVM", "IVM", "IVM", "XYZ", "XYZ", "XYZ"],
-    coordnms := ["A", "B", "C", "D", "X", "Y", "Z"]]
-col_tuples = list(zip(*arrays))
-col_tuples
+
 
 def tabulate(shape, dec=False, n=8):
+    arrays = [
+        ["IVM", "IVM", "IVM", "IVM", "XYZ", "XYZ", "XYZ"],
+        ["A", "B", "C", "D", "X", "Y", "Z"]]
+    col_tuples = list(zip(*arrays))
     vs = shape.vertexes.items()
     shape_name = shape.nick
     rows = []
@@ -56,6 +56,71 @@ def tabulate(shape, dec=False, n=8):
     df.columns = col_index
     return df
 
+def tabulate_xyz(shape, dec=False, n=8):
+    arrays = [
+        ["XYZ", "XYZ", "XYZ"],
+        ["X", "Y", "Z"]]
+    col_tuples = list(zip(*arrays))
+    vs = shape.vertexes.items()
+    shape_name = shape.nick
+    rows = []
+    row_tuples = []
+
+    for label, v in vs:
+        xyz = v.xyz
+        row_tuples.append((shape_name, label))
+        if not dec:
+            rows.append(dict(name = label, 
+                             X = xyz.x, 
+                             Y = xyz.y, 
+                             Z = xyz.z))
+        else:
+            rows.append(dict(name = label,  
+                             X = xyz.x.evalf(n).round(n), 
+                             Y = xyz.y.evalf(n).round(n), 
+                             Z = xyz.z.evalf(n).round(n)))  
+                        
+    df = pd.DataFrame.from_dict(rows)
+    col_index = pd.MultiIndex.from_tuples(col_tuples, names=["System", "Coords"])
+    row_index = pd.MultiIndex.from_tuples(row_tuples, names=["Shape", "Verts"])
+    df.index = row_index
+    df.drop(columns="name", axis=1, inplace=True)
+    df.columns = col_index
+    return df
+
+def tabulate_ivm(shape, dec=False, n=8):
+    arrays = [
+        ["IVM", "IVM", "IVM", "IVM"],
+        ["A", "B", "C", "D"]]
+    col_tuples = list(zip(*arrays))
+    vs = shape.vertexes.items()
+    shape_name = shape.nick
+    rows = []
+    row_tuples = []
+
+    for label, v in vs:
+        row_tuples.append((shape_name, label))
+        if not dec:
+            rows.append(dict(name = label, 
+                             A=v.a, 
+                             B=v.b, 
+                             C=v.c,
+                             D=v.d))
+        else:
+            rows.append(dict(name = label, 
+                             A = v.a.evalf(n).round(n), 
+                             B = v.b.evalf(n).round(n), 
+                             C = v.c.evalf(n).round(n), 
+                             D = v.d.evalf(n).round(n)))   
+                        
+    df = pd.DataFrame.from_dict(rows)
+    col_index = pd.MultiIndex.from_tuples(col_tuples, names=["System", "Coords"])
+    row_index = pd.MultiIndex.from_tuples(row_tuples, names=["Shape", "Verts"])
+    df.index = row_index
+    df.drop(columns="name", axis=1, inplace=True)
+    df.columns = col_index
+    return df
+
 def make_matrix(shape):
     the_edges = shape.unique
     labels = set()
@@ -71,7 +136,7 @@ def make_matrix(shape):
         face_matrix.loc[verts[1], verts[0]] = 1
     return face_matrix
 
-if __name__ == "__main__":
+def master_table():
     tet = tabulate(fx.Tetrahedron())
     invtet = tabulate(fx.InvTetrahedron())
     cu   = tabulate(fx.Cube())
@@ -79,6 +144,14 @@ if __name__ == "__main__":
     rd   = tabulate(fx.RD())
     co   = tabulate(fx.Cuboctahedron())
     
+    # tets_df = pd.concat((tet, invtet))
     master_df = pd.concat((tet, invtet, cu, octa, rd, co), axis=0)
-    faces_cu = make_matrix(fx.Cube())
+    # faces_cu = make_matrix(fx.Cube())  
+    return master_df
+    
+if __name__ == "__main__":
+    # master_table() 
+    df1 = tabulate_xyz(fx.Tetrahedron())
+    df2 = tabulate_ivm(fx.Tetrahedron())
+    df3 = df1.join(df2, how="inner")
     

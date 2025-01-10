@@ -44,9 +44,8 @@ the docstring for more details.
 
 from sympy import cos, sin, acos, sqrt, atan
 from mpmath import radians, degrees
-import math
 import sympy as sp
-from operator import add, sub, mul, neg
+from operator import add, mul, neg
 from collections import namedtuple
 
 XYZ = namedtuple("xyz_vector", "x y z")
@@ -133,8 +132,8 @@ class Vector:
         return self.cross(v1).length() * (1/RAD)
     
     def length(self):
-        """Return this vector's length"""
-        return sqrt(self.dot(self)) * DIAM
+        """Return this vector's length in R units or D units"""
+        return DIAM * sqrt(self.dot(self))
 
     def angle(self,v1):
         """
@@ -297,7 +296,7 @@ class Qvector:
         t = self.norm0()
         return DIAM * sp.sqrt(half * (t[0]**2 + t[1]**2 + t[2]**2 + t[3]**2))
 
-    def xlength(self):
+    def xyzlength(self):
         return self.xyz.length()
         
     def cross(self,v1):

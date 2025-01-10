@@ -245,9 +245,9 @@ class Tetrahedron(Polyhedron):
     
     def __init__(self):
         # POV-Ray
-        self.edge_color = "rgb <{}, {}, {}>".format(1, 173/255, 0) # orange
+        self.edge_color = "rgb <{}, {}, {}>".format(1, 140/255, 0) # orange
         self.edge_radius= 0.03
-        self.vert_color = "rgb <{}, {}, {}>".format(1, 173/255, 0) # orange
+        self.vert_color = "rgb <{}, {}, {}>".format(1, 140/255, 0) # orange
         self.vert_radius= 0.03
         self.face_color = self.edge_color # often not used 
         
@@ -799,7 +799,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <5.5, 0.1, 0.2>
+  location  <4, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -926,6 +926,49 @@ def test6():
     draw_poly(octa, out)
     draw_poly(cu_2F, out)
     draw_poly(rt, out)
+    out.close()
+
+def test6a():
+    """
+    MM1
+    """
+    out = open("test_6a.pov", "w")
+    out.write(pov_header)
+    tet  = Tetrahedron()
+    inv  = InvTetrahedron()
+    cu   = Cube()
+    octa = Octahedron()              # corresponding octa edges D
+    rd   = RD()
+    cu_2F = Cube() * 2               # 2F Cube
+    draw_poly(tet, out)
+    draw_poly(inv, out)
+    draw_poly(cu, out)
+    draw_poly(rd, out)
+    draw_poly(octa, out)
+    draw_poly(rd, out)
+    draw_poly(cu_2F, out)
+    out.close()
+
+def test6b():
+    """
+    MM2
+    """
+    out = open("test_6b.pov", "w")
+    out.write(pov_header)
+    tet  = Tetrahedron()
+    inv  = InvTetrahedron()
+    cu   = Cube()
+    octa = Octahedron()
+    rd   = RD()
+    cu_2F = Cube() * 2
+    
+    draw_poly(tet, out)
+    draw_poly(inv, out)
+    draw_poly(octa, out)
+    draw_poly(rd, out)
+    draw_poly(cu, out)
+    draw_poly(cu_2F, out)
+    draw_vert(ORIGIN, "T_Stone18", half, out, texture=True)
     out.close()
     
 def test7():
@@ -1682,7 +1725,154 @@ def test24():
     draw_poly(rd, f)
     # draw_poly(cu2, f)
     f.close()
+
+def test25():
+    f = open("testing25.pov", "w")
+    f.write(pov_header)
+
+    black = "rgb <{0}, {0}, {0}>".format(0)
+    white = "rgb <{0}, {0}, {0}>".format(220/255)
+    green = "rgb <0, 1, 0>"
+    red   = "rgb <1, 0, 0>"
+    blue  = "rgb <0, 0, 1>"
+    yellow= "rgb <1, 1, 0>"
+    tet = Tetrahedron()
+    cu  = Cube()
+    oc  = Octahedron() * (1/2)
+    oc2 = Octahedron()
+    rd  = RD()
+    co  = Cuboctahedron()
+    
+    
+    oc.edge_color = white
+    oc.vert_color = white
+    oc.vert_radius = 0.07
+    
+    # draw_vert(ORIGIN, c = black, r=0.07, t=f)
+    draw_vert(ORIGIN, "T_Stone18", half, f, texture=True)
+    
+    draw_poly(cu, f)
+    draw_poly(tet, f)
+    draw_poly(oc, f)
+    draw_poly(oc2, f)
+    draw_poly(rd, f)
+    draw_poly(co, f)
+
+    draw_vert(A, c = green, r = 0.07, t=f) 
+    draw_vert(B, c = blue, r = 0.07, t=f) 
+    draw_vert(C, c = red, r = 0.07, t=f) 
+    draw_vert(D, c = yellow, r = 0.07, t=f)
+    f.close()
+
+def test26():
+    """
+    // perspective (default) camera
+    camera {
+      location  <-2.5, 0.1, -0.4>
+      rotate    <90.0, 0, -100>
+      look_at   <0.0, 0.0,  0.0>
+      right     x*image_width/image_height
+    }
+    """
+    f = open("testing26.pov", "w")
+    f.write(pov_header)
+
+    black = "rgb <{0}, {0}, {0}>".format(0)
+    white = "rgb <{0}, {0}, {0}>".format(220/255)
+    green = "rgb <0, 1, 0>"
+    red   = "rgb <1, 0, 0>"
+    blue  = "rgb <0, 0, 1>"
+    yellow= "rgb <1, 1, 0>"
+    orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    brown = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
+    
+    tet = Tetrahedron() * 2
+    cu  = Cube() * 2
+    draw_poly(cu, f)
+    # draw_poly(tet, f)
+    
+    rad = 0.01
+    
+    draw_edge(Edge(ORIGIN, Vector((1,0,0))), red, rad, t=f)
+    draw_vert(Vector((1,0,0)), c=orange, r=0.07, t=f)
+    draw_edge(Edge(ORIGIN, Vector((-1,0,0))), red, rad, t=f)
+    
+    draw_edge(Edge(ORIGIN, Vector((0,1,0))), blue, rad,  t=f)
+    draw_vert(Vector((0,1,0)), c = orange, r=0.07, t=f)
+    draw_edge(Edge(ORIGIN, Vector((0,-1,0))), blue, rad,  t=f)
+    
+    draw_edge(Edge(ORIGIN, Vector((0,0,1))), yellow, rad, t=f)
+    draw_vert(Vector((0,0,1)), c = orange, r=0.07, t=f)    
+    draw_edge(Edge(ORIGIN, Vector((0,0,-1))), yellow, rad, t=f)
+    
+    draw_edge(Edge(ORIGIN, 2 * Qvector((1,0,0,0))), red, rad,  t=f)
+    draw_edge(Edge(ORIGIN, 2 * Qvector((0,1,0,0))), blue, rad,  t=f)
+    draw_edge(Edge(ORIGIN, 2 * Qvector((0,0,1,0))), yellow, rad,  t=f)
+    draw_edge(Edge(ORIGIN, 2 * Qvector((0,0,0,1))), white, rad, t=f)
+
+    r_edge_cube = {
+    'big_yellow'   : Vector((0,0,0)),
+    'small_yellow' : Vector((1,1,1)),
+    'small_blue'   : Vector((1,0,0)),
+    'big_blue'     : Vector((0,1,1)),
+    'small_green'  : Vector((0,1,0)),
+    'big_green'    : Vector((1,0,1)),
+    'small_red'    : Vector((0,0,1)),
+    'big_red'      : Vector((1,1,0)),
+    }  
+
+    edge = Edge(r_edge_cube['big_yellow'], r_edge_cube['small_green'])
+    #draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['big_yellow'], r_edge_cube['small_blue'])
+    #draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['big_yellow'], r_edge_cube['small_red'])
+    #draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_yellow'], r_edge_cube['big_red'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_yellow'], r_edge_cube['big_blue'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_yellow'], r_edge_cube['big_green'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_red'], r_edge_cube['big_blue'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_red'], r_edge_cube['big_green'])
+    draw_edge(edge, brown, 0.01, f)
+
+    edge = Edge(r_edge_cube['small_green'], r_edge_cube['big_red'])
+    draw_edge(edge, brown, 0.01, f)    
+
+    edge = Edge(r_edge_cube['small_green'], r_edge_cube['big_blue'])
+    draw_edge(edge, brown, 0.01, f)  
+
+    edge = Edge(r_edge_cube['small_blue'], r_edge_cube['big_green'])
+    draw_edge(edge, brown, 0.01, f)    
+
+    edge = Edge(r_edge_cube['small_blue'], r_edge_cube['big_red'])
+    draw_edge(edge, brown, 0.01, f) 
+
+    draw_vert(r_edge_cube['big_yellow'], c=' rgb <1,1,0>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_yellow'], c=' rgb <1,1,0>' , r=0.07, t=f)
+
+    draw_vert(r_edge_cube['big_green'], c=' rgb <0,1,0>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_green'], c=' rgb <0,1,0>' , r=0.07, t=f)
+
+    draw_vert(r_edge_cube['big_blue'], c=' rgb <0,0,1>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_blue'], c=' rgb <0,0,1>' , r=0.07, t=f)
+
+    draw_vert(r_edge_cube['big_red'], c=' rgb <1,0,0>' , r=0.14, t=f)
+    draw_vert(r_edge_cube['small_red'], c=' rgb <1,0,0>' , r=0.07, t=f)
+
+    
+    f.close()
     
 if __name__ == "__main__":
-    test22()
+    test6a()
+    test6b()
     
