@@ -5,6 +5,38 @@ Created on Sun Mar  8 11:40:54 2020
 
 @author: Kirby Urner
 
+The qrays.py module provides more context.
+
+This implementation of Matryoskah doll polys
+(nested) is yet another iteration of what I do:
+output in POV-Ray scene description language
+plus others: VRML, VPython, Blender, over the
+years. The overall schema is from Synergetics
+(R. B. Fuller), including the volumes table.
+
+The polys rely on an index of Qvectors, which
+inherit from Vectors in qrays.py, but for a 
+poly one needs face tuples, connecting 
+surface points into polygons. From the faces
+data structure e.g.
+
+# 4 faces
+self.faces = (('a','b','c'),('a','c','d'),
+              ('a','d','b'),('b','d','c'))
+
+the Polyhedron superclass is able to distill
+the edges (vector pairs, connecting endpoints).
+
+self.edges = self._distill()
+
+At this juncture (Jan 2025), remodeling around
+adding DIAM and RAD globals to qrays is not 
+complete. This module was developed around 
+DIAM = 1, RAD = 1/2 and those settings 
+produce expected results. But with DIAM = 2, 
+RAD = 1 expect issues. Research is underway.
+
+Jan  21, 2025:  adding new "scapes" (poly vistas)
 Oct  13, 2024:  write new tests, rewrite test6, simplify constants
 Oct  06, 2024:  test16 for 7-frame animated GIF
 Oct  05, 2024:  test15 for 9-frame animated GIF 
@@ -542,7 +574,7 @@ class PD (Polyhedron):
         self.edges = self._distill()
 
 class RT (Polyhedron):
-# Rhombic Triacontahedron
+    # Rhombic Triacontahedron
 
     def __init__(self):
         # Purple Heart rgb(105,53,156)
@@ -592,7 +624,7 @@ class RT (Polyhedron):
                              z =  Zi))                    
         self.name = "Rhombic Triacontahedron"
         self.nick = "RT"
-        self.volume = 20 * rt2(9./8)
+        self.volume = 20 * rt2(sy.Rational(9, 8))
         self.center = ORIGIN
         # 30 faces
         self.faces = (('s', 'stz', 'z', 'osz'),
@@ -627,8 +659,6 @@ class RT (Polyhedron):
                       ('u', 'stu', 't', 'tuv'),
                       )
         
-        
-
         self.edges = self._distill()
 
 class Cuboctahedron (Polyhedron):
@@ -799,7 +829,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <4, 0.1, 0.2>
+  location  <2, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -1871,8 +1901,59 @@ def test26():
 
     
     f.close()
+
+def test27():
+    f = open("testing27.pov", "w")
+    f.write(pov_header)
+
+    tet    = Tetrahedron()
+    cu     = Cube()
+    xyz_cu = Cube() * (1/rt2(2))
+    cu2    = Cube() * 2
+
+    draw_poly(tet, f)
+    draw_poly(xyz_cu, f)
+    draw_poly(cu, f)
+    draw_poly(cu2, f)
+
+def test28():
+    f = open("testing28.pov", "w")
+    f.write(pov_header)
+
+    rt   = RT() * (1/PHI)
+    rt.edge_radius = 0.02
+    rt75 = RT() * (1/PHI) * 0.9994 * (3/2)**(1/3) # 7.5 RT_K
+    rt75.edge_color = "rgb <{}, {}, {}>".format(1, 105/255, 180/255)
+    rt75.edge_radius = 0.02
+    rd    = RD()
+    rd.edge_radius = 0.02
     
+    draw_vert(ORIGIN, "T_Stone18", half, f, texture=True)
+    draw_poly(rt, f)
+    draw_poly(rt75, f)
+    draw_poly(rd, f)
+    
+def test29():
+    f = open("testing29.pov", "w")
+    f.write(pov_header)
+
+    rt   = RT()
+    rt.edge_radius = 0.02
+    ic   =  Icosahedron()
+    ic.edge_radius = 0.02
+    rd    = RD()
+    rd.edge_radius = 0.02
+    pd    = PD()
+    pd.edge_radius = 0.02
+    
+    # draw_vert(ORIGIN, "T_Stone18", half, f, texture=True)
+    # draw_poly(rt, f)
+    draw_poly(ic, f)
+    draw_poly(rd, f)
+    # draw_poly(pd, f)
+        
 if __name__ == "__main__":
-    test6a()
-    test6b()
+    # test6a()
+    # test6b()
+    test29()
     
