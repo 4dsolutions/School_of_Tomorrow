@@ -3,7 +3,7 @@
 Created on Sat Jun  4 09:07:22 2016
 
 qrays.py is an implementation of Quadray Coordinates,
-per Wikipedia. I have a few versions across repos.
+per Wikipedia.[1] I have a few versions across repos.
 This copy is from:
     
 https://github.com/4dsolutions/School_of_Tomorrow
@@ -65,7 +65,7 @@ application. Alternative juxtapositions of the D-edged
 IVM tetrahedron and the R-edge XYZ cube might be 
 imagined, such as a right-handed version.
 
-Per the slides [1], we introduce a human figure
+Per the slides [2], we introduce a human figure
 with arms outstreched, and legs striding a line
 perpendicular to the hand-to-hand one. The figure's
 left hand is in the all-positive (+ + +) octant of 
@@ -76,6 +76,9 @@ ivm_vector(a=1, b=0, c=0, d=0)
 
 >>> A.xyz
 xyz_vector(x=sqrt(2)/4, y=sqrt(2)/4, z=sqrt(2)/4)
+
+>>> A.length() # DIAM = 1
+sqrt(6)/4
 
 The right hand is kitty corner through the Y axis,
 still above the Z plane through the origin (our 
@@ -97,7 +100,13 @@ A, B, C, D is 109.47... whereas in XYZ with its
 "jack" arrangement, of three basis + three non-
 basis spokes, dividing space into octants, the
 relationships are either 90 or 180 degrees. 
+
+>>> A.angle(B)
+109.471220634491
     
+>>> X.angle(-X)
+180.000000000000
+
 Sometimes Synergetics explorers are thinking in 
 terms of unit radii, such that diameter lengthed
 edges get a value of 2. A 2R-edged tetrahedron 
@@ -122,9 +131,16 @@ the earlier versions assumed a fixed D=1 regime.
  
 This variable approach is not inconsistent with 
 Synergetics itself, wherein its basic modules 
-(A, B, E, S, T) come with edge length diagrams, 
-that include the variable 'a' as a scale factor
-along each edge.
+(A, B, E, S, T) come with plane nets, that include 
+the variable 'a' as a scale factor along each edge.[3]
+
+[1] https://en.wikipedia.org/wiki/Quadray_coordinates
+
+[2] Quadrays (Google slides):
+https://docs.google.com/presentation/d/1ynde13tnMAu7EelfVuQVTFDUWGYBcRDRmtkMu4LIUFw/edit?usp=sharing
+
+[3] http://rwgrayprojects.com/synergetics/s09/figs/f1301.html
+
 
 @author:  K. Urner, 4D Solutions, (M) MIT License
  Jan 21, 2025: rewrite the docstring
@@ -162,6 +178,8 @@ from mpmath import radians, degrees
 import sympy as sp
 from operator import add, mul, neg
 from collections import namedtuple
+
+import unittest
 
 XYZ = namedtuple("xyz_vector", "x y z")
 IVM = namedtuple("ivm_vector", "a b c d")
@@ -256,7 +274,7 @@ class Vector:
         """
         costheta = self.dot(v1)/(self.length()/DIAM * v1.length()/DIAM)
         theta = degrees(acos(costheta))
-        return theta
+        return theta.evalf()
 
     def rotaxis(self,vAxis,deg):
         """
@@ -492,6 +510,7 @@ def angle(a,b):
 def length(a):
     return a.length()
 
+
 A = Qvector((one, zero, zero, zero))
 B = Qvector((zero, one, zero, zero))
 C = Qvector((zero, zero, one, zero))
@@ -500,38 +519,57 @@ D = Qvector((zero, zero, zero, one))
 X = Vector((one, zero, zero))
 Y = Vector((zero, one, zero))
 Z = Vector((zero, zero, one))
-
-import unittest
+    
+class setcontext:
+    
+    def __init__(self, pv):
+        self.pv = pv
+    
+    def __enter__(self):
+        global DIAM, RAD
+        self._old_diam = DIAM
+        self._old_rad  = RAD
+        DIAM = self.pv
+        RAD = DIAM / 2
+        
+    def __exit__(self, *oops):
+        global DIAM, RAD
+        DIAM = self._old_diam
+        RAD = self._old_rad
+        
 
 class Test_Qvector(unittest.TestCase):
     
     def test_unit_length(self):
         self.assertEqual((A-B).length(), DIAM, "PV not DIAM")
-        
-    def test_2R_length(self):
-        global DIAM, RAD
-        DIAM = two; RAD = one
-        self.assertEqual((A-B).length(), 2, "PV not 2")
 
-    def test_D_length(self):
-        global DIAM, RAD
-        DIAM = one; RAD = half
-        self.assertEqual((A-B).length(), 1, "PV not 1")
+    def test_A_length(self):
+        with setcontext(one):
+            self.assertEqual(A.length(), sqrt(6)/4, "PV not DIAM")
+
+    def test_A_length_2(self):
+        with setcontext(two):
+            self.assertEqual(A.length(), sqrt(6)/2, "PV not DIAM")
+
+    def test_2R_length(self):
+        with setcontext(two):
+            self.assertEqual((A-B).length(), 2, "PV not 2")
+
+    def test_PV_length(self):
+        with setcontext(one):
+            self.assertEqual((A-B).length(), 1, "PV not 1")
         
     def test_convert(self):
         self.assertEqual(A.xyz.quadray(), A, "not 2-way")
         
     def test_angle(self):
-        global DIAM, RAD
-        DIAM = one; RAD = half        
-        self.assertAlmostEqual(float(A.angle(B).evalf()), 109.471, places=3)
+        with setcontext(one):        
+            self.assertAlmostEqual(float(A.angle(B).evalf()), 109.471, places=3)
 
     def test_angle_2(self):
-        global DIAM, RAD
-        DIAM = two; RAD = one        
-        self.assertAlmostEqual(float(A.angle(B).evalf()), 109.471, places=3)
+        with setcontext(two):        
+            self.assertAlmostEqual(A.angle(B), 109.471, places=3)
 
+    
 if __name__ == "__main__":
     unittest.main()
-
-
