@@ -29,13 +29,7 @@ the edges (vector pairs, connecting endpoints).
 
 self.edges = self._distill()
 
-At this juncture (Jan 2025), remodeling around
-adding DIAM and RAD globals to qrays is not 
-complete. This module was developed around 
-DIAM = 1, RAD = 1/2 and those settings 
-produce expected results. But with DIAM = 2, 
-RAD = 1 expect issues. Research is underway.
-
+Jan  22, 2025:  rethink deriving icosa from cubocta vectors
 Jan  21, 2025:  adding new "scapes" (poly vistas)
 Oct  13, 2024:  write new tests, rewrite test6, simplify constants
 Oct  06, 2024:  test16 for 7-frame animated GIF
@@ -50,12 +44,12 @@ from qrays import Qvector, Vector
 import sympy as sy  
 from sympy import sqrt as rt2
 
-PHI = (1 + rt2(5))/2
-
+two  = sy.Integer(2)
 one  = sy.Integer(1)
 half = sy.Rational(1, 2)
 zero = sy.Integer(0)
 
+PHI = (one + rt2(5))/two
 
 ORIGIN = Qvector((zero, zero, zero, zero))
 A = Qvector((one, zero, zero, zero))
@@ -76,37 +70,25 @@ half = sy.Rational(1,2)
 # ZY WX
 # RV OS
 # TU PQ
-control = (Z - T).length()
+control = (Z - T).length() # surface edge of Cubocta
 
-midface = (Z + Y)
-gold    = half * PHI * midface/midface.length()
-Zi = gold + J/J.length() * (control/2)
-Yi = gold + M/M.length() * (control/2)
+def phi_rect(v0, v1):
+    """
+    develop 3 phi-rectangles from cubocta face diagonals
+    takes a pair of points from square faces, returns a pair 
+    """
+    gold    = (v0+v1).unit_vector() * (control*PHI)/two
+    offset  = (v0-v1).unit_vector()
+    return (gold + (offset * control/two),
+            gold - (offset * control/two))
 
-midface = (W + X)
-gold    = half * PHI * midface/midface.length()
-Wi = gold + J/J.length() * (control/2)
-Xi = gold + M/M.length() * (control/2)
-
-midface = (R + V)
-gold    = half * PHI * midface/midface.length()
-Ri = gold + I/I.length() * (control/2)
-Vi = gold + N/N.length() * (control/2)
-
-midface = (O + S)
-gold    = half * PHI * midface/midface.length()
-Oi = gold + I/I.length() * (control/2)
-Si = gold + N/N.length() * (control/2)
-
-midface = (T + U)
-gold    = half * PHI * midface/midface.length()
-Ti = gold + K/K.length() * (control/2)
-Ui = gold + L/L.length() * (control/2)
-
-midface = (P + Q)
-gold    = half * PHI * midface/midface.length()
-Pi = gold + K/K.length() * (control/2)
-Qi = gold + L/L.length() * (control/2)
+# icosahedral points
+Zi, Yi = phi_rect(Z, Y)
+Wi, Xi = phi_rect(W, X)
+Ri, Vi = phi_rect(R, V)
+Oi, Si = phi_rect(O, S)
+Ti, Ui = phi_rect(T, U)
+Pi, Qi = phi_rect(P, Q)
 
 class Polyhedron:
     """
@@ -268,7 +250,54 @@ def draw_poly(p, the_file, v=True, f=False, e=True, *, texture=False):
         for e in p.edges:
             draw_edge(e, ec, er, the_file, texture=texture)
      
+#=== REPORTS ===
 
+def edge_lengths(shape):
+    return [(e.v0 - e.v1).length().evalf() 
+            for e in shape.edges]
+
+def globals():
+    print(\
+f"""\
+A  : {A.length().evalf()}
+B  : {B.length().evalf()}
+C  : {C.length().evalf()}
+D  : {D.length().evalf()}
+E  : {E.length().evalf()}
+F  : {F.length().evalf()}
+G  : {G.length().evalf()}
+H  : {H.length().evalf()}
+I  : {I.length().evalf()}
+J  : {J.length().evalf()}
+K  : {K.length().evalf()}
+L  : {L.length().evalf()}
+M  : {M.length().evalf()}
+N  : {N.length().evalf()}
+O  : {O.length().evalf()}
+P  : {P.length().evalf()}
+Q  : {Q.length().evalf()}
+R  : {R.length().evalf()}
+S  : {S.length().evalf()}
+T  : {T.length().evalf()}
+U  : {U.length().evalf()} 
+V  : {V.length().evalf()}
+W  : {W.length().evalf()}
+X  : {X.length().evalf()}
+Y  : {Y.length().evalf()}
+Z  : {Z.length().evalf()}
+Oi : {Oi.length().evalf()}
+Pi : {Pi.length().evalf()}
+Qi : {Qi.length().evalf()}
+Ri : {Ri.length().evalf()}
+Si : {Si.length().evalf()}
+Ti : {Ti.length().evalf()}
+Ui : {Ui.length().evalf()}
+Vi : {Vi.length().evalf()}
+Wi : {Wi.length().evalf()}
+Zi : {Zi.length().evalf()}
+""")
+    
+#=== POLYS ===
 
 class Tetrahedron(Polyhedron):
     """
@@ -464,9 +493,10 @@ class RD (Polyhedron):
 
             # 12 faces
             # I,J,K,L,M,N = A+B, A+C, A+D, B+C, B+D, C+D
-            self.faces = (('j','f','k','a'),('j','f','n','c'),('j','c','l','h'),('j','h','i','a'),
-                          ('m','d','k','g'),('m','d','n','e'),('m','e','l','b'),('m','b','i','g'),
-                          ('k','d','n','f'),('n','c','l','e'),('l','h','i','b'),('i','a','k','g'))
+            self.faces = (('j','f','k','a'),('j','f','n','c'),('j','c','l','h'),
+                          ('j','h','i','a'),('m','d','k','g'),('m','d','n','e'),
+                          ('m','e','l','b'),('m','b','i','g'),('k','d','n','f'),
+                          ('n','c','l','e'),('l','h','i','b'),('i','a','k','g'))
 
             self.edges = self._distill()
 
@@ -528,28 +558,29 @@ class PD (Polyhedron):
         
         # 20 vertexes
         # V + F = E + 2; 20 + 12 = 30 + 2
-        L = ((Wi + Qi + Oi)/3 - (Pi + Oi + Qi)/3).length()
-        sk = (1/L) * (1/PHI)
-        self.vertexes = dict(osw = sk * (Oi + Wi + Si)/3,
-                             osz = sk * (Oi + Zi + Si)/3,
-                             pyz = sk * (Zi + Pi + Yi)/3,
-                             tyz = sk * (Zi + Ti + Yi)/3,
-                             tuv = sk * (Ti + Vi + Ui)/3,
-                             stu = sk * (Ti + Si + Ui)/3,
-                             qwx = sk * (Wi + Qi + Xi)/3,
-                             uwx = sk * (Wi + Ui + Xi)/3,
-                             opq = sk * (Pi + Oi + Qi)/3,
-                             pqr = sk * (Pi + Ri + Qi)/3,
-                             rvy = sk * (Ri + Yi + Vi)/3,
-                             rvx = sk * (Ri + Xi + Vi)/3,
-                             stz = sk * (Zi + Si + Ti)/3,
-                             tvy = sk * (Ti + Yi + Vi)/3,
-                             pry = sk * (Yi + Pi + Ri)/3,
-                             qrx = sk * (Ri + Qi + Xi)/3,
-                             uvx = sk * (Xi + Ui + Vi)/3,
-                             suw = sk * (Ui + Si + Wi)/3,
-                             oqw = sk * (Wi + Qi + Oi)/3,
-                             opz = sk * (Oi + Zi + Pi)/3)
+        icosa_midedge = ((Wi + Qi)/two).length()
+        cross_wise = control/PHI * half
+        sk = rt2(icosa_midedge**2 + cross_wise**2) # scale factor
+        self.vertexes = dict(osw = sk * (Oi + Wi + Si).unit_vector(),
+                             osz = sk * (Oi + Zi + Si).unit_vector(),
+                             pyz = sk * (Zi + Pi + Yi).unit_vector(),
+                             tyz = sk * (Zi + Ti + Yi).unit_vector(),
+                             tuv = sk * (Ti + Vi + Ui).unit_vector(),
+                             stu = sk * (Ti + Si + Ui).unit_vector(),
+                             qwx = sk * (Wi + Qi + Xi).unit_vector(),
+                             uwx = sk * (Wi + Ui + Xi).unit_vector(),
+                             opq = sk * (Pi + Oi + Qi).unit_vector(),
+                             pqr = sk * (Pi + Ri + Qi).unit_vector(),
+                             rvy = sk * (Ri + Yi + Vi).unit_vector(),
+                             rvx = sk * (Ri + Xi + Vi).unit_vector(),
+                             stz = sk * (Zi + Si + Ti).unit_vector(),
+                             tvy = sk * (Ti + Yi + Vi).unit_vector(),
+                             pry = sk * (Yi + Pi + Ri).unit_vector(),
+                             qrx = sk * (Ri + Qi + Xi).unit_vector(),
+                             uvx = sk * (Xi + Ui + Vi).unit_vector(),
+                             suw = sk * (Ui + Si + Wi).unit_vector(),
+                             oqw = sk * (Wi + Qi + Oi).unit_vector(),
+                             opz = sk * (Oi + Zi + Pi).unit_vector())
         
         self.name = "Pentagonal Dodecahedron"            
         self.nick = "PD"
@@ -586,28 +617,29 @@ class RT (Polyhedron):
         
         # 32 vertexes
         # V + F = E + 2; 32 + 30 = 60 + 2
-        L = ((Wi + Qi + Oi)/3 - (Pi + Oi + Qi)/3).length()
-        sk = (1/L) * (1/PHI)
-        self.vertexes = dict(osw = sk * (Oi + Wi + Si)/3,
-                             osz = sk * (Oi + Zi + Si)/3,
-                             pyz = sk * (Zi + Pi + Yi)/3,
-                             tyz = sk * (Zi + Ti + Yi)/3,
-                             tuv = sk * (Ti + Vi + Ui)/3,
-                             stu = sk * (Ti + Si + Ui)/3,
-                             qwx = sk * (Wi + Qi + Xi)/3,
-                             uwx = sk * (Wi + Ui + Xi)/3,
-                             opq = sk * (Pi + Oi + Qi)/3,
-                             pqr = sk * (Pi + Ri + Qi)/3,
-                             rvy = sk * (Ri + Yi + Vi)/3,
-                             rvx = sk * (Ri + Xi + Vi)/3,
-                             stz = sk * (Zi + Si + Ti)/3,
-                             tvy = sk * (Ti + Yi + Vi)/3,
-                             pry = sk * (Yi + Pi + Ri)/3,
-                             qrx = sk * (Ri + Qi + Xi)/3,
-                             uvx = sk * (Xi + Ui + Vi)/3,
-                             suw = sk * (Ui + Si + Wi)/3,
-                             oqw = sk * (Wi + Qi + Oi)/3,
-                             opz = sk * (Oi + Zi + Pi)/3)
+        icosa_midedge = ((Wi + Qi)/two).length()
+        cross_wise = control/PHI * half
+        sk = rt2(icosa_midedge**2 + cross_wise**2) # scale factor
+        self.vertexes = dict(osw = sk * (Oi + Wi + Si).unit_vector(),
+                             osz = sk * (Oi + Zi + Si).unit_vector(),
+                             pyz = sk * (Zi + Pi + Yi).unit_vector(),
+                             tyz = sk * (Zi + Ti + Yi).unit_vector(),
+                             tuv = sk * (Ti + Vi + Ui).unit_vector(),
+                             stu = sk * (Ti + Si + Ui).unit_vector(),
+                             qwx = sk * (Wi + Qi + Xi).unit_vector(),
+                             uwx = sk * (Wi + Ui + Xi).unit_vector(),
+                             opq = sk * (Pi + Oi + Qi).unit_vector(),
+                             pqr = sk * (Pi + Ri + Qi).unit_vector(),
+                             rvy = sk * (Ri + Yi + Vi).unit_vector(),
+                             rvx = sk * (Ri + Xi + Vi).unit_vector(),
+                             stz = sk * (Zi + Si + Ti).unit_vector(),
+                             tvy = sk * (Ti + Yi + Vi).unit_vector(),
+                             pry = sk * (Yi + Pi + Ri).unit_vector(),
+                             qrx = sk * (Ri + Qi + Xi).unit_vector(),
+                             uvx = sk * (Xi + Ui + Vi).unit_vector(),
+                             suw = sk * (Ui + Si + Wi).unit_vector(),
+                             oqw = sk * (Wi + Qi + Oi).unit_vector(),
+                             opz = sk * (Oi + Zi + Pi).unit_vector())
         
         self.vertexes.update(dict(
                              o =  Oi,
@@ -829,7 +861,7 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <2, 0.1, 0.2>
+  location  <2.5, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -1563,7 +1595,7 @@ def test21():
     cu2.edge_color = brown = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
     orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
     
-    origin = ORIGIN
+    #origin = ORIGIN
     r_edge_cube = {
     'big_yellow'   : Vector((0,0,0)),
     'small_yellow' : Vector((1,1,1)),
@@ -1641,7 +1673,7 @@ def test22():
     orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
     brown = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
     
-    origin = ORIGIN
+    #origin = ORIGIN
     r_edge_cube = {
     'big_yellow'   : Vector((0,0,0)),
     'small_yellow' : Vector((1,1,1)),
@@ -1701,10 +1733,10 @@ def test22():
     draw_vert(r_edge_cube['big_red'], c=' rgb <1,0,0>' , r=0.14, t=f)
     draw_vert(r_edge_cube['small_red'], c=' rgb <1,0,0>' , r=0.07, t=f)
 
-    texture1 = "pigment { Col_Glass_Bluish }"
-    texture2 = "pigment { Col_Glass_Dark_Green }"
-    texture3 = "pigment { Col_Glass_Yellow }"
-    texture4 = "pigment { Col_Glass_Ruby }"
+    #texture1 = "pigment { Col_Glass_Bluish }"
+    #texture2 = "pigment { Col_Glass_Dark_Green }"
+    #texture3 = "pigment { Col_Glass_Yellow }"
+    #texture4 = "pigment { Col_Glass_Ruby }"
 
     draw_vert(2*A, c = orange, r = 0.14, t=f) 
     draw_vert(2*B, c = orange, r = 0.14, t=f) 
@@ -1730,9 +1762,9 @@ def test24():
     rd = RD() * 2
     
     orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
-    brown = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
+    #brown = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
 
-    texture1 = "T_Copper_1A"
+    #texture1 = "T_Copper_1A"
     texture2 = "T_Stone18"
     #texture2 = "pigment { Col_Glass_Dark_Green }"
     #texture3 = "pigment { Col_Glass_Yellow }"
@@ -1760,7 +1792,7 @@ def test25():
     f = open("testing25.pov", "w")
     f.write(pov_header)
 
-    black = "rgb <{0}, {0}, {0}>".format(0)
+    # black = "rgb <{0}, {0}, {0}>".format(0)
     white = "rgb <{0}, {0}, {0}>".format(220/255)
     green = "rgb <0, 1, 0>"
     red   = "rgb <1, 0, 0>"
@@ -1807,16 +1839,16 @@ def test26():
     f = open("testing26.pov", "w")
     f.write(pov_header)
 
-    black = "rgb <{0}, {0}, {0}>".format(0)
+    #black = "rgb <{0}, {0}, {0}>".format(0)
     white = "rgb <{0}, {0}, {0}>".format(220/255)
-    green = "rgb <0, 1, 0>"
+    #green = "rgb <0, 1, 0>"
     red   = "rgb <1, 0, 0>"
     blue  = "rgb <0, 0, 1>"
     yellow= "rgb <1, 1, 0>"
     orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
     brown = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
     
-    tet = Tetrahedron() * 2
+    #tet = Tetrahedron() * 2
     cu  = Cube() * 2
     draw_poly(cu, f)
     # draw_poly(tet, f)
@@ -1899,7 +1931,6 @@ def test26():
     draw_vert(r_edge_cube['big_red'], c=' rgb <1,0,0>' , r=0.14, t=f)
     draw_vert(r_edge_cube['small_red'], c=' rgb <1,0,0>' , r=0.07, t=f)
 
-    
     f.close()
 
 def test27():
@@ -1943,14 +1974,17 @@ def test29():
     ic.edge_radius = 0.02
     rd    = RD()
     rd.edge_radius = 0.02
+    cu = Cuboctahedron()
+    cu.edge_radius = 0.02
     pd    = PD()
     pd.edge_radius = 0.02
     
-    # draw_vert(ORIGIN, "T_Stone18", half, f, texture=True)
-    # draw_poly(rt, f)
+    draw_vert(ORIGIN, "T_Stone18", half, f, texture=True)
+    draw_poly(rt, f)
     draw_poly(ic, f)
-    draw_poly(rd, f)
-    # draw_poly(pd, f)
+    # draw_poly(rd, f)
+    # draw_poly(cu, f)
+    draw_poly(pd, f)
         
 if __name__ == "__main__":
     # test6a()

@@ -191,7 +191,7 @@ half = sp.Rational(1, 2)
 one  = sp.Integer(1)
 two  = sp.Rational(2)
 
-DIAM = one
+DIAM = one # comment out if DIAM = two
 # DIAM = two
 RAD  = DIAM / 2
 
@@ -369,7 +369,10 @@ class Qvector:
         q  = self.coords
         av = (q[0] + q[1] + q[2] + q[3])/4
         return IVM(q[0]-av, q[1]-av, q[2]-av, q[3]-av)
-
+    
+    def unit_vector(self):
+        return self/self.length()
+    
     @property
     def a(self):
         return self.coords.a

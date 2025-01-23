@@ -642,7 +642,6 @@ def make_tri(v0,v1):
     tri = Triangle(v0.length(), v1.length(), (v1-v0).length())
     return tri
 
-
 # ============[ TESTS ]===================        
 import unittest
 
