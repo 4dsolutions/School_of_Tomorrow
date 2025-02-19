@@ -4,10 +4,12 @@
 Created on Thurs Feb 13 2025
 
 @author: mac
+
+Feb 19: import PHI as sympy object vs using math.sqrt and dumbing it down too early
 """
 from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron
 from flextegrity import Tetrahedron, InvTetrahedron, RD, Icosahedron, Struts
-from flextegrity import twelve_around_one, draw_poly, draw_vert, half, ORIGIN
+from flextegrity import twelve_around_one, draw_poly, draw_vert, half, ORIGIN, PHI
 from qrays import Qvector
 from itertools import cycle
 
@@ -20,7 +22,6 @@ g = permutations((2,1,1,0))
 UNIQUE = {p for p in g}  # set comprehension
 
 IVM_DIRS = {Qvector(x) for x in UNIQUE}
-PHI = (1 + math.sqrt(5))/2
 
 Svol = (PHI **-5)/2  
 Evol = (math.sqrt(2)/8) * (PHI ** -3)
