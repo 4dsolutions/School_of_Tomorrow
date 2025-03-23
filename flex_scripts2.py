@@ -5,17 +5,16 @@ Created on Thurs Feb 13 2025
 
 @author: mac
 
-Feb 19: import PHI as sympy object vs using math.sqrt and dumbing it down too early
+Feb 19: import PHI as sympy object vs using math.sqrt and dumbing it down too earlycd 
 """
-from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron
-from flextegrity import Tetrahedron, InvTetrahedron, RD, Icosahedron, Struts
-from flextegrity import twelve_around_one, draw_poly, draw_vert, half, ORIGIN, PHI
-from qrays import Qvector
-from itertools import cycle
+from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron, RT
+from flextegrity import Tetrahedron, InvTetrahedron, RD, PD, Icosahedron
+from flextegrity import Edge, draw_edge, draw_poly, draw_vert, half, ORIGIN, PHI
+from qrays import Qvector, Vector, A, B, C, D
 
-import os
 import numpy as np
-import math
+import sympy as sy
+from math import sqrt as rt2
 
 from itertools import permutations
 g = permutations((2,1,1,0))
@@ -24,7 +23,7 @@ UNIQUE = {p for p in g}  # set comprehension
 IVM_DIRS = {Qvector(x) for x in UNIQUE}
 
 Svol = (PHI **-5)/2  
-Evol = (math.sqrt(2)/8) * (PHI ** -3)
+Evol = (rt2(2)/8) * (PHI ** -3)
 
 sfactor = Svol/Evol
 
@@ -1154,5 +1153,21 @@ def test31():
         
         f.close()
 
+def test32():
+    f = open("testing32.pov", "w")
+    f.write(pov_header)
+
+    cu      = Cube()
+    cu.vert_radius = 0.01
+    cu.edge_radius = 0.01
+    
+    octa    = Octahedron() * (3/4) 
+    octa.vert_radius = 0.01
+    octa.edge_radius = 0.01
+
+    draw_poly(cu, f)
+    draw_poly(octa, f, f=True)
+    
+    
 if __name__ == "__main__":
-    test31()
+    test32()
