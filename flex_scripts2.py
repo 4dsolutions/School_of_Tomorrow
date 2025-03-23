@@ -1154,19 +1154,19 @@ def test31():
         f.close()
 
 def test32():
-    f = open("testing32.pov", "w")
-    f.write(pov_header)
-
-    cu      = Cube()
-    cu.vert_radius = 0.01
-    cu.edge_radius = 0.01
+    with open("testing32.pov", "w") as f:
+        f.write(pov_header)
     
-    octa    = Octahedron() * (3/4) 
-    octa.vert_radius = 0.01
-    octa.edge_radius = 0.01
-
-    draw_poly(cu, f)
-    draw_poly(octa, f, f=True)
+        cu      = Cube()
+        cu.vert_radius = 0.01
+        cu.edge_radius = 0.01
+        
+        octa    = Octahedron() * (3/4) 
+        octa.vert_radius = 0.01
+        octa.edge_radius = 0.01
+    
+        draw_poly(cu, f)
+        draw_poly(octa, f, f=True)
     
     
 if __name__ == "__main__":
