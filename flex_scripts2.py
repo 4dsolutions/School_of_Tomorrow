@@ -1168,6 +1168,28 @@ def test32():
         draw_poly(cu, f)
         draw_poly(octa, f, f=True)
     
+def test33():
+    with open("testing33.pov", "w") as f:
+        f.write(pov_header)
+    
+        rt      = RT()
+        rt.vert_radius = 0.01
+        rt.edge_radius = 0.01
+        red   = "rgb <1, 0, 0>"
+        
+        for face in rt.faces:
+            face_center = (  rt.vertexes[face[0]] 
+                           + rt.vertexes[face[1]] 
+                           + rt.vertexes[face[2]] 
+                           + rt.vertexes[face[3]]) / 4 
+            tentpole = face_center * 1.1 #just a little longer
+            for i in range(len(face)):
+                draw_edge(Edge(tentpole, rt.vertexes[face[i]]), 
+                          red, rt.edge_radius, f)
+        
+        draw_poly(rt, f) # the whole rt
+        
+
     
 if __name__ == "__main__":
-    test32()
+    test33()
