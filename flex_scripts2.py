@@ -1187,7 +1187,7 @@ def test33():
                 draw_edge(Edge(tentpole, rt.vertexes[face[i]]), 
                           red, rt.edge_radius, f)
         
-        draw_poly(rt, f) # the whole rt
+        draw_poly(rt, f, f=True) # the whole rt
         
 
     
