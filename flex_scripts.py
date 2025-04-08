@@ -4,7 +4,13 @@
 Created on Sun Mar  8 11:50:00 2020
 
 @author: mac
+
+These were the earliest animated GIF scripts, developed 
+in conjunction with:
+
+https://github.com/4dsolutions/School_of_Tomorrow/blob/master/Flextegrity_Lattice.ipynb
 """
+
 from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron
 from flextegrity import Tetrahedron, InvTetrahedron, RD, Icosahedron, Struts
 from flextegrity import twelve_around_one, draw_poly, draw_vert

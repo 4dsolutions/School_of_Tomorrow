@@ -5,8 +5,10 @@ Created on Thurs Feb 13 2025
 
 @author: mac
 
-Feb 19: import PHI as sympy object vs using math.sqrt and dumbing it down too earlycd 
+Apr  8: make this 2nd of 2 files, flex_scripts1.py being the first
+Feb 19: import PHI as sympy object vs using math.sqrt  
 """
+
 from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron, RT
 from flextegrity import Tetrahedron, InvTetrahedron, RD, PD, Icosahedron
 from flextegrity import Edge, draw_edge, draw_poly, draw_vert, half, ORIGIN, PHI
@@ -1182,14 +1184,94 @@ def test33():
                            + rt.vertexes[face[1]] 
                            + rt.vertexes[face[2]] 
                            + rt.vertexes[face[3]]) / 4 
-            tentpole = face_center * 1.1 #just a little longer
+            tentpole = face_center * 1.05 #just a little longer
             for i in range(len(face)):
                 draw_edge(Edge(tentpole, rt.vertexes[face[i]]), 
                           red, rt.edge_radius, f)
         
         draw_poly(rt, f, f=True) # the whole rt
         
+def test34():
+    """
+    verbose comments for practice...
+    """ 
+    # we're gonna use this as our output textfile
+    # which'll be something povray can eat and make
+    # a PNG out of.
+    with open("testing34.pov", "w") as f:
+        f.write(pov_header)        # boilerplate povray, lotsa lines
+    
+        cu3 = Cube()               # birth a cube in the Matryoshka context
+        cu3.vert_radius = 0.01     # override default vertex radius
+        cu3.edge_radius = 0.01     # override edge cylinder radius
+        
+        cu24 = Cube() * 2          # birth a cube but scale up all edges x2
+        cu24.vert_radius = 0.01    # ergo volume is boosted 8-fold from
+        cu24.edge_radius = 0.01    # 3 to 24 (cu3 vs cu24 refers to volume)
+        
+        octa = Octahedron()        # red by default, dual of cu3
+        octa.vert_radius = 0.01
+        octa.edge_radius = 0.01
+        
+        tet = Tetrahedron()        # orange by default, inverse tet is black
+        tet.vert_radius = 0.01     # appears as face diagonals of cu3
+        tet.edge_radius = 0.01
 
+        # here is where we actually commit the polys to the open textfile
+        draw_poly(cu3, f, f=False)
+        draw_poly(cu24, f, f=False)        
+        draw_poly(octa, f, f=False)
+        draw_poly(tet, f, f=True)  # the only one with filled-in faces     
+       
+    # output file is closed automatically here, as
+    # indentation block is finished
+        
+def test35():
+    with open("testing35.pov", "w") as f:
+        f.write(pov_header)
+    
+        draw_vert(ORIGIN, "T_Stone18", half, f, texture=True)
+        
+        cu3 = Cube()
+        cu3.vert_radius = 0.01
+        cu3.edge_radius = 0.01
+        
+        cu24 = Cube() * 2
+        cu24.vert_radius = 0.01
+        cu24.edge_radius = 0.01
+        
+        octa = Octahedron()  # red
+        octa.vert_radius = 0.01
+        octa.edge_radius = 0.01
+        
+        draw_poly(cu3, f, f=False)
+        draw_poly(cu24, f, f=False)        
+        draw_poly(octa, f, f=False)
+ 
+
+def test36():
+    with open("testing36.pov", "w") as f:
+        f.write(pov_header)
+    
+        draw_vert(ORIGIN, "T_Stone18", half, f, texture=True)
+        
+        cu3 = Cube()
+        cu3.vert_radius = 0.01
+        cu3.edge_radius = 0.01
+        
+        cu24 = Cube() * 2
+        cu24.vert_radius = 0.01
+        cu24.edge_radius = 0.01
+        
+        rd = RD()  # red
+        rd.vert_radius = 0.01
+        rd.edge_radius = 0.01
+        
+        draw_poly(cu3, f, f=False)
+        draw_poly(cu24, f, f=False)        
+        draw_poly(rd, f, f=False)  
     
 if __name__ == "__main__":
-    test33()
+    test34()
+    test35()
+    test36()
