@@ -10,7 +10,7 @@ Feb 19: import PHI as sympy object vs using math.sqrt
 """
 
 from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron, RT
-from flextegrity import Tetrahedron, InvTetrahedron, RD, PD, Icosahedron
+from flextegrity import Tetrahedron, InvTetrahedron, RD, PD, Icosahedron, Mite
 from flextegrity import Edge, draw_edge, draw_poly, draw_vert, half, ORIGIN, PHI
 from qrays import Qvector, Vector, A, B, C, D
 
@@ -1269,9 +1269,188 @@ def test36():
         
         draw_poly(cu3, f, f=False)
         draw_poly(cu24, f, f=False)        
-        draw_poly(rd, f, f=False)  
-    
+        draw_poly(rd, f, f=False)
+        
+def test37():
+    with open("testing37.pov", "w") as f:
+        f.write(pov_header)
+        
+        cu = Cube()
+        cu.vert_radius = 0.01
+        cu.edge_radius = 0.01
+        
+        orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+        
+        draw_edge(Edge(ORIGIN, A), r=0.01, c=orange, t=f)
+        draw_edge(Edge(ORIGIN, B), r=0.01, c=orange, t=f)
+        draw_edge(Edge(ORIGIN, C), r=0.01, c=orange, t=f)
+        draw_edge(Edge(ORIGIN, D), r=0.01, c=orange, t=f)
+        
+        draw_poly(cu, f)
+
+def test38():
+    with open("testing38.pov", "w") as f:
+        f.write(pov_header)       
+        cu = Cube()
+        cu.vert_radius = 0.01
+        cu.edge_radius = 0.01   
+        tet = Tetrahedron()
+        tet.vert_radius = 0.01
+        tet.edge_radius = 0.01 
+        rd = RD()
+        rd.vert_radius = 0.01
+        rd.edge_radius = 0.01 
+        ve = Cuboctahedron()
+        ve.vert_radius = 0.01
+        ve.edge_radius = 0.01  
+        oc = Octahedron()
+        oc.vert_radius = 0.01
+        oc.edge_radius = 0.01
+        orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+        cubes = []
+        spherics = []
+        
+        draw_vert(ORIGIN, "T_Stone18", half, f, texture=True)
+        for v in IVM_DIRS:
+            # draw_edge(Edge(ORIGIN, v), r=0.01, c=orange, t=f)           
+            cube = Cube() + v
+            cube.vert_radius = 0.01
+            cube.edge_radius = 0.01            
+            spheric = RD() + v
+            spheric.vert_radius = 0.01
+            spheric.edge_radius = 0.01
+            
+            cubes.append(cube)
+            spherics.append(spheric)
+            
+            # draw_vert(v, "T_Stone18", half/4, f, texture=True)
+        
+        draw_poly(cu, f)
+        #for cube in cubes:
+        #    draw_poly(cube, f) 
+        # draw_poly(tet, f, f=True, e=True)
+        draw_poly(ve, f)
+        draw_poly(oc, f) 
+        draw_poly(rd, f)
+        #for spheric in spherics:
+        #    draw_poly(spheric, f)
+
+def test39():
+    with open("testing39.pov", "w") as f:
+        f.write(pov_header)
+        cu = Cube()
+        cu.vert_radius = 0.01
+        cu.edge_radius = 0.01
+        cu2 = Cube() + (A+B)
+        cu2.vert_radius = 0.01
+        cu2.edge_radius = 0.01
+        orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+        rd = RD() + (A+B)
+        rd.vert_radius = 0.05
+        rd.edge_radius = 0.02  
+        rd.edge_color = "T_Silver_3A"
+        rd.vert_color = 'T_Copper_1A'
+        
+        m = Mite()
+        m.vert_radius = 0.01
+        m.edge_radius = 0.03
+        # m.face_color = "T_Stone18"
+        m.edge_color = orange
+        # m.vert_color = 'T_Copper_1A'
+
+        draw_poly(cu, f)
+        draw_poly(cu2, f)
+        draw_poly(m, f)
+        draw_poly(rd, f, texture=True)
+        
+def test40():
+    with open("testing40.pov", "w") as f:
+        f.write(pov_header)
+        cu = Cube()
+        cu.vert_radius = 0.01
+        cu.edge_radius = 0.01
+        cu2 = Cube() * 2
+        cu2.vert_radius = 0.01
+        cu2.edge_radius = 0.01
+        rd = RD()
+        rd.vert_radius = 0.01
+        rd.edge_radius = 0.01  
+        
+        rds = []
+        for k, v in cu2.vertexes.items():
+            newrd = RD() + v
+            newrd.vert_radius = 0.01
+            newrd.edge_radius = 0.01            
+            rds.append(newrd)
+            
+        draw_poly(cu, f)
+        draw_poly(cu2, f)
+        draw_poly(rd, f)        
+        #for rd in rds:
+        #    draw_poly(rd, f) 
+        draw_poly(rds[0], f)           
+
+def test41():
+    with open("testing41.pov", "w") as f:
+        f.write(pov_header)
+        cu = Cube()
+        cu.vert_radius = 0.01
+        cu.edge_radius = 0.01
+        cu2 = Cube() * 2
+        cu2.vert_radius = 0.01
+        cu2.edge_radius = 0.01
+        oc = Octahedron() 
+        oc.vert_radius = 0.01
+        oc.edge_radius = 0.01
+        
+        orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+        brown  = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
+        yellow = "rgb <1, 1, 0>"   
+        red    = "rgb <1, 0, 0>"
+        green  = "rgb <0, 1, 0>"
+        blue   = "rgb <0, 0, 1>"
+        
+        # +X +Y +Z
+        X = Edge(ORIGIN, Vector((1,0,0)))
+        Y = Edge(ORIGIN, Vector((0,1,0)))
+        Z = Edge(ORIGIN, Vector((0,0,1)))
+
+        draw_edge(X, orange, 0.01, f)
+        draw_edge(Y, orange, 0.01, f)
+        draw_edge(Z, orange, 0.01, f)  
+        
+        draw_vert(Vector((1,0,0)), red,   0.03, f)
+        draw_vert(Vector((0,1,0)), green, 0.03, f)
+        draw_vert(Vector((0,0,1)), blue,  0.03, f)
+        
+        # -X -Y -Z
+        X = Edge(ORIGIN, Vector((-1,0,0)))
+        Y = Edge(ORIGIN, Vector((0,-1,0)))
+        Z = Edge(ORIGIN, Vector((0,0,-1)))
+
+        draw_edge(X, yellow, 0.01, f)
+        draw_edge(Y, yellow, 0.01, f)
+        draw_edge(Z, yellow, 0.01, f)
+        
+        # four quadrays
+        a = Edge(ORIGIN, Qvector((1,0,0,0)))
+        b = Edge(ORIGIN, Qvector((0,1,0,0)))
+        c = Edge(ORIGIN, Qvector((0,0,1,0)))
+        d = Edge(ORIGIN, Qvector((0,0,0,1)))
+
+        draw_vert(Qvector((1,0,0,0)), red,     0.03, f)
+        draw_vert(Qvector((0,1,0,0)), green,   0.03, f)
+        draw_vert(Qvector((0,0,1,0)), blue,    0.03, f)
+        draw_vert(Qvector((0,0,0,1)), yellow,  0.03, f)
+        
+        draw_edge(a, brown, 0.02, f)
+        draw_edge(b, brown, 0.02, f)
+        draw_edge(c, brown, 0.02, f)
+        draw_edge(d, brown, 0.02, f)
+
+        draw_poly(cu, f)
+        draw_poly(cu2, f)
+        # draw_poly(oc, f)
+             
 if __name__ == "__main__":
-    test34()
-    test35()
-    test36()
+    test41()
