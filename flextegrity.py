@@ -29,6 +29,7 @@ the edges (vector pairs, connecting endpoints).
 
 self.edges = self._distill()
 
+Apr  29, 2025:  prettify, shorten E,F,G,H to -A,-B,-C,-D
 Apr   8, 2025:  refactor to split off remaining testnn() functions
 Jan  22, 2025:  rethink deriving icosa from cubocta vectors
 Jan  21, 2025:  adding new "scapes" (poly vistas)
@@ -59,7 +60,7 @@ C = Qvector((zero, zero, one, zero))
 D = Qvector((zero, zero, zero ,one))
 
 # from Wikipedia (Quadray Coordinates)
-E,F,G,H     = B+C+D, A+C+D, A+B+D, A+B+C
+E,F,G,H     = -A, -B, -C, -D
 I,J,K,L,M,N = A+B, A+C, A+D, B+C, B+D, C+D
 O,P,Q,R,S,T = I+J, I+K, I+L, I+M, N+J, N+K
 U,V,W,X,Y,Z = N+L, N+M, J+L, L+M, M+K, K+J
@@ -735,6 +736,7 @@ class Cuboctahedron (Polyhedron):
                              x =  X,
                              y =  Y,
                              z =  Z)
+        
         self.name = "Cuboctahedron"
         self.nick = "CO"
         self.volume = sy.Integer(20)
@@ -750,6 +752,39 @@ class Cuboctahedron (Polyhedron):
                       ('w','q','o'),('o','z','p'))
 
         self.edges = self._distill()
+
+class Mite(Polyhedron):
+    """
+    MITE = minimum tetrahedron
+    """
+
+    def __init__(self):
+        # POV-Ray
+        self.edge_color = "rgb <1, 0, 0>"
+        self.edge_radius= 0.03
+        self.vert_color = "rgb <1, 0, 0>"
+        self.vert_radius= 0.03
+        self.face_color = "rgb <1, 0, 0>"
+        
+        AB = (A+B) * half
+        # AC,AD,BC,BD,CD =  (A+C)/2, (A+D)/2, (B+C)/2, (B+D)/2, (C+D)/2
+
+        self.name = "Mite"
+        self.nick = "MITE"
+        self.volume = sy.Rational(1,8)  
+        self.center = ORIGIN
+        
+        # 4 vertices
+        self.vertexes = dict(origin=ORIGIN, ab= AB, a= A, h= H)
+
+        # 4 faces
+        self.faces = (('origin', 'ab', 'a'),
+                      ('origin', 'ab', 'h'),
+                      ('origin', 'a', 'h'),
+                      ('ab', 'a', 'h'))
+
+        self.edges = self._distill()
+        
         
 class Struts(Polyhedron):
     
@@ -881,8 +916,9 @@ global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <2.5, 0.1, 0.2>
-  rotate    <35, 35, 10.0>
+  location  <4.5, 0.1, 0.2>
+//  rotate    <35, 35, 10.0>
+  rotate    <35, 55, 20.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
 }

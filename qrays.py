@@ -362,7 +362,10 @@ class Qvector:
     def norm(self, arg):
         """Normalize such that 4-tuple all non-negative members."""
         minarg = min(arg)
-        return IVM(arg[0] - minarg, arg[1] - minarg, arg[2] - minarg, arg[3] - minarg)
+        return IVM(arg[0] - minarg, 
+                   arg[1] - minarg, 
+                   arg[2] - minarg, 
+                   arg[3] - minarg)
     
     def norm0(self):
         """Normalize such that sum of 4-tuple members = 0"""
