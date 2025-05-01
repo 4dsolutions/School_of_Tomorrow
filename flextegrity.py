@@ -157,6 +157,9 @@ class Edge:
              
     def __repr__(self):
         return 'Edge from %s to %s' % (self.v0, self.v1)
+    
+    def length(self):
+        return (self.v0 - self.v1).length()
 
 #=== DRAW ROUTINES ===
 

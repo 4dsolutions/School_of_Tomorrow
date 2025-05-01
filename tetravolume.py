@@ -82,7 +82,7 @@ https://www.omnicalculator.com/math/triangle-angle
 
 from sympy import Rational, Integer, Matrix, acos, cos, sin, deg, N, Eq
 from sympy import sqrt as rt2
-from qrays import Qvector, Vector, RAD, DIAM, zero, half, one, two
+from qrays import Qvector, Vector, RAD, DIAM, one, two
 import sys
 
 # ============[ GLOBAL CONSTANTS ]=================== 
@@ -98,6 +98,7 @@ PHI = (1 + root5)/2
 Svol = (PHI **-5)/2  
 Evol = (root2/8) * (PHI ** -3)
 Avol = Bvol = Tvol = Rational(1,24)
+Kvol = Tvol * Rational(3,2)
 
 sfactor = Svol/Evol
 
@@ -614,6 +615,43 @@ class E(Tetrahedron):
         else:
             return figdata
 
+class K(Tetrahedron):
+    
+    def __init__(self):
+        E2K = (Rational(1,16) / E().ivm_volume()).simplify()
+        h = E2K ** Rational(1,3)
+        a  = DIAM/2
+        e0 = a
+        e1 = a * root3 * PHI**-1
+        e2 = a * rt2((5 - root5)/2)
+        e3 = a * (3 - root5)/2
+        e4 = a * rt2(5 - 2*root5)
+        e5 = a * 1/PHI
+        
+        e0 *= h
+        e1 *= h
+        e2 *= h
+        e3 *= h
+        e4 *= h
+        e5 *= h
+ 
+        super().__init__(e0, e1, e2, e3, e4, e5)        
+
+    def fig986_411(self, value = False, prec = 15):
+        E2T = (Rational(1,24) / E().ivm_volume()).simplify()
+        h = RAD * (E2T ** Rational(1,3))       
+        figdata = {
+            "CA" : (h/2) * (3 - root5),
+            "CB" : (h/2) * (root5 - 1),
+            "CO" : h,
+            "AB" : h * rt2(5 - 2 * root5),
+            "AO" : h * rt2((5 - root5)/2),
+            "BO" : h * rt2((9 - 3 * root5)/2),}
+        if value:
+            return { edge: N(expr, prec) for (edge, expr) in figdata.items() }
+        else:
+            return figdata
+        
 # ============[ TRIANGLE CLASS ]===================
 
 class Triangle:

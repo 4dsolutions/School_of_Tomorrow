@@ -1451,6 +1451,68 @@ def test41():
         draw_poly(cu, f)
         draw_poly(cu2, f)
         # draw_poly(oc, f)
+
+def test42():
+    from random import choice
+    from tetravolume import Tetrahedron
+    
+    with open("testing42.pov", "w") as T:
+        T.write(pov_header)
+        twelve_directions = list(IVM_DIRS)
+        
+        # orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+        brown  = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
+        yellow = "rgb <1, 1, 0>"   
+        red    = "rgb <1, 0, 0>"
+        green  = "rgb <0, 1, 0>"
+        blue   = "rgb <0, 0, 1>"
+        
+        # define the four turtles at their common origin
+        turtles = [RD(), RD(), RD(), RD()]
+        turtles[0].edge_color = red
+        turtles[1].edge_color = green
+        turtles[2].edge_color = blue
+        turtles[3].edge_color = yellow
+        
+        # draw the turtles in their initial position
+        for t in turtles:
+            draw_poly(t, T)
+        
+        # wander off, choosing randomly from 12 directions
+        for _ in range(500):
+            for idx in range(len(turtles)):
+                t = turtles[idx]
+                keep_color = t.edge_color
+                turtles[idx] = t + choice(twelve_directions)
+                turtles[idx].edge_color = keep_color
+                draw_poly(turtles[idx], T)
              
+        # connect the final positions of the four turtles into a tet
+        a = Edge(turtles[0].center, turtles[1].center)
+        b = Edge(turtles[0].center, turtles[2].center)
+        c = Edge(turtles[0].center, turtles[3].center)
+        d = Edge(turtles[1].center, turtles[2].center)
+        e = Edge(turtles[2].center, turtles[3].center)
+        f = Edge(turtles[3].center, turtles[1].center)
+        
+        # draw the tet
+        draw_edge(a, brown, 0.05, T)
+        draw_edge(b, brown, 0.05, T)
+        draw_edge(c, brown, 0.05, T)
+        draw_edge(d, brown, 0.05, T)
+        draw_edge(e, brown, 0.05, T)
+        draw_edge(f, brown, 0.05, T)
+        
+        # compute the volume of the tet
+        tet = Tetrahedron(a.length(), 
+                          b.length(), 
+                          c.length(), 
+                          d.length(), 
+                          e.length(), 
+                          f.length())
+        
+        # report the volume
+        print("Tet volume:", tet.ivm_volume())             
+        
 if __name__ == "__main__":
-    test41()
+    test42()
