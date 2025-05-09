@@ -11,7 +11,8 @@ May 7: initialized to make renderings relevant to the QuadCraft Project
 from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron, RT
 from flextegrity import Tetrahedron, InvTetrahedron, RD, PD, Icosahedron, Mite
 from flextegrity import Edge, draw_edge, draw_poly, draw_vert, half, ORIGIN, PHI
-from qrays import Qvector, Vector, A, B, C, D
+from qrays import Qvector, Vector
+from flextegrity import A, B, C, D, E, F, G, H
 
 import numpy as np
 import sympy as sy
@@ -81,13 +82,15 @@ def test2():
     t.edge_radius = 0.02
     t.edge_color  = black
     t.vert_color  = black
-        
+    
+    # one permutation per frame    
     for idx, v in enumerate(UNIQUE):
         Aspoke = A * v[0]
         Bspoke = B * v[1]
         Cspoke = C * v[2]
         Dspoke = D * v[3]
         
+        # for each frame of the animated GIF...
         with open(f"thrust{idx}.pov", "w") as T:
             T.write(pov_header)
 
@@ -115,8 +118,48 @@ camera {
             draw_poly(t, T)          
             draw_poly(cu, T)
         
-        # break # just testing first iteration
+def test3():
+    """
+    cubes world
+    """
+
+    orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    black = "rgb <{}, {}, {}>".format(0, 0, 0)   
+    
+    with open("qc8.pov", "w") as T:
+        T.write(pov_header)
+
+        # draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+
+        def spokes(offset):
+            draw_edge(Edge(ORIGIN + offset, E + offset), black, 0.02, T)
+            draw_edge(Edge(ORIGIN + offset, F + offset), black, 0.02, T)
+            draw_edge(Edge(ORIGIN + offset, G + offset), black, 0.02, T)
+            draw_edge(Edge(ORIGIN + offset, H + offset), black, 0.02, T)         
+                    
+        for offset in [ORIGIN, E+F, E+G, E+H, F+G, G+H, H+F]:
+            
+            cu = Cube() + offset
+            cu.edge_radius = 0.02
+            draw_poly(cu, T)
+            spokes(offset)
+
+        for offset in IVM_DIRS:
+            
+            cu = Cube() + offset
+            cu.edge_radius = 0.02
+            draw_poly(cu, T)
+            spokes(offset)
+            # draw_vert(ORIGIN + offset, "T_Stone18", half, T, texture=True)
+            
+        rd = RD()
+        rd.edge_radius = 0.02
+        # draw_poly(rd, T)
         
+        oc = Octahedron()
+        oc.edge_radius = 0.02
+        # draw_poly(oc, T)
+
 if __name__ == "__main__":
-    test2()
+    test3()
     
