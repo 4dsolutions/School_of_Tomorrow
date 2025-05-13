@@ -12,7 +12,7 @@ from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron, RT
 from flextegrity import Tetrahedron, InvTetrahedron, RD, PD, Icosahedron, Mite
 from flextegrity import Edge, draw_edge, draw_poly, draw_vert, half, ORIGIN, PHI
 from qrays import Qvector, Vector
-from flextegrity import A, B, C, D, E, F, G, H
+from flextegrity import A, B, C, D, E, F, G, H, I, J, K, L, M, N
 
 import numpy as np
 import sympy as sy
@@ -160,6 +160,104 @@ def test3():
         oc.edge_radius = 0.02
         # draw_poly(oc, T)
 
+def test4():
+    """
+    Animated GIF: tet, balls, invtet, balls, both tets, cube, octa, RD
+    """
+    
+    tet = Tetrahedron()
+    tet.edge_radius = 0.02
+    
+    invtet = InvTetrahedron()
+    invtet.edge_radius = 0.02
+    
+    cu = Cube()
+    cu.edge_radius = 0.02
+    
+    octa = Octahedron()
+    octa.edge_radius = 0.02
+    
+    rd = RD()    
+    rd.edge_radius = 0.02
+    
+    with open("qctest4_1.pov", "w") as T:
+        T.write(pov_header)    
+        draw_poly(tet, T)
+
+    with open("qctest4_2.pov", "w") as T:
+        T.write(pov_header)
+        for qv in A,B,C,D:
+            draw_vert(ORIGIN + qv, "T_Stone18", half, T, texture=True)
+        
+    with open("qctest4_3.pov", "w") as T:
+        T.write(pov_header)
+        draw_poly(tet, T)
+        draw_poly(invtet, T)
+        
+    with open("qctest4_4.pov", "w") as T:
+        T.write(pov_header)
+        for qv in E,F,G,H:
+            draw_vert(ORIGIN + qv, "T_Stone18", half, T, texture=True)
+            
+    with open("qctest4_5.pov", "w") as T:
+        T.write(pov_header)
+        draw_poly(tet, T)
+        draw_poly(invtet, T)
+        draw_poly(cu, T)
+        
+    with open("qctest4_6.pov", "w") as T:
+        T.write(pov_header)
+        T.write(pov_header)
+        draw_poly(cu, T)
+        
+    with open("qctest4_7.pov", "w") as T:
+        T.write(pov_header)
+        draw_poly(cu, T)
+        draw_poly(octa, T)  
+
+    with open("qctest4_8.pov", "w") as T:
+        T.write(pov_header)
+        draw_poly(cu, T)
+        draw_poly(octa, T)
+        for qv in I, J, K, L, M, N:
+            draw_vert(ORIGIN + qv, "T_Stone18", half, T, texture=True)
+
+    with open("qctest4_9.pov", "w") as T:
+        T.write(pov_header)
+        draw_poly(cu, T)
+        draw_poly(octa, T)
+        for qv in I, J, K, L, M, N:
+            draw_vert(ORIGIN + qv, "T_Stone18", half, T, texture=True)
+            newrd = rd + qv
+            newrd.edge_radius = 0.02
+            draw_poly(newrd, T)
+            
+    with open("qctest4_10.pov", "w") as T:
+        T.write(pov_header)
+        draw_poly(cu, T)
+        draw_poly(octa, T)  
+        draw_poly(rd, T)
+
+    with open("qctest4_11.pov", "w") as T:
+        T.write(pov_header)  
+        draw_poly(rd, T)
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)        
+
+def test5():
+    """
+    Lakota Tetrapod
+    """
+    
+    red    = "rgb <1, 0, 0>"
+    white  = "rgb <1, 1, 1>"
+    yellow = "rgb <1, 1, 0>"
+    black  = "rgb <0, 0, 0>"
+    
+    with open("lakota_tetra.pov", "w") as T:  
+        T.write(pov_header)
+        for qv, c in zip([A,B,C,D],[red, white, yellow, black]):
+            draw_vert(ORIGIN + qv, c, half, T)        
+    
 if __name__ == "__main__":
-    test3()
+    test5()
     
