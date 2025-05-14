@@ -257,7 +257,71 @@ def test5():
         T.write(pov_header)
         for qv, c in zip([A,B,C,D],[red, white, yellow, black]):
             draw_vert(ORIGIN + qv, c, half, T)        
+
+def test6():
+    """
+    Layered CCP packing
+    """
     
+    nucleus = tuple([Qvector((0,0,0,0))])
+    
+    cubocta = tuple(IVM_DIRS)
+    
+    with open("ccp0.pov", "w") as T:  
+        T.write(pov_header)
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+
+    def next_layer(curr_layer, prev_layer):
+        """
+        generates a next layer of FCC spheres by trying 12-around-1 
+        for each in the current layer (curr_layer) but without keeping
+        any duplicates i.e. discarding redundant sphere centers.
+        """
+        next_layer = set()
+        for qv in curr_layer:
+            for bv in cubocta:
+                v_sum = qv + bv
+                if (not v_sum in curr_layer 
+                    and not v_sum in prev_layer):
+                    next_layer.add(v_sum)
+        return sorted(list(next_layer))
+    
+    def frame(balls):
+        for ball in balls:
+            draw_vert(ball, "T_Stone18", half, T, texture=True)               
+
+    with open("ccp1.pov", "w") as T:  
+        T.write(pov_header)            
+        nl   = next_layer(nucleus, nucleus) # 1-freq
+        frame(nl)
+
+    with open("ccp2.pov", "w") as T:  
+        T.write(pov_header)    
+        nnl  = next_layer(nl, nucleus)      # 2-freq
+        frame(nl)
+        frame(nnl)
+
+    with open("ccp3.pov", "w") as T:  
+        T.write(pov_header)    
+        nnnl = next_layer(nnl, nl)          # 3-freq
+        frame(nl)
+        frame(nnl)
+        frame(nnnl)
+
+    with open("ccp4.pov", "w") as T:  
+        T.write(pov_header)    
+        nnnnl= next_layer(nnnl, nnl)        # 4-freq
+        frame(nl)
+        frame(nnl)
+        frame(nnnl)
+        frame(nnnnl)  
+    
+    print("Number of balls in successive layers:")
+    print(len(nl))     # 12 around 1
+    print(len(nnl))    # should be 42 unique balls
+    print(len(nnnl))   # expecting 92 unique balls
+    print(len(nnnnl))  # the next next next next layer
+            
 if __name__ == "__main__":
-    test5()
+    test6()
     
