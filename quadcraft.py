@@ -266,10 +266,13 @@ def test6():
     nucleus = tuple([Qvector((0,0,0,0))])
     
     cubocta = tuple(IVM_DIRS)
+    rd = RD()
+    rd.edge_radius = 0.02
     
     with open("ccp0.pov", "w") as T:  
         T.write(pov_header)
         draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+        draw_poly(rd, T)
 
     def next_layer(curr_layer, prev_layer):
         """
@@ -288,7 +291,8 @@ def test6():
     
     def frame(balls):
         for ball in balls:
-            draw_vert(ball, "T_Stone18", half, T, texture=True)               
+            draw_vert(ball, "T_Stone18", half, T, texture=True) 
+            draw_poly(rd + ball, T)              
 
     with open("ccp1.pov", "w") as T:  
         T.write(pov_header)            
