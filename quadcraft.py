@@ -34,33 +34,38 @@ def test1():
     """
     sandbox for testing text output
     """
+    print("Opening file...")
     
-    with open("qc1.pov", "w") as T:
+    with open("qc1.pov", "w") as T: # __enter__ with-block
         T.write(pov_header)
 
-        T.write("""
-                // perspective (default) camera
-                camera {
-                  location  <7.5, 0.1, 0.2>
-                  rotate    <0, 90, 0>
-                  look_at   <0.0, 0.0,  0.0>
-                  right     x*image_width/image_height
-                }
-                """)
+        T.write(
+"""
+// perspective (default) camera
+camera {
+  location  <7.5, 0.1, 0.2>
+  rotate    <0, 90, 0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
+""") # keeping output flush left with .pov target file T
                 
         # test text writing
-        T.write("""
-            text {
-            ttf "timrom.ttf" "Welcome to QuadCraft" .25, 0 
-            pigment { Blue }
-            translate -4.7*x
-            translate -2*y
-            }
-            """)
+        T.write(
+"""
+text {
+ttf "timrom.ttf" "Welcome to QuadCraft" .25, 0 
+pigment { Blue }
+translate -4.7*x
+translate -2*y
+}
+""")
                         
         cu = Cuboctahedron()
         
         draw_poly(cu, T)
+        
+    print("File closed end of with-block")
 
 def test2():
     """
@@ -611,5 +616,5 @@ def test9():
             draw_vert(ball, texture, half, T, texture=True)
             
 if __name__ == "__main__":
-    test9()
+    test1()
     
