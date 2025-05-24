@@ -33,8 +33,14 @@ sfactor = Svol/Evol
 def test1():
     """
     sandbox for testing text output
+    
+    The target file written by this function:
+        
+    https://github.com/4dsolutions/School_of_Tomorrow/blob/master/qc1.pov
+    
     """
-    print("Opening file...")
+    
+    print("Opening file...") # console output
     
     with open("qc1.pov", "w") as T: # __enter__ with-block
         T.write(pov_header)
