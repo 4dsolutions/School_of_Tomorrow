@@ -38,6 +38,15 @@ def test1():
         
     https://github.com/4dsolutions/School_of_Tomorrow/blob/master/qc1.pov
     
+    which text file POV-Ray (povray.org) renders thusly, as a graphic:
+        
+    https://github.com/4dsolutions/School_of_Tomorrow/blob/master/qc1.png
+    
+    This function does not perform the rendering step, whereas 
+    the Python language does provide tools for starting other 
+    processes. In this workflow, the user has POV-Ray already 
+    installed and therefore able to render the .pov file into
+    a .png or maybe .jpg file.
     """
     
     print("Opening file...") # console output
