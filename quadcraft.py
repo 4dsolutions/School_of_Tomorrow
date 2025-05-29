@@ -535,9 +535,14 @@ def test9():
     Red    = A
     Yellow = D
   
-    paths = [2 * Red + Green + Yellow,
-             2 * Green + Red + Yellow,
-             2 * Yellow + Red + Green]
+    paths = [2 * Green + Red + Yellow,
+             2 * Yellow + Red + Green,
+             2 * Red + Green + Yellow]
+
+    BALLNUMBER  = 1
+    balldict    = {}
+    rad = half
+    rad = 0.12
     
     texture = "T_Wood20"
     # texture = "T_Stone18"
@@ -548,7 +553,7 @@ def test9():
 
     // perspective (default) camera
     camera {
-      location  <0.1, 0.2, 12.5>
+      location  <0.1, 0.2, 8.5>
       rotate    <20, 30, 180>
       //rotate    <35, 55, 20.0>
       look_at   <0.0, 0.0,  0.0>
@@ -569,19 +574,26 @@ def test9():
         draw_vert(Yellow, c=yellow,r=0.1, t=T)  # base
         
     def next_layer(layer):
-        nextlayer = set()
+        nonlocal BALLNUMBER
+        nextlayer = list()
         for ball in layer:
             for path in paths:
-                nextlayer.add(ball + path)
-        return list(nextlayer)
+                candidate = ball + path
+                # print(candidate)
+                if candidate not in nextlayer:
+                    BALLNUMBER += 1
+                    nextlayer.append(candidate)
+                    balldict[BALLNUMBER] = candidate
+        return nextlayer
 
+    balldict[1] = Blue
     l0 = [Blue]
     l1 = next_layer(l0)
     l2 = next_layer(l1)
     l3 = next_layer(l2)
     l4 = next_layer(l3)
     l5 = next_layer(l4)
- 
+
     with open("tetrapack_0.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
@@ -593,43 +605,150 @@ def test9():
         q_spokes()
         
         for ball in l0:
-            draw_vert(ball, texture, half, T, texture=True)
+            draw_vert(ball, texture, rad, T, texture=True)
 
     with open("tetrapack_2.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
         
         for ball in l0 + l1:
-            draw_vert(ball, texture, half, T, texture=True)        
+            draw_vert(ball, texture, rad, T, texture=True)        
 
     with open("tetrapack_3.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
         
         for ball in l0 + l1 + l2:
-            draw_vert(ball, texture, half, T, texture=True)
+            draw_vert(ball, texture, rad, T, texture=True)
     
     with open("tetrapack_4.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
         
         for ball in l0 + l1 + l2 + l3:
-            draw_vert(ball, texture, half, T, texture=True)
+            draw_vert(ball, texture, rad, T, texture=True)
 
     with open("tetrapack_5.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
+        q_spokes()
         
         for ball in l0 + l1 + l2 + l3 + l4:
-            draw_vert(ball, texture, half, T, texture=True)
+            draw_vert(ball, texture, rad, T, texture=True)
+
+        ball15 = balldict[15]
+        draw_vert(ball15, texture, half, T, texture=True)
+        draw_edge(Edge(ball15, ball15 + 4*Red), red, 0.03, T)
+        draw_edge(Edge(ball15, ball15 + 4*Green), green, 0.03, T)
+        draw_edge(Edge(ball15, ball15 + 4*Blue), blue, 0.03, T)
+        draw_edge(Edge(ball15, ball15 + 4*Yellow), yellow, 0.03, T)
+
+        draw_edge(Edge(ball15, ball15 - (4/3)*Red), red, 0.03, T)
+        draw_edge(Edge(ball15, ball15 - (4/3)*Green), green, 0.03, T)
+        draw_edge(Edge(ball15, ball15 - (4/3)*Blue), blue, 0.03, T)
+        draw_edge(Edge(ball15, ball15 - (4/3)*Yellow), yellow, 0.03, T)
             
+        draw_poly((4 * Tetrahedron()) + (-3*C), T)
+        
     with open("tetrapack_6.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
         
         for ball in l0 + l1 + l2 + l3 + l4 + l5:
-            draw_vert(ball, texture, half, T, texture=True)
+            draw_vert(ball, texture, rad, T, texture=True)
+
+
+    
+    return balldict
+
+def test10():
+    """
+    TetraPacking
+    """
+    cblue   = "rgb <0, 0, 1>"
+    cred    = "rgb <1, 0, 0>"
+    cgreen  = "rgb <0, 1, 0>"
+    cyellow = "rgb <1, 1, 0>"
+    cblack = "rgb <0, 0, 0>"
+    corange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    
+    Blue   = C
+    Green  = B
+    Red    = A
+    Yellow = D
+    
+    blue   = -Blue
+    green  = -Green
+    red    = -Red
+    yellow = -Yellow
+ 
+    # texture = "T_Wood20"
+    # texture = "T_Stone18"
+    # texture = "T_Silver_4D"
+    # texture = "T_Brass_5A"
+    
+    camera = """
+
+    // perspective (default) camera
+    camera {
+      location  <0.1, 0.2, 2.5>
+      rotate    <20, 30, 180>
+      //rotate    <35, 55, 20.0>
+      look_at   <0.0, 0.0,  0.0>
+      right     x*image_width/image_height
+    }
+
+    """  
+    cu = Cube()
+    cu.edge_radius = 0.01
+    cu.edge_color = "rgb <{}, {}, {}>".format(67/255, 70/255, 75/255)
+    
+    tet = Tetrahedron()
+    tet.edge_radius = 0.01
+    tet.edge_color  = corange
+    
+    invtet = InvTetrahedron()
+    invtet.edge_radius = 0.01
+    invtet.edge_color = cblack
+    
+    def q_spokes():
+        draw_edge(Edge(ORIGIN, Blue),   c=cblue,   r=0.03, t=T) # home base
+        draw_edge(Edge(ORIGIN, Green),  c=cgreen,  r=0.03, t=T) # tip apex
+        draw_edge(Edge(ORIGIN, Red),    c=cred,    r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, Yellow), c=cyellow, r=0.03, t=T) # base
+
+        draw_edge(Edge(ORIGIN, blue),   c=cblue,   r=0.03, t=T) # home base
+        draw_edge(Edge(ORIGIN, green),  c=cgreen,  r=0.03, t=T) # tip apex
+        draw_edge(Edge(ORIGIN, red),    c=cred,    r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, yellow), c=cyellow, r=0.03, t=T) # base     
+            
+        draw_vert(Blue,   c=cblue,  r=0.12, t=T)  # home base
+        draw_vert(Green,  c=cgreen, r=0.12, t=T)  # tip apex
+        draw_vert(Red,    c=cred,   r=0.12, t=T)  # base
+        draw_vert(Yellow, c=cyellow,r=0.12, t=T)  # base
+        
+        draw_vert(blue,   c=cblue,  r=0.06, t=T)  # home base
+        draw_vert(green,  c=cgreen, r=0.06, t=T)  # tip apex
+        draw_vert(red,    c=cred,   r=0.06, t=T)  # base
+        draw_vert(yellow, c=cyellow,r=0.06, t=T)  # base
+        
+    with open("test10_1.pov", "w") as T: 
+        T.write(pov_header)
+        # T.write(camera) 
+        q_spokes()
+        draw_poly(cu, T)
+        draw_poly(tet, T)
+        draw_vert(ORIGIN, c=corange, r=0.12, t=T)
+        
+    with open("test10_2.pov", "w") as T: 
+        T.write(pov_header)
+        T.write(camera) 
+        q_spokes()
+        draw_poly(cu, T)
+        draw_poly(invtet, T)
+        draw_vert(ORIGIN, c=cblack, r=0.12, t=T)
+        
             
 if __name__ == "__main__":
-    test1()
+    bd = test9()
     
