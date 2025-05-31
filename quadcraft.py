@@ -434,18 +434,17 @@ def test8():
     Red    = A
     Yellow = D
   
-    camera = """
+    camera = """\
+// perspective (default) camera
+camera {
+  location  <0.1, 0.2, 2.5>
+  rotate    <20, 30, 180>
+  //rotate    <35, 55, 20.0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
 
-    // perspective (default) camera
-    camera {
-      location  <0.1, 0.2, 2.5>
-      rotate    <20, 30, 180>
-      //rotate    <35, 55, 20.0>
-      look_at   <0.0, 0.0,  0.0>
-      right     x*image_width/image_height
-    }
-
-    """
+"""
 
     def q_spokes():
         draw_edge(Edge(ORIGIN, Blue),   c=blue,   r=0.03, t=T) # home base
@@ -544,29 +543,28 @@ def test9():
     rad = half
     rad = 0.12
     
-    texture = "T_Wood20"
+    # texture = "T_Wood20"
     # texture = "T_Stone18"
     # texture = "T_Silver_4D"
     # texture = "T_Brass_5A"
     
-    camera = """
-
-    // perspective (default) camera
-    camera {
-      location  <0.1, 0.2, 8.5>
-      rotate    <20, 30, 180>
-      //rotate    <35, 55, 20.0>
-      look_at   <0.0, 0.0,  0.0>
-      right     x*image_width/image_height
-    }
-
-    """  
+    camera = \
+"""
+// perspective (default) camera
+camera {
+  location  <0.1, 0.2, 9.5>
+  rotate    <20, 30, 180>
+  //rotate    <35, 55, 20.0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
+"""
 
     def q_spokes():
-        draw_edge(Edge(ORIGIN, Blue),   c=blue,   r=0.03, t=T) # home base
-        draw_edge(Edge(ORIGIN, Green),  c=green,  r=0.03, t=T) # tip apex
-        draw_edge(Edge(ORIGIN, Red),    c=red,    r=0.03, t=T) # base
-        draw_edge(Edge(ORIGIN, Yellow), c=yellow, r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, Blue),   c=blue,   r=0.05, t=T) # home base
+        draw_edge(Edge(ORIGIN, Green),  c=green,  r=0.05, t=T) # tip apex
+        draw_edge(Edge(ORIGIN, Red),    c=red,    r=0.05, t=T) # base
+        draw_edge(Edge(ORIGIN, Yellow), c=yellow, r=0.05, t=T) # base
        
         draw_vert(Blue,   c=blue,  r=0.1, t=T)  # home base
         draw_vert(Green,  c=green, r=0.1, t=T)  # tip apex
@@ -585,7 +583,7 @@ def test9():
                     nextlayer.append(candidate)
                     balldict[BALLNUMBER] = candidate
         return nextlayer
-
+        
     balldict[1] = Blue
     l0 = [Blue]
     l1 = next_layer(l0)
@@ -593,50 +591,74 @@ def test9():
     l3 = next_layer(l2)
     l4 = next_layer(l3)
     l5 = next_layer(l4)
-
-    with open("tetrapack_0.pov", "w") as T:  
+    
+    def get_texture(b):
+        if b in l0:
+            return "T_Stone18"
+        if b in l1:
+            return "T_Silver_4D"
+        if b in l2:
+            return "T_Brass_5A"
+        if b in l3:
+            return "T_Wood20"
+        if b in l4:
+            return "T_Stone18"
+        if b in l5:
+            return "T_Silver_4D"
+        
+    with open("pack_0.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
         q_spokes()
         
-    with open("tetrapack_1.pov", "w") as T:  
+    with open("pack_1.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera)       
         q_spokes()
-        
+
         for ball in l0:
+            texture = get_texture(ball)
             draw_vert(ball, texture, rad, T, texture=True)
 
-    with open("tetrapack_2.pov", "w") as T:  
+    with open("pack_2.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
+        q_spokes()
         
         for ball in l0 + l1:
+            texture = get_texture(ball)
             draw_vert(ball, texture, rad, T, texture=True)        
 
-    with open("tetrapack_3.pov", "w") as T:  
+    with open("pack_3.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
+        q_spokes()
         
         for ball in l0 + l1 + l2:
+            texture = get_texture(ball)
             draw_vert(ball, texture, rad, T, texture=True)
     
-    with open("tetrapack_4.pov", "w") as T:  
+    with open("pack_4.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
+        q_spokes()
         
         for ball in l0 + l1 + l2 + l3:
+            texture = get_texture(ball)
             draw_vert(ball, texture, rad, T, texture=True)
 
-    with open("tetrapack_5.pov", "w") as T:  
+    with open("pack_5.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
         q_spokes()
         
         for ball in l0 + l1 + l2 + l3 + l4:
+            texture = get_texture(ball)
             draw_vert(ball, texture, rad, T, texture=True)
 
         ball15 = balldict[15]
+        texture = get_texture(ball15)
+        
         draw_vert(ball15, texture, half, T, texture=True)
         draw_edge(Edge(ball15, ball15 + 4*Red), red, 0.03, T)
         draw_edge(Edge(ball15, ball15 + 4*Green), green, 0.03, T)
@@ -650,15 +672,15 @@ def test9():
             
         draw_poly((4 * Tetrahedron()) + (-3*C), T)
         
-    with open("tetrapack_6.pov", "w") as T:  
-        T.write(pov_header)
-        T.write(camera) 
-        
-        for ball in l0 + l1 + l2 + l3 + l4 + l5:
-            draw_vert(ball, texture, rad, T, texture=True)
+#    with open("pack_6.pov", "w") as T:  
+#        T.write(pov_header)
+#        T.write(camera) 
+#        
+#        for ball in l0 + l1 + l2 + l3 + l4 + l5:
+#            texture = get_texture(ball)
+#            draw_vert(ball, texture, rad, T, texture=True)
 
-
-    
+            
     return balldict
 
 def test10():
@@ -687,18 +709,17 @@ def test10():
     # texture = "T_Silver_4D"
     # texture = "T_Brass_5A"
     
-    camera = """
-
-    // perspective (default) camera
-    camera {
-      location  <0.1, 0.2, 2.5>
-      rotate    <20, 30, 180>
-      //rotate    <35, 55, 20.0>
-      look_at   <0.0, 0.0,  0.0>
-      right     x*image_width/image_height
-    }
-
-    """  
+    camera = \
+"""
+// perspective (default) camera
+camera {
+  location  <0.1, 0.2, 2.5>
+  rotate    <20, 30, 180>
+  //rotate    <35, 55, 20.0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
+"""  
     cu = Cube()
     cu.edge_radius = 0.01
     cu.edge_color = "rgb <{}, {}, {}>".format(67/255, 70/255, 75/255)
@@ -747,8 +768,208 @@ def test10():
         draw_poly(cu, T)
         draw_poly(invtet, T)
         draw_vert(ORIGIN, c=cblack, r=0.12, t=T)
+
+def test11():
+    """
+    XYZ vs IVM
+    """
+    cblue   = "rgb <0, 0, 1>"
+    cred    = "rgb <1, 0, 0>"
+    cgreen  = "rgb <0, 1, 0>"
+    cyellow = "rgb <1, 1, 0>"
+    cblack  = "rgb <0, 0, 0>"
+    corange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    
+    Blue   = C
+    Green  = B
+    Red    = A
+    Yellow = D
+    
+    blue   = -Blue
+    green  = -Green
+    red    = -Red
+    yellow = -Yellow
+
+    camera = \
+"""
+// perspective (default) camera
+camera {
+  location  <6, 0.2, 0.2>
+  rotate    <0, -10, 10>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
+
+"""  
+
+    camera = \
+"""
+// perspective (default) camera
+camera {
+  location  <0.1, 0.2, 6.5>
+  rotate    <20, 30, 180>
+  //rotate    <35, 55, 20.0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
+""" 
+
+    # texture = "T_Wood20"
+    # texture = "T_Stone18"
+    # texture = "T_Silver_4D"
+    # texture = "T_Brass_5A"
+    
+    cu = Cube()
+    xyz_cube = Cube() * rt2(2) * 2
+
+    with open("test11.pov", "w") as T: 
+        T.write(pov_header)
+        # T.write(camera) 
+
+        draw_edge(Edge(ORIGIN, Vector(( 1, 0, 0))), c=cblack, r=0.03, t=T)
+        draw_edge(Edge(ORIGIN, Vector((-1, 0, 0))), c=cblack, r=0.03, t=T)
+        draw_edge(Edge(ORIGIN, Vector(( 0, 1, 0))), c=cblack, r=0.03, t=T)
+        draw_edge(Edge(ORIGIN, Vector(( 0,-1, 0))), c=cblack, r=0.03, t=T)
+        draw_edge(Edge(ORIGIN, Vector(( 0, 0, 1))), c=cblack, r=0.03, t=T)
+        draw_edge(Edge(ORIGIN, Vector(( 0, 0,-1))), c=cblack, r=0.03, t=T) 
+
+        draw_vert(Vector(( 1, 0, 0)), "T_Stone18",  r=0.12, t=T, texture = True) 
+        draw_vert(Vector((-1, 0, 0)), "T_Stone18",  r=0.06, t=T, texture = True)  
+        draw_vert(Vector(( 0, 1, 0)), "T_Brass_5A", r=0.12, t=T, texture = True)  
+        draw_vert(Vector(( 0,-1, 0)), "T_Brass_5A", r=0.06, t=T, texture = True)  
+        draw_vert(Vector(( 0, 0, 1)), "T_Wood20",   r=0.12, t=T, texture = True)  
+        draw_vert(Vector(( 0, 0,-1)), "T_Wood20",   r=0.06, t=T, texture = True)  
+
         
-            
+        draw_edge(Edge(ORIGIN, Vector(( 1, 1, 1))), c=cred,    r=0.03, t=T)
+        draw_edge(Edge(ORIGIN, Vector((-1,-1, 1))), c=cgreen,  r=0.03, t=T)
+        draw_edge(Edge(ORIGIN, Vector((-1, 1,-1))), c=cblue,   r=0.03, t=T)
+        draw_edge(Edge(ORIGIN, Vector(( 1,-1,-1))), c=cyellow, r=0.03, t=T)
+
+        draw_vert(Blue, c=cblue,   r=0.1, t=T)  # home base
+        draw_vert(Green, c=cgreen,  r=0.1, t=T)  # tip apex
+        draw_vert(Red, c=cred,    r=0.1, t=T)  # base
+        draw_vert(Yellow, c=cyellow, r=0.1, t=T)  # base
+        
+        draw_vert(ORIGIN, r=0.1, c=corange, t=T)
+        draw_poly(xyz_cube, T)
+        draw_poly(cu, T)
+
+def test12():
+
+    """
+    Two 3-vector cobras
+    """
+    cblue   = "rgb <0, 0, 1>"
+    cred    = "rgb <1, 0, 0>"
+    cgreen  = "rgb <0, 1, 0>"
+    cyellow = "rgb <1, 1, 0>"
+    cblack = "rgb <0, 0, 0>"
+    corange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    
+    Blue   = C
+    Green  = B
+    Red    = A
+    Yellow = D
+    
+    blue   = -Blue
+    green  = -Green
+    red    = -Red
+    yellow = -Yellow
+ 
+    # texture = "T_Wood20"
+    # texture = "T_Stone18"
+    # texture = "T_Silver_4D"
+    # texture = "T_Brass_5A"
+    
+    camera = \
+"""
+// perspective (default) camera
+camera {
+  location  <0.1, 0.2, 2.5>
+  rotate    <20, 30, 180>
+  //rotate    <35, 55, 20.0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
+"""
+    def q_spokes():
+        
+        draw_vert(ORIGIN, c=corange,  r=0.12, t=T)  # ORIGIN
+        
+        draw_edge(Edge(ORIGIN, Blue),   c=cblue,   r=0.03, t=T) # home base
+        draw_edge(Edge(ORIGIN, Green),  c=cgreen,  r=0.03, t=T) # tip apex
+        draw_edge(Edge(ORIGIN, Red),    c=cred,    r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, Yellow), c=cyellow, r=0.03, t=T) # base
+
+        draw_vert(Blue,   c=cblue,  r=0.12, t=T)  # home base
+        draw_vert(Green,  c=cgreen, r=0.12, t=T)  # tip apex
+        draw_vert(Red,    c=cred,   r=0.12, t=T)  # base
+        draw_vert(Yellow, c=cyellow,r=0.12, t=T)  # base
+
+    with open("cobra1.pov", "w") as T:
+        T.write(pov_header)
+        T.write(camera)
+        q_spokes()
+
+    with open("cobra2.pov", "w") as T:
+        T.write(pov_header)
+        T.write(camera)
+        q_spokes()
+        
+        draw_edge(Edge(Blue, Red), c=corange, r=0.03, t=T)
+        
+    with open("cobra3.pov", "w") as T:
+        T.write(pov_header)
+        T.write(camera)
+        q_spokes()
+        
+        draw_edge(Edge(Blue, Red),  c=corange, r=0.03, t=T)
+        draw_edge(Edge(Red, Yellow), c=corange, r=0.03, t=T)
+        
+    with open("cobra4.pov", "w") as T:
+        T.write(pov_header)
+        T.write(camera)
+        q_spokes()
+        
+        draw_edge(Edge(Blue, Red),    c=corange, r=0.03, t=T)
+        draw_edge(Edge(Red, Yellow),   c=corange, r=0.03, t=T)
+        draw_edge(Edge(Yellow, Green), c=corange, r=0.03, t=T)
+        
+    with open("cobra5.pov", "w") as T:
+        T.write(pov_header)
+        T.write(camera)
+        q_spokes()
+        
+        draw_edge(Edge(Red, Green), c=corange, r=0.03, t=T)
+        
+    with open("cobra6.pov", "w") as T:
+        T.write(pov_header)
+        T.write(camera)
+        q_spokes()
+        
+        draw_edge(Edge(Red, Green),  c=corange, r=0.03, t=T)
+        draw_edge(Edge(Green, Blue), c=corange, r=0.03, t=T)
+        
+    with open("cobra7.pov", "w") as T:   
+        T.write(pov_header)
+        T.write(camera)
+        q_spokes()
+        
+        draw_edge(Edge(Red, Green),  c=corange, r=0.03, t=T)
+        draw_edge(Edge(Green, Blue), c=corange, r=0.03, t=T)
+        draw_edge(Edge(Blue, Yellow), c=corange, r=0.03, t=T)
+
+    with open("cobra8.pov", "w") as T:   
+        T.write(pov_header)
+        T.write(camera)
+        q_spokes()
+
+        tet = Tetrahedron()
+        tet.edge_radius = 0.03
+        draw_poly(tet, T) 
+          
 if __name__ == "__main__":
-    bd = test9()
+    # bd = test9()
+    test12()
     
