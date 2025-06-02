@@ -29,6 +29,40 @@ Evol = (rt2(2)/8) * (PHI ** -3)
 
 sfactor = Svol/Evol
 
+cblue   = "rgb <0, 0, 1>"
+cred    = "rgb <1, 0, 0>"
+cgreen  = "rgb <0, 1, 0>"
+cyellow = "rgb <1, 1, 0>"
+cblack = "rgb <0, 0, 0>"
+corange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+
+Blue   = C
+Green  = B
+Red    = A
+Yellow = D
+
+blue   = -Blue
+green  = -Green
+red    = -Red
+yellow = -Yellow
+ 
+# texture = "T_Wood20"
+# texture = "T_Stone18"
+# texture = "T_Silver_4D"
+# texture = "T_Brass_5A"
+    
+BRYG_camera = \
+"""
+
+// perspective (default) camera
+camera {
+  location  <0.1, 0.2, 4.5>
+  rotate    <20, 30, 180>
+  //rotate    <35, 55, 20.0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
+"""
        
 def test1():
     """
@@ -351,39 +385,30 @@ def test7():
     """
     Blues Radio
     """
-    blue   = "rgb <0, 0, 1>"
-    red    = "rgb <1, 0, 0>"
-    green  = "rgb <0, 1, 0>"
-    yellow = "rgb <1, 1, 0>"
 
-    Blue   = C
-    Green  = B
-    Red    = A
-    Yellow = D
-  
     camera = """
+    
+// perspective (default) camera
+camera {
+  location  <0.1, 0.2, 2.5>
+  rotate    <20, 30, 180>
+  //rotate    <35, 55, 20.0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
 
-    // perspective (default) camera
-    camera {
-      location  <0.1, 0.2, 2.5>
-      rotate    <20, 30, 180>
-      //rotate    <35, 55, 20.0>
-      look_at   <0.0, 0.0,  0.0>
-      right     x*image_width/image_height
-    }
-
-    """
+"""
 
     def q_spokes():
-        draw_edge(Edge(ORIGIN, Blue),   c=blue,   r=0.03, t=T) # home base
-        draw_edge(Edge(ORIGIN, Green),  c=green,  r=0.03, t=T) # tip apex
-        draw_edge(Edge(ORIGIN, Red),    c=red,    r=0.03, t=T) # base
-        draw_edge(Edge(ORIGIN, Yellow), c=yellow, r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, Blue),   c=cblue,   r=0.03, t=T) # home base
+        draw_edge(Edge(ORIGIN, Green),  c=cgreen,  r=0.03, t=T) # tip apex
+        draw_edge(Edge(ORIGIN, Red),    c=cred,    r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, Yellow), c=cyellow, r=0.03, t=T) # base
        
-        draw_vert(Blue,   c=blue,  r=0.1, t=T)  # home base
-        draw_vert(Green,  c=green, r=0.1, t=T)  # tip apex
-        draw_vert(Red,    c=red,   r=0.1, t=T)  # base
-        draw_vert(Yellow, c=yellow,r=0.1, t=T)  # base
+        draw_vert(Blue,   c=cblue,  r=0.1, t=T)  # home base
+        draw_vert(Green,  c=cgreen, r=0.1, t=T)  # tip apex
+        draw_vert(Red,    c=cred,   r=0.1, t=T)  # base
+        draw_vert(Yellow, c=cyellow,r=0.1, t=T)  # base
         
     with open("tripod_1.pov", "w") as T:  
         T.write(pov_header)
@@ -393,47 +418,38 @@ def test7():
     with open("tripod_2.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
-        draw_vert(Blue, c=blue, r=half, t=T )
+        draw_vert(Blue, c=cblue, r=half, t=T )
         q_spokes()
         
     with open("tripod_3.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
-        draw_vert(Blue, c=blue, r=half, t=T )
-        draw_vert(Blue + 2 * Yellow + Red + Green, c=yellow, r=half, t=T )       
+        draw_vert(Blue, c=cblue, r=half, t=T )
+        draw_vert(Blue + 2 * Yellow + Red + Green, c=cyellow, r=half, t=T )       
         q_spokes()
               
     with open("tripod_4.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
         draw_vert(Blue, c=blue, r=half, t=T )
-        draw_vert(Blue + 2 * Yellow + Red + Green, c=yellow, r=half, t=T )       
-        draw_vert(Blue + 2 * Green + Red + Yellow,  c=green,  r=half, t=T )
+        draw_vert(Blue + 2 * Yellow + Red + Green, c=cyellow, r=half, t=T )       
+        draw_vert(Blue + 2 * Green + Red + Yellow, c=cgreen,  r=half, t=T )
         q_spokes()
         
     with open("tripod_5.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera) 
-        draw_vert(Blue, c=blue, r=half, t=T )
-        draw_vert(Blue + 2 * Yellow + Red + Green, c=yellow, r=half, t=T )       
-        draw_vert(Blue + 2 * Green + Red + Yellow, c=green,  r=half, t=T )
-        draw_vert(Blue + 2 * Red + Green + Yellow, c=red,    r=half, t=T )
+        draw_vert(Blue, c=cblue, r=half, t=T )
+        draw_vert(Blue + 2 * Yellow + Red + Green, c=cyellow, r=half, t=T )       
+        draw_vert(Blue + 2 * Green + Red + Yellow, c=cgreen,  r=half, t=T )
+        draw_vert(Blue + 2 * Red + Green + Yellow, c=cred,    r=half, t=T )
         q_spokes()
  
 def test8():
     """
     Blues Radio
     """
-    blue   = "rgb <0, 0, 1>"
-    red    = "rgb <1, 0, 0>"
-    green  = "rgb <0, 1, 0>"
-    yellow = "rgb <1, 1, 0>"
 
-    Blue   = C
-    Green  = B
-    Red    = A
-    Yellow = D
-  
     camera = """\
 // perspective (default) camera
 camera {
@@ -447,15 +463,15 @@ camera {
 """
 
     def q_spokes():
-        draw_edge(Edge(ORIGIN, Blue),   c=blue,   r=0.03, t=T) # home base
-        draw_edge(Edge(ORIGIN, Green),  c=green,  r=0.03, t=T) # tip apex
-        draw_edge(Edge(ORIGIN, Red),    c=red,    r=0.03, t=T) # base
-        draw_edge(Edge(ORIGIN, Yellow), c=yellow, r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, Blue),   c=cblue,   r=0.03, t=T) # home base
+        draw_edge(Edge(ORIGIN, Green),  c=cgreen,  r=0.03, t=T) # tip apex
+        draw_edge(Edge(ORIGIN, Red),    c=cred,    r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, Yellow), c=cyellow, r=0.03, t=T) # base
        
-        draw_vert(Blue,   c=blue,  r=0.1, t=T)  # home base
-        draw_vert(Green,  c=green, r=0.1, t=T)  # tip apex
-        draw_vert(Red,    c=red,   r=0.1, t=T)  # base
-        draw_vert(Yellow, c=yellow,r=0.1, t=T)  # base
+        draw_vert(Blue,   c=cblue,  r=0.1, t=T)  # home base
+        draw_vert(Green,  c=cgreen, r=0.1, t=T)  # tip apex
+        draw_vert(Red,    c=cred,   r=0.1, t=T)  # base
+        draw_vert(Yellow, c=cyellow,r=0.1, t=T)  # base
         
     with open("vector_add_1.pov", "w") as T:  
         T.write(pov_header)
@@ -464,61 +480,61 @@ camera {
         
         draw_edge(Edge(Blue, Blue + Yellow), c=yellow, r=0.02, t=T)
         start = Blue + Yellow
-        draw_vert(start, c=yellow, r=0.03, t=T)
+        draw_vert(start, c=cyellow, r=0.03, t=T)
         
-        draw_edge(Edge(start, start + Yellow), c=yellow, r=0.02, t=T)
+        draw_edge(Edge(start, start + Yellow), c=cyellow, r=0.02, t=T)
         start = start + Yellow
-        draw_vert(start, c=yellow, r=0.03, t=T)
+        draw_vert(start, c=cyellow, r=0.03, t=T)
         
-        draw_edge(Edge(start, start + Red), c=red, r=0.02, t=T)
+        draw_edge(Edge(start, start + Red), c=cred, r=0.02, t=T)
         start = start + Red 
-        draw_vert(start, c=red, r=0.03, t=T)
+        draw_vert(start, c=cred, r=0.03, t=T)
         
-        draw_edge(Edge(start, start + Green), c=green, r=0.02, t=T)
+        draw_edge(Edge(start, start + Green), c=cgreen, r=0.02, t=T)
         start = start + Green
-        draw_vert(start, c=green, r=0.03, t=T)        
+        draw_vert(start, c=cgreen, r=0.03, t=T)        
 
     with open("vector_add_2.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera)      
         q_spokes()
         
-        draw_edge(Edge(Blue, Blue + Green), c=green, r=0.02, t=T)
+        draw_edge(Edge(Blue, Blue + Green), c=cgreen, r=0.02, t=T)
         start = Blue + Green
-        draw_vert(start, c=green, r=0.03, t=T)
+        draw_vert(start, c=cgreen, r=0.03, t=T)
         
-        draw_edge(Edge(start, start + Green), c=green, r=0.02, t=T)
+        draw_edge(Edge(start, start + Green), c=cgreen, r=0.02, t=T)
         start = start + Green
-        draw_vert(start, c=green, r=0.03, t=T)
+        draw_vert(start, c=cgreen, r=0.03, t=T)
         
-        draw_edge(Edge(start, start + Red), c=red, r=0.02, t=T)
+        draw_edge(Edge(start, start + Red), c=cred, r=0.02, t=T)
         start = start + Red 
-        draw_vert(start, c=red, r=0.03, t=T)
+        draw_vert(start, c=cred, r=0.03, t=T)
         
-        draw_edge(Edge(start, start + Yellow), c=yellow, r=0.02, t=T)
+        draw_edge(Edge(start, start + Yellow), c=cyellow, r=0.02, t=T)
         start = start + Yellow
-        draw_vert(start, c=yellow, r=0.03, t=T)        
+        draw_vert(start, c=cyellow, r=0.03, t=T)        
 
     with open("vector_add_3.pov", "w") as T:  
         T.write(pov_header)
         T.write(camera)      
         q_spokes()
         
-        draw_edge(Edge(Blue, Blue + Red), c=red, r=0.02, t=T)
+        draw_edge(Edge(Blue, Blue + Red), c=cred, r=0.02, t=T)
         start = Blue + Red
-        draw_vert(start, c=red, r=0.03, t=T)
+        draw_vert(start, c=cred, r=0.03, t=T)
         
-        draw_edge(Edge(start, start + Red), c=red, r=0.02, t=T)
+        draw_edge(Edge(start, start + Red), c=cred, r=0.02, t=T)
         start = start + Red
-        draw_vert(start, c=red, r=0.03, t=T)
+        draw_vert(start, c=cred, r=0.03, t=T)
         
-        draw_edge(Edge(start, start + Green), c=green, r=0.02, t=T)
+        draw_edge(Edge(start, start + Green), c=cgreen, r=0.02, t=T)
         start = start + Green
-        draw_vert(start, c=green, r=0.03, t=T)
+        draw_vert(start, c=cgreen, r=0.03, t=T)
         
-        draw_edge(Edge(start, start + Yellow), c=yellow, r=0.02, t=T)
+        draw_edge(Edge(start, start + Yellow), c=cyellow, r=0.02, t=T)
         start = start + Yellow
-        draw_vert(start, c=yellow, r=0.03, t=T)        
+        draw_vert(start, c=cyellow, r=0.03, t=T)        
 
 def test9():
     """
@@ -528,11 +544,6 @@ def test9():
     red    = "rgb <1, 0, 0>"
     green  = "rgb <0, 1, 0>"
     yellow = "rgb <1, 1, 0>"
-
-    Blue   = C
-    Green  = B
-    Red    = A
-    Yellow = D
   
     paths = [2 * Green + Red + Yellow,
              2 * Yellow + Red + Green,
@@ -561,15 +572,15 @@ camera {
 """
 
     def q_spokes():
-        draw_edge(Edge(ORIGIN, Blue),   c=blue,   r=0.05, t=T) # home base
-        draw_edge(Edge(ORIGIN, Green),  c=green,  r=0.05, t=T) # tip apex
-        draw_edge(Edge(ORIGIN, Red),    c=red,    r=0.05, t=T) # base
-        draw_edge(Edge(ORIGIN, Yellow), c=yellow, r=0.05, t=T) # base
+        draw_edge(Edge(ORIGIN, Blue),   c=cblue,   r=0.05, t=T) # home base
+        draw_edge(Edge(ORIGIN, Green),  c=cgreen,  r=0.05, t=T) # tip apex
+        draw_edge(Edge(ORIGIN, Red),    c=cred,    r=0.05, t=T) # base
+        draw_edge(Edge(ORIGIN, Yellow), c=cyellow, r=0.05, t=T) # base
        
-        draw_vert(Blue,   c=blue,  r=0.1, t=T)  # home base
-        draw_vert(Green,  c=green, r=0.1, t=T)  # tip apex
-        draw_vert(Red,    c=red,   r=0.1, t=T)  # base
-        draw_vert(Yellow, c=yellow,r=0.1, t=T)  # base
+        draw_vert(Blue,   c=cblue,  r=0.1, t=T)  # home base
+        draw_vert(Green,  c=cgreen, r=0.1, t=T)  # tip apex
+        draw_vert(Red,    c=cred,   r=0.1, t=T)  # base
+        draw_vert(Yellow, c=cyellow,r=0.1, t=T)  # base
         
     def next_layer(layer):
         nonlocal BALLNUMBER
@@ -660,15 +671,15 @@ camera {
         texture = get_texture(ball15)
         
         draw_vert(ball15, texture, half, T, texture=True)
-        draw_edge(Edge(ball15, ball15 + 4*Red), red, 0.03, T)
-        draw_edge(Edge(ball15, ball15 + 4*Green), green, 0.03, T)
-        draw_edge(Edge(ball15, ball15 + 4*Blue), blue, 0.03, T)
-        draw_edge(Edge(ball15, ball15 + 4*Yellow), yellow, 0.03, T)
+        draw_edge(Edge(ball15, ball15 + 4*Red), cred, 0.03, T)
+        draw_edge(Edge(ball15, ball15 + 4*Green), cgreen, 0.03, T)
+        draw_edge(Edge(ball15, ball15 + 4*Blue), cblue, 0.03, T)
+        draw_edge(Edge(ball15, ball15 + 4*Yellow), cyellow, 0.03, T)
 
-        draw_edge(Edge(ball15, ball15 - (4/3)*Red), red, 0.03, T)
-        draw_edge(Edge(ball15, ball15 - (4/3)*Green), green, 0.03, T)
-        draw_edge(Edge(ball15, ball15 - (4/3)*Blue), blue, 0.03, T)
-        draw_edge(Edge(ball15, ball15 - (4/3)*Yellow), yellow, 0.03, T)
+        draw_edge(Edge(ball15, ball15 - (4/3)*Red), cred, 0.03, T)
+        draw_edge(Edge(ball15, ball15 - (4/3)*Green), cgreen, 0.03, T)
+        draw_edge(Edge(ball15, ball15 - (4/3)*Blue), cblue, 0.03, T)
+        draw_edge(Edge(ball15, ball15 - (4/3)*Yellow), cyellow, 0.03, T)
             
         draw_poly((4 * Tetrahedron()) + (-3*C), T)
         
@@ -693,16 +704,6 @@ def test10():
     cyellow = "rgb <1, 1, 0>"
     cblack = "rgb <0, 0, 0>"
     corange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
-    
-    Blue   = C
-    Green  = B
-    Red    = A
-    Yellow = D
-    
-    blue   = -Blue
-    green  = -Green
-    red    = -Red
-    yellow = -Yellow
  
     # texture = "T_Wood20"
     # texture = "T_Stone18"
@@ -773,22 +774,6 @@ def test11():
     """
     XYZ vs IVM
     """
-    cblue   = "rgb <0, 0, 1>"
-    cred    = "rgb <1, 0, 0>"
-    cgreen  = "rgb <0, 1, 0>"
-    cyellow = "rgb <1, 1, 0>"
-    cblack  = "rgb <0, 0, 0>"
-    corange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
-    
-    Blue   = C
-    Green  = B
-    Red    = A
-    Yellow = D
-    
-    blue   = -Blue
-    green  = -Green
-    red    = -Red
-    yellow = -Yellow
 
     camera = \
 """
@@ -858,25 +843,19 @@ camera {
 def test12():
 
     """
-    Two 3-vector cobras
+    Two 3-vector cobras: orange tet
     """
     cblue   = "rgb <0, 0, 1>"
     cred    = "rgb <1, 0, 0>"
     cgreen  = "rgb <0, 1, 0>"
     cyellow = "rgb <1, 1, 0>"
-    cblack = "rgb <0, 0, 0>"
     corange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
     
     Blue   = C
     Green  = B
     Red    = A
     Yellow = D
-    
-    blue   = -Blue
-    green  = -Green
-    red    = -Red
-    yellow = -Yellow
- 
+
     # texture = "T_Wood20"
     # texture = "T_Stone18"
     # texture = "T_Silver_4D"
@@ -968,8 +947,254 @@ camera {
         tet = Tetrahedron()
         tet.edge_radius = 0.03
         draw_poly(tet, T) 
-          
+
+def test13():
+    """
+    Two 3-vector cobras: black tet
+    """
+    cblue   = "rgb <0, 0, 1>"
+    cred    = "rgb <1, 0, 0>"
+    cgreen  = "rgb <0, 1, 0>"
+    cyellow = "rgb <1, 1, 0>"
+    cblack = "rgb <0, 0, 0>"
+    corange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    
+    Blue   = C
+    Green  = B
+    Red    = A
+    Yellow = D
+    
+    blue   = -Blue
+    green  = -Green
+    red    = -Red
+    yellow = -Yellow
+ 
+    # texture = "T_Wood20"
+    # texture = "T_Stone18"
+    # texture = "T_Silver_4D"
+    # texture = "T_Brass_5A"
+    
+    camera = \
+"""
+// perspective (default) camera
+camera {
+  location  <0.1, 0.2, 2.5>
+  rotate    <20, 30, 180>
+  //rotate    <35, 55, 20.0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
+"""
+    def q_spokes():
+        
+        draw_vert(ORIGIN, c=cblack,  r=0.12, t=T)  # ORIGIN
+        
+        draw_edge(Edge(ORIGIN, blue),   c=cblue,   r=0.03, t=T) # home base
+        draw_edge(Edge(ORIGIN, green),  c=cgreen,  r=0.03, t=T) # tip apex
+        draw_edge(Edge(ORIGIN, red),    c=cred,    r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, yellow), c=cyellow, r=0.03, t=T) # base
+
+        draw_vert(blue,   c=cblue,  r=0.06, t=T)  # home base
+        draw_vert(green,  c=cgreen, r=0.06, t=T)  # tip apex
+        draw_vert(red,    c=cred,   r=0.06, t=T)  # base
+        draw_vert(yellow, c=cyellow,r=0.06, t=T)  # base
+
+    with open("bcobra1.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        q_spokes()
+
+    with open("bcobra2.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        q_spokes()
+        
+        draw_edge(Edge(blue, red), c=cblack, r=0.03, t=T)
+        
+    with open("bcobra3.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        q_spokes()
+        
+        draw_edge(Edge(blue, red),  c=cblack, r=0.03, t=T)
+        draw_edge(Edge(red, yellow), c=cblack, r=0.03, t=T)
+        
+    with open("bcobra4.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        q_spokes()
+        
+        draw_edge(Edge(blue, red),    c=cblack, r=0.03, t=T)
+        draw_edge(Edge(red, yellow),   c=cblack, r=0.03, t=T)
+        draw_edge(Edge(yellow, green), c=cblack, r=0.03, t=T)
+        
+    with open("bcobra5.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        q_spokes()
+        
+        draw_edge(Edge(red, green), c=cblack, r=0.03, t=T)
+        
+    with open("bcobra6.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        q_spokes()
+        
+        draw_edge(Edge(red, green),  c=cblack, r=0.03, t=T)
+        draw_edge(Edge(green, blue), c=cblack, r=0.03, t=T)
+        
+    with open("bcobra7.pov", "w") as T:   
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        q_spokes()
+        
+        draw_edge(Edge(red, green),  c=cblack, r=0.03, t=T)
+        draw_edge(Edge(green, blue), c=cblack, r=0.03, t=T)
+        draw_edge(Edge(blue, yellow), c=cblack, r=0.03, t=T)
+
+    with open("bcobra8.pov", "w") as T:   
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        q_spokes()
+
+        tet = InvTetrahedron()
+        tet.edge_radius = 0.03
+        draw_poly(tet, T) 
+
+def test14():
+    """
+    Two 3-vector cobras: black tet
+    """
+    
+    cu = Cube()
+    cu.edge_radius = 0.03
+    
+    def q_spokes_o():
+        
+        draw_vert(ORIGIN, c=corange,  r=0.12, t=T)  # ORIGIN
+        
+        draw_edge(Edge(ORIGIN, Blue),   c=cblue,   r=0.03, t=T) # home base
+        draw_edge(Edge(ORIGIN, Green),  c=cgreen,  r=0.03, t=T) # tip apex
+        draw_edge(Edge(ORIGIN, Red),    c=cred,    r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, Yellow), c=cyellow, r=0.03, t=T) # base
+
+        draw_vert(Blue,   c=cblue,  r=0.12, t=T)  # home base
+        draw_vert(Green,  c=cgreen, r=0.12, t=T)  # tip apex
+        draw_vert(Red,    c=cred,   r=0.12, t=T)  # base
+        draw_vert(Yellow, c=cyellow,r=0.12, t=T)  # base
+        
+    def q_spokes_k():
+        
+        draw_vert(ORIGIN, c=cblack,  r=0.12, t=T)  # ORIGIN
+        
+        draw_edge(Edge(ORIGIN, blue),   c=cblue,   r=0.03, t=T) # home base
+        draw_edge(Edge(ORIGIN, green),  c=cgreen,  r=0.03, t=T) # tip apex
+        draw_edge(Edge(ORIGIN, red),    c=cred,    r=0.03, t=T) # base
+        draw_edge(Edge(ORIGIN, yellow), c=cyellow, r=0.03, t=T) # base
+
+        draw_vert(blue,   c=cblue,  r=0.06, t=T)  # home base
+        draw_vert(green,  c=cgreen, r=0.06, t=T)  # tip apex
+        draw_vert(red,    c=cred,   r=0.06, t=T)  # base
+        draw_vert(yellow, c=cyellow,r=0.06, t=T)  # base
+
+    with open("duotet1.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        q_spokes_o()
+        draw_poly(cu, T)
+        tet = Tetrahedron()
+        tet.edge_radius = 0.03
+        draw_poly(tet, T)
+        
+    with open("duotet2.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        q_spokes_k()
+        draw_poly(cu, T)
+        tet = InvTetrahedron()
+        tet.edge_radius = 0.03
+        draw_poly(tet, T)
+
+def test15():
+    """
+    color-coded duotet, home view, with alternating black & orange tets
+    red octa appears
+    blue rd appears
+    ball appears
+    """  
+
+    cu = Cube()
+    cu.edge_radius = 0.03
+    
+    octa = Octahedron()
+    octa.edge_radius = 0.03
+    
+    rd = RD()
+    rd.edge_radius = 0.03
+
+    co = Cuboctahedron()
+    co.edge_radius = 0.03        
+    
+    def cube_verts(T):
+        # BRYG balls       
+        draw_vert(Blue,   c=cblue,  r=0.12, t=T)  # home base
+        draw_vert(Red,    c=cred,   r=0.12, t=T)  # base
+        draw_vert(Yellow, c=cyellow,r=0.12, t=T)  # base
+        draw_vert(Green,  c=cgreen, r=0.12, t=T)  # tip apex
+        
+        # bryg balls
+        draw_vert(blue,   c=cblue,  r=0.06, t=T)  # home base
+        draw_vert(red,    c=cred,   r=0.06, t=T)  # base
+        draw_vert(yellow, c=cyellow,r=0.06, t=T)  # base
+        draw_vert(green,  c=cgreen, r=0.06, t=T)  # tip apex
+
+    with open("hg_1.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        cube_verts(T)
+        draw_poly(cu, T)
+
+    with open("hg_2.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        cube_verts(T)
+        draw_poly(cu, T) 
+        draw_poly(octa, T)
+
+    with open("hg_3.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        cube_verts(T)
+        draw_poly(cu, T) 
+        draw_poly(octa, T) 
+        draw_poly(rd, T) 
+
+    with open("hg_4.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        cube_verts(T) 
+        draw_poly(rd, T) 
+        draw_vert(ORIGIN, r=half, c=corange, t=T)
+        
+    with open("hg_5.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        draw_vert(ORIGIN, r=half, c=corange, t=T)
+        draw_poly(rd, T)
+        for ball in IVM_DIRS:
+            draw_vert(ball, r=half, c=corange, t=T) 
+            draw_poly(rd + ball, T)
+
+    with open("hg_6.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG_camera)
+        draw_vert(ORIGIN, r=half, c=corange, t=T)
+        cube_verts(T)
+        draw_poly(cu, T)
+        draw_poly(rd, T)
+        draw_poly(co, T)
+    
 if __name__ == "__main__":
     # bd = test9()
-    test12()
+    test15()
     
