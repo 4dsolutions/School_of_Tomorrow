@@ -12,6 +12,9 @@ A School of Tomorrow approach to learning Python includes:
 
 https://docs.python.org/3/tutorial/introduction.html#using-python-as-a-calculator
 
+https://mail.python.org/archives/list/edu-sig@python.org/message/6IVIMHQLBN5UVJHKKM7JJEVLXI7O35WQ/
+
+
 OUTPUT:
     
 phi: 1/2 + sqrt(5)/2
