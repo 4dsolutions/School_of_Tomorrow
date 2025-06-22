@@ -14,6 +14,7 @@ https://docs.python.org/3/tutorial/introduction.html#using-python-as-a-calculato
 
 https://mail.python.org/archives/list/edu-sig@python.org/message/6IVIMHQLBN5UVJHKKM7JJEVLXI7O35WQ/
 
+https://docs.google.com/presentation/d/13QLfgKo6kyX0j0K0RJ7W0uisB0ZyeBiK-_qbzytipck/edit?usp=sharing
 
 OUTPUT:
     
