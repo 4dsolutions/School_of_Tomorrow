@@ -30,7 +30,7 @@ Emod: 0.0417313169277737
 sfactor: 2*sqrt(2)/(1/2 + sqrt(5)/2)**2
 sfactor: 1.08036302695091
 ----
-IW: 12/(1/2 + sqrt(5)/2)**5 + 20/(1/2 + sqrt(5)/2)**4
+IW: 20/(1/2 + sqrt(5)/2)**4
 IW: 2.91796067500631
 --- calcs ---
 1/((1/2 + sqrt(5)/2)**3 + (1/2 + sqrt(5)/2)**6)
@@ -84,3 +84,4 @@ print("----")
 # IW + 24S modules = 4 exactly
 print("Octa:",((24 * Smod) + IW).simplify())
 print("Octa:",((24 * Smod) + IW).evalf())
+
