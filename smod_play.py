@@ -5,6 +5,13 @@ Created on Sun Jun 22 09:28:28 2025
 
 @author: kirbyurner
 
+A School of Tomorrow approach to learning Python includes:
+(a) learning to use Jupyter Notebooks
+(b) learning to use an IDE (vs a Notebook as an IDE)
+(c) practicing using Python as a calulator with Nested Hierarchy i.e. BASKET
+
+https://docs.python.org/3/tutorial/introduction.html#using-python-as-a-calculator
+
 OUTPUT:
     
 phi: 1/2 + sqrt(5)/2
@@ -42,7 +49,7 @@ print("phi:", phi)
 print("phi:", phi.evalf())
 print("----")
 
-Smod = 1/(2 * phi ** 5)
+Smod = 1/(2 * phi ** 5) 
 print("Smod:",Smod)
 print("Smod:",Smod.evalf())
 print("----")
@@ -57,7 +64,7 @@ print("sfactor:",sfactor)
 print("sfactor:",sfactor.evalf())
 print("----")
 
-# icosa within
+# Icosa Within (volume = cubocta of 2.5 * sfactor * sfactor)
 IW = sympy.Rational(5,2) * sfactor**2
 print("IW:",(24 * Smod) + IW)
 print("IW:", IW.evalf())
@@ -70,6 +77,6 @@ print((1/(11 + 5*root5)).evalf())
 print("Equal Smod?:",sympy.Eq(1/(11 + 5*root5), Smod))
 print("----")
 
-# IW + 24S modules
+# IW + 24S modules = 4 exactly
 print("Octa:",((24 * Smod) + IW).simplify())
 print("Octa:",((24 * Smod) + IW).evalf())
