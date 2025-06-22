@@ -70,7 +70,7 @@ print("----")
 
 # Icosa Within (volume = cubocta of 2.5 * sfactor * sfactor)
 IW = sympy.Rational(5,2) * sfactor**2
-print("IW:",(24 * Smod) + IW)
+print("IW:", IW)
 print("IW:", IW.evalf())
 print("--- calcs ---")
 
