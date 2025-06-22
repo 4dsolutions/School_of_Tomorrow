@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jun 22 09:28:28 2025
+
+@author: kirbyurner
+
+OUTPUT:
+    
+phi: 1/2 + sqrt(5)/2
+phi: 1.61803398874989
+----
+Smod: 1/(2*(1/2 + sqrt(5)/2)**5)
+Smod: 0.0450849718747371
+----
+Emod: sqrt(2)/(8*(1/2 + sqrt(5)/2)**3)
+Emod: 0.0417313169277737
+----
+sfactor: 2*sqrt(2)/(1/2 + sqrt(5)/2)**2
+sfactor: 1.08036302695091
+----
+IW: 12/(1/2 + sqrt(5)/2)**5 + 20/(1/2 + sqrt(5)/2)**4
+IW: 2.91796067500631
+--- calcs ---
+1/((1/2 + sqrt(5)/2)**3 + (1/2 + sqrt(5)/2)**6)
+11 + 5*sqrt(5)
+1/(11 + 5*sqrt(5))
+0.0450849718747371
+Equal Smod?: True
+----
+Octa: 4
+Octa: 4.00000000000000
+
+"""
+import sympy
+from sympy import sqrt as rt2
+
+root2 = rt2(2)
+root5 = rt2(5)
+phi = (1 + root5)/2
+print("phi:", phi)
+print("phi:", phi.evalf())
+print("----")
+
+Smod = 1/(2 * phi ** 5)
+print("Smod:",Smod)
+print("Smod:",Smod.evalf())
+print("----")
+
+Emod = (root2/8)*(phi**-3)
+print("Emod:",Emod)
+print("Emod:",Emod.evalf())
+print("----")
+
+sfactor = Smod/Emod
+print("sfactor:",sfactor)
+print("sfactor:",sfactor.evalf())
+print("----")
+
+# icosa within
+IW = sympy.Rational(5,2) * sfactor**2
+print("IW:",(24 * Smod) + IW)
+print("IW:", IW.evalf())
+print("--- calcs ---")
+
+print(1/(phi**3 + phi**6))
+print((phi**3 + phi**6).simplify())
+print(1/(11 + 5*root5))
+print((1/(11 + 5*root5)).evalf())
+print("Equal Smod?:",sympy.Eq(1/(11 + 5*root5), Smod))
+print("----")
+
+# IW + 24S modules
+print("Octa:",((24 * Smod) + IW).simplify())
+print("Octa:",((24 * Smod) + IW).evalf())
