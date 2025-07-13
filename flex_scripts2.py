@@ -3,7 +3,7 @@
 """
 Created on Thurs Feb 13 2025
 
-@author: mac
+@author: K. Urner
 
 Apr  8: make this 2nd of 2 files, flex_scripts1.py being the first
 Feb 19: import PHI as sympy object vs using math.sqrt  
@@ -16,7 +16,7 @@ from qrays import Qvector, Vector, A, B, C, D
 
 import numpy as np
 import sympy as sy
-from math import sqrt as rt2
+from sympy import sqrt as rt2
 
 from itertools import permutations
 g = permutations((2,1,1,0))
@@ -29,6 +29,32 @@ Evol = (rt2(2)/8) * (PHI ** -3)
 
 sfactor = Svol/Evol
 
+BRYG = \
+"""
+
+// perspective (default) camera
+camera {
+   location  <-2.5, 0.1, -0.4>
+   rotate    <90.0, 0, -100>
+   look_at   <0.0, 0.0,  0.0>
+   right     x*image_width/image_height
+}
+
+"""
+
+CLOSEUP = \
+"""
+   
+// perspective (default) camera
+camera {
+  location  <2, 0.1, 0.2>
+  rotate    <35, 35, 10.0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
+}
+
+"""
+    
 def test11():
     out = open("rt_spokes.pov", "w")
     out.write(pov_header) 
@@ -1479,14 +1505,18 @@ def test42():
             draw_poly(t, T)
         
         # wander off, choosing randomly from 12 directions
-        for _ in range(500):
+        for _ in range(10):
             for idx in range(len(turtles)):
                 t = turtles[idx]
                 keep_color = t.edge_color
                 turtles[idx] = t + choice(twelve_directions)
                 turtles[idx].edge_color = keep_color
-                draw_poly(turtles[idx], T)
-             
+                # draw_poly(turtles[idx], T)
+
+        # draw the turtles in their final positions
+        for t in turtles:
+            draw_poly(t, T)
+                            
         # connect the final positions of the four turtles into a tet
         a = Edge(turtles[0].center, turtles[1].center)
         b = Edge(turtles[0].center, turtles[2].center)
@@ -1513,6 +1543,108 @@ def test42():
         
         # report the volume
         print("Tet volume:", tet.ivm_volume())             
+
+def test43():
+    with open("testing43.pov", "w") as T:
+        T.write(pov_header)
+        
+        rd = RD()
+        co = Cuboctahedron() * half
+        
+        draw_poly(rd, T)
+        draw_poly(co, T)
+        
+def test45():
+    with open("testing45.pov", "w") as T:
+        T.write(pov_header)
+        
+        rd = RD()
+        rt_e = RT() * (1/PHI)   # RT_E
+        # rt_75 = RT() * (1/(3*rt2(2)))**(1/3) * (3/2)**(1/3) # RT 7.5
+
+        rd.vert_radius = 0.01
+        rd.edge_radius = 0.01
+        
+        rt_e.vert_radius = 0.01
+        rt_e.edge_radius = 0.01
+        
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)        
+        draw_poly(rd, T)
+        draw_poly(rt_e, T)
+
+def test46():
+    """
+    S3 + S6 = RegTet (tvs)
+    
+    Where would we slice the Regtet parallel to a face
+    such that apex volume = S3, fustrum volume = S6 
+    or.. apex volume = S6 and fustrum volume = S3?
+    
+    After computing these two slice locations, make 
+    the corresponding POV-ray renderings.
+    
+    """
+    print("Svol:", Svol)
+    S3 = Svol * PHI**3
+    apex_edge_S3 = S3 ** sy.Rational(1,3)
+    print("S3 apex tet edges:", apex_edge_S3.evalf())
+    
+    S6 = Svol * PHI**6
+    apex_edge_S6 = S6 ** sy.Rational(1,3)
+    print("S6 apex tet edges:", apex_edge_S6.evalf())
+    
+    with open("testing46a.pov", "w") as T:
+        T.write(pov_header)
+        T.write(CLOSEUP)
+        
+        RegTet = Tetrahedron() 
+        RegTet.face_color = "T_Stone17"
+        RegTet.edge_color = "T_Copper_1A"
+        RegTet.edge_radius = 0.01
+        
+        # S3 is apex tet, leaving a fat fustrum for the bigger volume S6
+        S3_tet = Tetrahedron() * apex_edge_S3
+        print("S3_tet volume:", S3_tet.volume.evalf())
+        print("S3:", S3.evalf())
+
+        shift = RegTet.vertexes['a'] - S3_tet.vertexes['a']
+        S3_tet = S3_tet + shift # align apex vertexes of both tets
+        S3_tet = S3_tet * 1.005 # inflate very slightly so texture will appear
+        
+        S3_tet.face_color = "T_Stone18"
+        S3_tet.edge_color = "T_Copper_1A"
+        S3_tet.edge_radius = 0.01
+        
+        draw_poly(S3_tet, T, v=False, e=False, f=True, texture=True) 
+        draw_poly(RegTet, T, v=False, e=True, f=True, texture=True) 
+
+    with open("testing46b.pov", "w") as T:
+        T.write(pov_header)
+        T.write(CLOSEUP)
+        
+        RegTet = Tetrahedron()
+        RegTet.face_color = "T_Stone18"
+        RegTet.edge_color = "T_Copper_1A"
+        RegTet.edge_radius = 0.01
+        
+        # S6 is apex tet, leaving a thin fustrum for the smaller volume S3
+        S6_tet = Tetrahedron() * apex_edge_S6
+        print("S6_tet volume:", S6_tet.volume.evalf())
+        print("S6:", S6.evalf())
+
+        shift = RegTet.vertexes['a'] - S6_tet.vertexes['a']
+        S6_tet = S6_tet + shift
+        S6_tet = S6_tet * 1.005 
+        
+        S6_tet.face_color = "T_Stone17"
+        S6_tet.edge_color = "T_Copper_1A"
+        S6_tet.edge_radius = 0.01
+        
+        draw_poly(S6_tet, T, v=False, e=False, f=True, texture=True) 
+        draw_poly(RegTet, T, v=False, e=True, f=True, texture=True) 
+
+        print("S3 + S6:", S3.evalf() + S6.evalf())
+
         
 if __name__ == "__main__":
-    test42()
+    test46()
