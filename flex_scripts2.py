@@ -34,10 +34,11 @@ BRYG = \
 
 // perspective (default) camera
 camera {
-   location  <-2.5, 0.1, -0.4>
-   rotate    <90.0, 0, -100>
-   look_at   <0.0, 0.0,  0.0>
-   right     x*image_width/image_height
+  location  <0.1, 0.2, 4.5>
+  rotate    <20, 30, 180>
+  //rotate    <35, 55, 20.0>
+  look_at   <0.0, 0.0,  0.0>
+  right     x*image_width/image_height
 }
 
 """
@@ -1645,6 +1646,110 @@ def test46():
 
         print("S3 + S6:", S3.evalf() + S6.evalf())
 
+def test47():
+    """
+    S3 + S6 = RegTet (tvs)
+    
+    Here we're partitioning a regular tet into two
+    tets each with 60-60-60 degree angles. We'll put a 
+    sliding point on a shared edge such that computing 
+    tetravolume requires simply multiplying the three 
+    edges stemming from those angles.
+    
+    """
+    orange  = "rgb <{}, {}, {}>".format(1, 165/255, 0)
+    red     = "rgb <{}, {}, {}>".format(1, 0, 0)
+    green   = "rgb <{}, {}, {}>".format(0, 1, 0) 
+    blue    = "rgb <{}, {}, {}>".format(0, 0, 1)
+    yellow  = "rgb <{}, {}, {}>".format(1, 1, 0)
+    magenta = "rgb <{}, {}, {}>".format(1, 0, 1)
+    black   = "rgb <{}, {}, {}>".format(0, 0, 0)
+    purple  = "rgb <{}, {}, {}>".format(0, 128/255, 128/255)
+    cyan    =  "rgb <{}, {}, {}>".format(0, 1, 1)
+    pink    =  "rgb <{}, {}, {}>".format(1, 105/255, 180/255)
+    brown   =  "rgb <{}, {}, {}>".format(160/255, 82/255, 45/255)
+    salmon  =  "rgb <{}, {}, {}>".format(1, 140/255, 105/255)
+    grey    =  "rgb <{}, {}, {}>".format(128/255, 128/255, 128/255)  
+        
+    # S6 length
+    ps6 = A - (A-B) * Svol * PHI**6
+    e1_s6 = Edge(A, D) # 1
+    e2_s6 = Edge(A, C) # 1
+    e3_s6 = Edge(A, ps6) # volume of S6
+    e4_s6 = Edge(D, ps6)
+    e5_s6 = Edge(C, ps6)
+    e6_s6 = Edge(C, D) # 1
+    
+    S6vol = e1_s6.length() * e2_s6.length() * e3_s6.length()
+    print("S6vol:", S6vol.simplify())
+    print("S6vol:", S6vol.evalf())
+    print("AD:", e1_s6.length())
+    print("AC:", e2_s6.length())
+    print("Ap:", e3_s6.length().evalf())
+    print("Dp:", e4_s6.length())
+    print("Cp:", e5_s6.length())
+    print("CD:", e6_s6.length())
+
+    # S3 lengths
+    ps3 = B - (B-A) * Svol * PHI**3
+    e1_s3 = Edge(B, D) # 1
+    e2_s3 = Edge(B, C)
+    e3_s3 = Edge(B, ps3) # volume of S3
+    e4_s3 = Edge(C, ps3) 
+    e5_s3 = Edge(D, ps3) 
+    e6_s3 = Edge(C, D)
+    
+    S3vol = e1_s3.length() * e2_s3.length() * e3_s3.length()
+    print("S3vol:", S3vol.simplify())
+    print("S3vol:", S3vol.evalf())
+    print("BD:", e1_s3.length())
+    print("BC:", e2_s3.length())
+    print("Bp:", e3_s3.length().evalf())
+    
+    print()
+    
+    print("Total volume:", (S3vol + S6vol).evalf())
+    
+    with open("testing47.pov", "w") as T:
+        T.write(pov_header)
+        T.write(BRYG)
+       
+        def regtet():
+            draw_vert(A, red, 0.03, T)
+            draw_vert(B, green, 0.03, T)
+            draw_vert(C, blue, 0.03, T)
+            draw_vert(D, yellow, 0.03, T)
+        
+            draw_edge(Edge(A,B), green, 0.01, T)
+            draw_edge(Edge(A,C), green, 0.01, T)
+            draw_edge(Edge(A,D), green, 0.01, T)
+            draw_edge(Edge(B,C), green, 0.01, T)
+            draw_edge(Edge(C,D), green, 0.01, T)
+            draw_edge(Edge(D,B), green, 0.01, T)        
+            draw_vert(ps6, magenta, 0.03, T)
+            draw_vert(ps3, magenta, 0.03, T)
+            
+        def draw_S6():
+            #draw_edge(e1_s6, orange, 0.02, T)
+            #draw_edge(e2_s6, orange, 0.02, T)
+            #draw_edge(e3_s6, orange, 0.02, T)
+            #draw_vert(ps6, blue, 0.03, T)
+            draw_edge(e4_s6, orange, 0.01, T)
+            draw_edge(e5_s6, orange, 0.01, T)
+            draw_edge(e6_s6, orange, 0.01, T)
+
+        def draw_S3():
+            draw_edge(e1_s3, red, 0.01, T)
+            draw_edge(e2_s3, red, 0.01, T)
+            draw_edge(e3_s3, red, 0.01, T)
+            draw_vert(ps3, blue, 0.03, T)
+            draw_edge(e4_s3, red, 0.01, T)
+            draw_edge(e5_s3, red, 0.01, T)
+            draw_edge(e6_s3, red, 0.01, T)
+        
+        regtet()
+        draw_S6()
+        # draw_S3()
         
 if __name__ == "__main__":
-    test46()
+    test47()
