@@ -143,6 +143,7 @@ https://docs.google.com/presentation/d/1ynde13tnMAu7EelfVuQVTFDUWGYBcRDRmtkMu4LI
 
 
 @author:  K. Urner, 4D Solutions, (M) MIT License
+ Aug 06, 2025: fix typo in Qvector
  Jan 21, 2025: rewrite the docstring
  Dec 31, 2024: DIAM=1; RAD=1/2 and DIAM=2; RAD=1 need to both work equally well
  Dec 26, 2024: simplify Qvector <-> Vector conversion algs
@@ -353,7 +354,7 @@ class Qvector:
     """Quadray vector"""
 
     def __init__(self, arg):
-        """Initialize a vector at an (x,y,z)"""
+        """Initialize a vector at an (a,b,c,d)"""
         self.coords = self.norm(arg)
 
     def __repr__(self):
@@ -551,11 +552,11 @@ class Test_Qvector(unittest.TestCase):
 
     def test_A_length(self):
         with setcontext(one):
-            self.assertEqual(A.length(), sqrt(6)/4, "PV not DIAM")
+            self.assertEqual(A.length(), sqrt(6)/4, "PV wrong length")
 
     def test_A_length_2(self):
         with setcontext(two):
-            self.assertEqual(A.length(), sqrt(6)/2, "PV not DIAM")
+            self.assertEqual(A.length(), sqrt(6)/2, "PV wrong length")
 
     def test_2R_length(self):
         with setcontext(two):
