@@ -47,7 +47,7 @@ CLOSEUP = \
    
 // perspective (default) camera
 camera {
-  location  <2, 0.1, 0.2>
+  location  <3, 0.1, 0.2>
   rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
@@ -290,9 +290,62 @@ camera {
             draw_poly(rd + ball, T)            
 
     return balldict
+
+def test4():
+    "Qvector addition: 12-around 1"
+    camera = CLOSEUP
     
+    one  = sy.Integer(1)
+    zero = sy.Integer(0)
+    
+    cu = Cube()
+    co = Cuboctahedron()
+    
+    final_stops = []
+    
+    for idx, t in enumerate(sorted(list(UNIQUE))):
+        qv0 = t[0] * Qvector((one, zero, zero, zero))
+        qv1 = t[1] * Qvector((zero, one, zero, zero))
+        qv2 = t[2] * Qvector((zero, zero, one, zero))
+        qv3 = t[3] * Qvector((zero, zero, zero, one))
+
+        print(qv0, qv1, qv2, qv3, sep="\n")
+        print()
+        
+        stops = (ORIGIN, 
+                 ORIGIN + qv0, 
+                 ORIGIN + qv0 + qv1, 
+                 ORIGIN + qv0 + qv1 + qv2,
+                 ORIGIN + qv0 + qv1 + qv2 + qv3)
+        
+        final_stops.append(stops[-1])
+        
+        with open("qva_{}.pov".format(idx), "w") as T:
+            T.write(pov_header)
+            T.write(camera)
+
+            draw_vert(stops[0], red, 0.04, T)
+            draw_vert(stops[1], red, 0.04, T)
+            draw_vert(stops[2], red, 0.04, T)
+            draw_vert(stops[3], red, 0.04, T)
+            
+            draw_poly(cu, T)
+            draw_poly(co, T)  
+            
+            if stops[0] != stops[1]:
+                draw_edge(Edge(stops[0], stops[1]), orange, 0.02, T)
+            if stops[1] != stops[2]:
+                draw_edge(Edge(stops[1], stops[2]), orange, 0.02, T)
+            if stops[2] != stops[3]:
+                draw_edge(Edge(stops[2], stops[3]), orange, 0.02, T)
+            if stops[3] != stops[4]:
+                draw_edge(Edge(stops[3], stops[4]), orange, 0.02, T)                              
+
+            for fs in final_stops:
+                draw_vert(fs, "T_Stone18", 0.08, T, texture=True)
+                
 def main():
-    test3()
+    test4()
     
 if __name__ == "__main__":
     main()
