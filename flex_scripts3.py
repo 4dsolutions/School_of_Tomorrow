@@ -30,6 +30,10 @@ Evol = (rt2(2)/8) * (PHI ** -3)
 sfactor = Svol/Evol
 
 def test1():
+    """
+    rotate Qvector tip around Quadray A per Tom Ace method
+    https://www.minortriad.com/quadray.html
+    """
 
     orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
     brown  = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)

@@ -143,7 +143,7 @@ https://docs.google.com/presentation/d/1ynde13tnMAu7EelfVuQVTFDUWGYBcRDRmtkMu4LI
 
 
 @author:  K. Urner, 4D Solutions, (M) MIT License
- Oct 07, 2025: restore Tom Ace Qvector qrotx and test it (flex_scripts3.test1)
+ Oct 07, 2025: restore Tom Ace Qvector qrotA and test it (flex_scripts3.test1)
  Aug 06, 2025: fix typo in Qvector
  Jan 21, 2025: rewrite the docstring
  Dec 31, 2024: DIAM=1; RAD=1/2 and DIAM=2; RAD=1 need to both work equally well
