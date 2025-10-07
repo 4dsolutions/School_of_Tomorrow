@@ -143,6 +143,7 @@ https://docs.google.com/presentation/d/1ynde13tnMAu7EelfVuQVTFDUWGYBcRDRmtkMu4LI
 
 
 @author:  K. Urner, 4D Solutions, (M) MIT License
+ Oct 07, 2025: restore Tom Ace Qvector qrotx and test it (flex_scripts3.test1)
  Aug 06, 2025: fix typo in Qvector
  Jan 21, 2025: rewrite the docstring
  Dec 31, 2024: DIAM=1; RAD=1/2 and DIAM=2; RAD=1 need to both work equally well
@@ -191,6 +192,7 @@ zero = sp.Integer(0)
 half = sp.Rational(1, 2)
 one  = sp.Integer(1)
 two  = sp.Rational(2)
+three= sp.Rational(3)
 
 DIAM = one # comment out if DIAM = two
 # DIAM = two
@@ -456,7 +458,21 @@ class Qvector:
                + a1*b2*C - a1*b2*D - a2*B*d1 + a2*B*c1 
                + a2*C*d1 - a2*D*c1 - a2*b1*C + a2*b1*D)
         return k * the_sum
-    
+
+    def qrotx(self, theta):
+        """
+        rotate self about quadray A by theta degrees
+        https://www.minortriad.com/quadray.html
+        """
+        F = (two * cos(radians(theta      )) + 1)/three
+        G = (two * cos(radians(theta - 120)) + 1)/three
+        H = (two * cos(radians(theta + 120)) + 1)/three
+        R = sp.Matrix([[one, zero, zero, zero],
+                       [zero,   F,    H,    G],
+                       [zero,   G,    F,    H],
+                       [zero,   H,    G,    F]])  
+        return Qvector(tuple(R * sp.Matrix(tuple(self.coords))))
+        
     def area(self, v1):
         """
         area in unit triangles of edges D
