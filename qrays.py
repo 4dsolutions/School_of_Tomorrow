@@ -143,7 +143,7 @@ https://docs.google.com/presentation/d/1ynde13tnMAu7EelfVuQVTFDUWGYBcRDRmtkMu4LI
 
 
 @author:  K. Urner, 4D Solutions, (M) MIT License
- Oct 07, 2025: restore Tom Ace Qvector qrotA and test it (flex_scripts3.test1)
+ Oct 07, 2025: restore Tom Ace Qvector qrotA and test it at flex_scripts3.test1
  Aug 06, 2025: fix typo in Qvector
  Jan 21, 2025: rewrite the docstring
  Dec 31, 2024: DIAM=1; RAD=1/2 and DIAM=2; RAD=1 need to both work equally well
@@ -459,9 +459,9 @@ class Qvector:
                + a2*C*d1 - a2*D*c1 - a2*b1*C + a2*b1*D)
         return k * the_sum
 
-    def qrotx(self, theta):
+    def qrotA(self, theta):
         """
-        rotate self about quadray A by theta degrees
+        rotate self about the x axis by theta degrees
         https://www.minortriad.com/quadray.html
         """
         F = (two * cos(radians(theta      )) + 1)/three
