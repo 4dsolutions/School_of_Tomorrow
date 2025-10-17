@@ -30,10 +30,6 @@ Evol = (rt2(2)/8) * (PHI ** -3)
 sfactor = Svol/Evol
 
 def test1():
-    """
-    rotate Qvector tip around Quadray A per Tom Ace method
-    https://www.minortriad.com/quadray.html
-    """
 
     orange = "rgb <{}, {}, {}>".format(1, 128/255, 0)
     brown  = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
@@ -50,7 +46,7 @@ def test1():
         draw_edge(Edge(ORIGIN, x_spoke), blue, 0.03, T)
 
         for degrees in range(360):
-            newtip = tip.qrotx(degrees)
+            newtip = tip.qrotA(degrees)
             edge = Edge(ORIGIN, newtip)
             draw_edge(edge, brown, 0.03, T)
             draw_vert(newtip, c=green , r=0.03, t=T)
