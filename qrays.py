@@ -370,12 +370,12 @@ class Qvector:
                    arg[1] - minarg, 
                    arg[2] - minarg, 
                    arg[3] - minarg)
-    
+
     def norm0(self):
         """Normalize such that sum of 4-tuple members = 0"""
-        q  = self.coords
-        av = sp.Rational(sum(q), 4)
-        return IVM(q[0]-av, q[1]-av, q[2]-av, q[3]-av)
+        a,b,c,d  = self.coords
+        av = (a + b + c + d) * sp.Rational(1,4)
+        return IVM(a-av, b-av, c-av, d-av)
     
     def unit_vector(self):
         return self/self.length()
