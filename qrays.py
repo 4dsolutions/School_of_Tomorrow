@@ -143,6 +143,7 @@ https://docs.google.com/presentation/d/1ynde13tnMAu7EelfVuQVTFDUWGYBcRDRmtkMu4LI
 
 
 @author:  K. Urner, 4D Solutions, (M) MIT License
+ Nov 06, 2025: implement length2 which works independently of norm0, add a test
  Oct 07, 2025: restore Tom Ace Qvector qrotA and test it at flex_scripts3.test1
  Aug 06, 2025: fix typo in Qvector
  Jan 21, 2025: rewrite the docstring
@@ -373,7 +374,7 @@ class Qvector:
     def norm0(self):
         """Normalize such that sum of 4-tuple members = 0"""
         q  = self.coords
-        av = (q[0] + q[1] + q[2] + q[3])/4
+        av = sp.Rational(sum(q), 4)
         return IVM(q[0]-av, q[1]-av, q[2]-av, q[3]-av)
     
     def unit_vector(self):
@@ -438,6 +439,14 @@ class Qvector:
         t = self.norm0()
         return DIAM * sp.sqrt(half * (t[0]**2 + t[1]**2 + t[2]**2 + t[3]**2))
 
+    def length2(self):
+        """
+        Uses canonical normalization
+        https://grunch.net/synergetics/quadintro.html
+        """
+        a,b,c,d = self.coords
+        return DIAM * half * sp.sqrt(sp.Rational(3,2) * (a**2 + b**2 + c**2 + d**2) - (a*b + a*c + a*d + b*c + b*d + c*d))
+        
     def xyzlength(self):
         return self.xyz.length()
         
@@ -560,7 +569,6 @@ class setcontext:
         DIAM = self._old_diam
         RAD = self._old_rad
         
-
 class Test_Qvector(unittest.TestCase):
     
     def test_unit_length(self):
@@ -592,6 +600,9 @@ class Test_Qvector(unittest.TestCase):
     def test_angle_2(self):
         with setcontext(two):        
             self.assertAlmostEqual(A.angle(B), 109.471, places=3)
+
+    def test_lengths(self):
+        self.assertEqual((A-B).length(), (A-B).length2(), "different length results")
 
     
 if __name__ == "__main__":
