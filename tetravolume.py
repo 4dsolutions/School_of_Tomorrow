@@ -87,20 +87,23 @@ import sys
 
 # ============[ GLOBAL CONSTANTS ]=================== 
 
-Syn3  = rt2(Rational(9, 8))
-root2 = rt2(2)
-root3 = rt2(3)
-root5 = rt2(5)
-root6 = rt2(6)
+R = Rational(1,2)
+D = Integer(1)
+
+Syn3   = rt2(Rational(9, 8))
+root2  = rt2(2)
+root3  = rt2(3)
+root5  = rt2(5)
+root6  = rt2(6)
+root10 = rt2(10)
 
 PHI = (1 + root5)/2
 
 Svol = (PHI **-5)/2  
 Evol = (root2/8) * (PHI ** -3)
 Avol = Bvol = Tvol = Rational(1,24)
-Kvol = Tvol * Rational(3,2)
 
-sfactor = Svol/Evol
+sfactor = Svol/Evol  # = (2*root2 / PHI**2) = (3*root2 - root10)
 
 # ============[ TETRAHEDRON CLASS ]=================== 
 
