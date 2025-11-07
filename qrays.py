@@ -192,8 +192,8 @@ root2    = sqrt(2)
 zero = sp.Integer(0)
 half = sp.Rational(1, 2)
 one  = sp.Integer(1)
-two  = sp.Rational(2)
-three= sp.Rational(3)
+two  = sp.Integer(2)
+three= sp.Integer(3)
 
 DIAM = one # comment out if DIAM = two
 # DIAM = two
