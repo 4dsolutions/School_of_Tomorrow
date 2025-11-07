@@ -17,6 +17,7 @@ from qrays import Qvector, Vector, A, B, C, D
 import numpy as np
 import sympy as sy
 from sympy import sqrt as rt2
+from mpmath import radians
 
 from itertools import permutations
 g = permutations((2,1,1,0))
@@ -200,9 +201,69 @@ def test3():
 
         draw_poly(tet, T)
         draw_poly(invtet, T)
-        
-if __name__ == "__main__":
-    test2()
-                        
-        
+
+def test4():
+    """
+    [(0, 'sin', 'cos', 0),
+     ('sin', 0, 'cos', 0),
+     (0, 'sin', 0, 'cos'),
+     ('sin', 'cos', 0, 0),
+     ('sin', 0, 0, 'cos'),
+     (0, 0, 'sin', 'cos')]
+    """
+
+    green   = "rgb <0, 1, 0>"
+    orange  = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    black   = "rgb <0, 0, 0>"
+    red     = "rgb <1, 0, 0>"
+    blue    = "rgb <0, 0, 1>"
+    yellow  = "rgb <1, 1, 0>"
+    brown   = "rgb <{}, {}, {}>".format(102/255, 51/255, 0)
+    magenta = "rgb <{}, {}, {}>".format(1, 0, 1)
+    purple  = "rgb <{}, {}, {}>".format(0, 128/255, 128/255)
+    cyan    =  "rgb <{}, {}, {}>".format(0, 1, 1)
+    pink    =  "rgb <{}, {}, {}>".format(1, 105/255, 180/255)
     
+    cu = Cube()
+    cu.edge_radius = 0.03
+    
+    oc = Octahedron()
+    oc.edge_radius = 0.03
+    
+    with open("trig_test.pov", "w") as T:
+        T.write(pov_header)
+        # T.write(CLOSEUP)
+        
+        #draw_edge(Edge(ORIGIN, A), black, 0.03, T)
+        #draw_edge(Edge(ORIGIN, B), black, 0.03, T)
+        #draw_edge(Edge(ORIGIN, C), black, 0.03, T)
+        #draw_edge(Edge(ORIGIN, D), black, 0.03, T)
+
+        #draw_edge(Edge(ORIGIN, -A), black, 0.03, T)
+        #draw_edge(Edge(ORIGIN, -B), black, 0.03, T)
+        #draw_edge(Edge(ORIGIN, -C), black, 0.03, T)
+        #draw_edge(Edge(ORIGIN, -D), black, 0.03, T)
+        
+        draw_vert(ORIGIN, orange, 0.05, T)
+        draw_poly(cu, T)
+        draw_poly(oc, T)
+        
+        for i in range(360):
+            r = radians(i)
+            p0 = Qvector((0, sy.sin(r), sy.cos(r), 0)) # (0, 'sin', 'cos', 0)
+            p1 = Qvector((sy.sin(r), 0, sy.cos(r), 0)) # ('sin', 0, 'cos', 0)
+            p2 = Qvector((0, sy.sin(r), 0, sy.cos(r))) # (0, 'sin', 0, 'cos')
+            p3 = Qvector((sy.sin(r), sy.cos(r), 0, 0)) # ('sin', 'cos', 0, 0)
+            p4 = Qvector((sy.sin(r), 0, 0, sy.cos(r))) # ('sin', 0, 0, 'cos')          
+            p5 = Qvector((0, 0, sy.sin(r), sy.cos(r))) # (0, 0, 'sin', 'cos')
+            
+            draw_vert(p0, magenta, 0.03, T)
+            draw_vert(p1, blue, 0.03, T)
+            draw_vert(p2, purple, 0.03, T)
+            draw_vert(p3, yellow, 0.03, T)
+            draw_vert(p4, brown, 0.03, T)
+            draw_vert(p5, cyan, 0.03, T)
+            
+if __name__ == "__main__":
+    test4()
+                        
