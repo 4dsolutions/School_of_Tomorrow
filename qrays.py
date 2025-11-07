@@ -434,18 +434,19 @@ class Qvector:
                   
     def length(self):
         """
-        Uses norm0
+        Uses norm0; swap names length and length2 to test both with unit tests
         """
         t = self.norm0()
         return DIAM * sp.sqrt(half * (t[0]**2 + t[1]**2 + t[2]**2 + t[3]**2))
 
     def length2(self):
         """
-        Uses canonical normalization
         https://grunch.net/synergetics/quadintro.html
+        uses canonical normalization and distance formula for DIAM=2
         """
         a,b,c,d = self.coords
-        return DIAM * half * sp.sqrt(sp.Rational(3,2) * (a**2 + b**2 + c**2 + d**2) - (a*b + a*c + a*d + b*c + b*d + c*d))
+        return DIAM * half * sp.sqrt(sp.Rational(3,2) * (a**2 + b**2 + c**2 + d**2)  
+                                     - (a*b + a*c + a*d + b*c + b*d + c*d))
         
     def xyzlength(self):
         return self.xyz.length()
