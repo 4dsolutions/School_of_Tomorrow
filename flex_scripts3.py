@@ -16,7 +16,7 @@ from qrays import Qvector, Vector, A, B, C, D
 
 import numpy as np
 import sympy as sy
-from sympy import sqrt as rt2
+from sympy import sqrt as rt2, sin, cos
 from mpmath import radians
 
 from itertools import permutations
@@ -244,25 +244,28 @@ def test4():
         #draw_edge(Edge(ORIGIN, -C), black, 0.03, T)
         #draw_edge(Edge(ORIGIN, -D), black, 0.03, T)
         
-        draw_vert(ORIGIN, orange, 0.05, T)
-        draw_poly(cu, T)
-        draw_poly(oc, T)
+        # draw_vert(ORIGIN, orange, 0.05, T)
         
-        for i in range(360):
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+        draw_poly(cu, T)  # canonical cube tv 3
+        draw_poly(oc, T)  # canonical octahedron tv 4
+        
+        for i in range(360): # from 0 to 359 degrees
             r = radians(i)
-            p0 = Qvector((0, sy.sin(r), sy.cos(r), 0)) # (0, 'sin', 'cos', 0)
-            p1 = Qvector((sy.sin(r), 0, sy.cos(r), 0)) # ('sin', 0, 'cos', 0)
-            p2 = Qvector((0, sy.sin(r), 0, sy.cos(r))) # (0, 'sin', 0, 'cos')
-            p3 = Qvector((sy.sin(r), sy.cos(r), 0, 0)) # ('sin', 'cos', 0, 0)
-            p4 = Qvector((sy.sin(r), 0, 0, sy.cos(r))) # ('sin', 0, 0, 'cos')          
-            p5 = Qvector((0, 0, sy.sin(r), sy.cos(r))) # (0, 0, 'sin', 'cos')
+            sinr, cosr = sin(r), cos(r)
+            p0 = Qvector((0, sinr, cosr, 0)) # (0, sin, cos, 0)
+            p1 = Qvector((sinr, 0, cosr, 0)) # (sin, 0, cos, 0)
+            p2 = Qvector((0, sinr, 0, cosr)) # (0, sin, 0, cos)
+            p3 = Qvector((sinr, cosr, 0, 0)) # (sin, cos, 0, 0)
+            p4 = Qvector((sinr, 0, 0, cosr)) # (sin, 0, 0, cos)          
+            p5 = Qvector((0, 0, sinr, cosr)) # (0, 0, sin, cos)
             
             draw_vert(p0, magenta, 0.03, T)
-            draw_vert(p1, blue, 0.03, T)
-            draw_vert(p2, purple, 0.03, T)
-            draw_vert(p3, yellow, 0.03, T)
-            draw_vert(p4, brown, 0.03, T)
-            draw_vert(p5, cyan, 0.03, T)
+            draw_vert(p1, blue,    0.03, T)
+            draw_vert(p2, orange,  0.03, T)
+            draw_vert(p3, yellow,  0.03, T)
+            draw_vert(p4, pink,    0.03, T)
+            draw_vert(p5, cyan,    0.03, T)
             
 if __name__ == "__main__":
     test4()
