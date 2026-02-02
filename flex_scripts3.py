@@ -36,7 +36,7 @@ CLOSEUP = \
 // perspective (default) camera
 camera {
   location  <3, 0.1, 0.2>
-  rotate    <90, 0, 47.0>
+  rotate    <35, 20, 33.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
 }
@@ -266,7 +266,144 @@ def test4():
             draw_vert(p3, yellow,  0.03, T)
             draw_vert(p4, pink,    0.03, T)
             draw_vert(p5, cyan,    0.03, T)
-            
+
+def test5():
+    magenta = "rgb <{}, {}, {}>".format(1, 0, 1)
+    
+    cu3    = Cube()            # face diagonals = D
+    cu3.edge_radius = 0.03
+
+    xyzcu  = cu3 * (1/rt2(2))  # cube edges = R
+    xyzcu.edge_color = magenta
+    xyzcu.edge_radius = 0.03
+    xyzcu.vert_color = magenta
+
+    rd     = RD()              # hug ball
+        
+    with open("learn_s3_0.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(cu3, T)
+        draw_poly(xyzcu, T)
+        
+    with open("learn_s3_1.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(cu3, T)
+        draw_poly(xyzcu, T)
+        draw_poly(rd, T)
+
+    with open("learn_s3_2.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(cu3, T)
+        draw_poly(xyzcu, T)
+        draw_poly(rd, T)
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+
+def test6():
+
+    big_size = 0.07
+    sml_size = 0.04
+
+    green   = "rgb <0, 1, 0>"
+    blue    = "rgb <0, 0, 1>"
+    yellow  = "rgb <1, 1, 0>"
+    red     = "rgb <1, 0, 0>"
+    
+    cu3    = Cube()            # face diagonals = D
+    cu3.edge_radius = 0.03
+
+    BRYG  = Tetrahedron() 
+    BRYG.edge_radius = 0.03
+
+    bryg  = InvTetrahedron() 
+    bryg.edge_radius = 0.03
+    
+    oc4    = Octahedron()          
+    oc4.edge_radius = 0.03
+    
+    rd6    = RD()          
+    rd6.edge_radius = 0.03
+
+    with open("ccp_ball_1.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(cu3, T)
+        draw_poly(BRYG, T)
+        draw_poly(bryg, T)
+        
+        draw_vert(A, red, big_size, T)
+        draw_vert(B, green, big_size, T)
+        draw_vert(C, blue, big_size, T)
+        draw_vert(D, yellow, big_size, T)
+
+        draw_vert(-A, red, sml_size, T)
+        draw_vert(-B, green, sml_size, T)
+        draw_vert(-C, blue, sml_size, T)
+        draw_vert(-D, yellow, sml_size, T)
+           
+    with open("ccp_ball_2.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(cu3, T)
+        draw_poly(BRYG, T)
+        draw_poly(bryg, T)
+        
+        draw_vert(A, red, big_size, T)
+        draw_vert(B, green, big_size, T)
+        draw_vert(C, blue, big_size, T)
+        draw_vert(D, yellow, big_size, T)
+
+        draw_vert(-A, red, sml_size, T)
+        draw_vert(-B, green, sml_size, T)
+        draw_vert(-C, blue, sml_size, T)
+        draw_vert(-D, yellow, sml_size, T)
+        
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+
+    with open("ccp_ball_3.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(cu3, T)
+        draw_poly(BRYG, T)
+        draw_poly(bryg, T)
+        
+        draw_vert(A, red, big_size, T)
+        draw_vert(B, green, big_size, T)
+        draw_vert(C, blue, big_size, T)
+        draw_vert(D, yellow, big_size, T)
+
+        draw_vert(-A, red, sml_size, T)
+        draw_vert(-B, green, sml_size, T)
+        draw_vert(-C, blue, sml_size, T)
+        draw_vert(-D, yellow, sml_size, T)
+    
+        draw_poly(oc4, T)
+        draw_poly(rd6, T)
+        
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+
+    with open("ccp_ball_4.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(cu3, T)
+        draw_poly(BRYG, T)
+        draw_poly(bryg, T)
+        
+        draw_vert(A, red, big_size, T)
+        draw_vert(B, green, big_size, T)
+        draw_vert(C, blue, big_size, T)
+        draw_vert(D, yellow, big_size, T)
+
+        draw_vert(-A, red, sml_size, T)
+        draw_vert(-B, green, sml_size, T)
+        draw_vert(-C, blue, sml_size, T)
+        draw_vert(-D, yellow, sml_size, T)
+    
+        draw_poly(oc4, T)
+        draw_poly(rd6, T)
+           
 if __name__ == "__main__":
-    test4()
+    test6()
                         

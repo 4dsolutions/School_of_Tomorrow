@@ -143,6 +143,7 @@ https://docs.google.com/presentation/d/1ynde13tnMAu7EelfVuQVTFDUWGYBcRDRmtkMu4LI
 
 
 @author:  K. Urner, 4D Solutions, (M) MIT License
+ Feb 02, 2026: named Qvector((0,0,0,0)) ORIGIN as in other modules
  Nov 06, 2025: implement length2 which works independently of norm0, add a test
  Oct 07, 2025: restore Tom Ace Qvector qrotA and test it at flex_scripts3.test1
  Aug 06, 2025: fix typo in Qvector
@@ -432,19 +433,29 @@ class Qvector:
         """Return a vector, the negative of this one."""
         return type(self)(tuple(map(neg, self.coords)))
                   
-    def length(self):
+    def length3(self):
         """
-        Uses norm0; swap names length and length2 to test both with unit tests
+        Uses norm0; swap names length, length2, length3 to test each 
+        with unit tests: python qrays.py & python tetravolume.py
         """
-        t = self.norm0()
-        return DIAM * sp.sqrt(half * (t[0]**2 + t[1]**2 + t[2]**2 + t[3]**2))
+        a,b,c,d = self.norm0()
+        return DIAM * sp.sqrt(half * (a**2 + b**2 + c**2 + d**2))
 
-    def length2(self):
+    def length(self):
         """
         https://grunch.net/synergetics/quadintro.html
         uses canonical normalization and distance formula for DIAM=2
+        so a half factor added for DIAM=1 default
         """
         a,b,c,d = self.coords
+        return DIAM * half * sp.sqrt(sp.Rational(3,2) * (a**2 + b**2 + c**2 + d**2)  
+                                     - (a*b + a*c + a*d + b*c + b*d + c*d))
+
+    def length2(self):
+        """
+        variant of length2 showing norm0ed qrays give the same answer
+        """
+        a,b,c,d = self.norm0()
         return DIAM * half * sp.sqrt(sp.Rational(3,2) * (a**2 + b**2 + c**2 + d**2)  
                                      - (a*b + a*c + a*d + b*c + b*d + c*d))
         
@@ -548,6 +559,8 @@ A = Qvector((one, zero, zero, zero))
 B = Qvector((zero, one, zero, zero))
 C = Qvector((zero, zero, one, zero))
 D = Qvector((zero, zero, zero, one))
+
+ORIGIN = Qvector((zero, zero, zero, zero))
 
 X = Vector((one, zero, zero))
 Y = Vector((zero, one, zero))
