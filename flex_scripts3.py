@@ -403,7 +403,61 @@ def test6():
     
         draw_poly(oc4, T)
         draw_poly(rd6, T)
-           
+
+def test7():
+    """
+    This function gets detailed expository treatment 
+    in a School of Tomorrow Jupyter Notebook:
+        
+    https://github.com/4dsolutions/School_of_Tomorrow/blob/master/Shapes_Framework.ipynb
+    """
+    
+    ic    = Icosahedron()    # edges D
+    ic.edge_radius = 0.03
+
+    pd  = PD()               # Icosa's dual
+    pd.edge_radius = 0.03
+
+    rt  = RT()               # their "begot" 
+    rt.edge_radius = 0.03
+    
+    rt_e    = rt * (1/PHI)          
+    rt_e.edge_radius = 0.03
+ 
+    with open("genesis_1.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(ic, T)
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+     
+    with open("genesis_2.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(ic, T)
+        draw_poly(pd, T)
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+
+    with open("genesis_3.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(ic, T)
+        draw_poly(pd, T)
+        draw_poly(rt, T)
+        
+    with open("genesis_4.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(ic, T)
+        draw_poly(pd, T)
+        draw_poly(rt_e, T)
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+
+    with open("genesis_5.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(rt_e, T)
+        draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
+            
 if __name__ == "__main__":
-    test6()
+    test7()
                         
