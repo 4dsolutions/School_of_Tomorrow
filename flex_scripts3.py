@@ -5,11 +5,13 @@ Created on Thurs Feb 13 2025
 
 @author: K. Urner
 
-Apr  8: make this 2nd of 2 files, flex_scripts1.py being the first
-Feb 19: import PHI as sympy object vs using math.sqrt  
+Feb  7 2026: add A module
+Feb  5 2026: new tests
+Apr  8 2025: make this 2nd of 2 files, flex_scripts1.py being the first
+Feb 19 2025: import PHI as sympy object vs using math.sqrt  
 """
 
-from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron, RT
+from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron, RT, Amod
 from flextegrity import Tetrahedron, InvTetrahedron, RD, PD, Icosahedron, Mite
 from flextegrity import Edge, draw_edge, draw_poly, draw_vert, half, ORIGIN, PHI
 from qrays import Qvector, Vector, A, B, C, D
@@ -457,7 +459,25 @@ def test7():
         T.write(CLOSEUP)
         draw_poly(rt_e, T)
         draw_vert(ORIGIN, "T_Stone18", half, T, texture=True)
-            
+
+def test8():
+    
+    cu3   = Cube()
+    cu3.edge_radius = 0.01
+    
+    hbt   = Tetrahedron()
+    hbt.edge_radius = 0.01
+    
+    amod  = Amod()
+    amod.edge_radius = 0.02
+
+    with open("amod_in_hbt.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        draw_poly(cu3, T)
+        draw_poly(hbt, T)
+        draw_poly(amod, T)
+        
 if __name__ == "__main__":
-    test7()
+    test8()
                         

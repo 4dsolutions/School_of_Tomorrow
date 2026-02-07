@@ -435,7 +435,7 @@ class A(Tetrahedron):
         amod_CE = b
         amod_DE = amod_D
         
-        # around the base, C, D, E
+        # around the base, F, C, D
         amod_CF = amod_C - amod_F
         amod_CD = amod_C - amod_D
         amod_DF = amod_D - amod_F

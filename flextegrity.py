@@ -29,6 +29,7 @@ the edges (vector pairs, connecting endpoints).
 
 self.edges = self._distill()
 
+Feb   7, 2026:  add Amod as a Polyhedron
 Apr  29, 2025:  prettify, shorten E,F,G,H to -A,-B,-C,-D
 Apr   8, 2025:  refactor to split off remaining testnn() functions
 Jan  22, 2025:  rethink deriving icosa from cubocta vectors
@@ -46,10 +47,11 @@ from qrays import Qvector, Vector
 import sympy as sy  
 from sympy import sqrt as rt2
 
-two  = sy.Integer(2)
-one  = sy.Integer(1)
-half = sy.Rational(1, 2)
-zero = sy.Integer(0)
+three = sy.Integer(3)
+two   = sy.Integer(2)
+one   = sy.Integer(1)
+half  = sy.Rational(1, 2)
+zero  = sy.Integer(0)
 
 PHI = (one + rt2(5))/two
 
@@ -64,7 +66,7 @@ E,F,G,H     = -A, -B, -C, -D
 I,J,K,L,M,N = A+B, A+C, A+D, B+C, B+D, C+D
 O,P,Q,R,S,T = I+J, I+K, I+L, I+M, N+J, N+K
 U,V,W,X,Y,Z = N+L, N+M, J+L, L+M, M+K, K+J
-
+    
 sfactor = 20/(5 * rt2(2) * PHI**2) # VE/icosa vol ratio
 half = sy.Rational(1,2)
 
@@ -362,7 +364,8 @@ class InvTetrahedron(Polyhedron):
     
     def __init__(self):
         # POV-Ray
-        self.edge_color = "rgb <{}, {}, {}>".format(67/255, 70/255, 75/255) # black
+        # self.edge_color = "rgb <{}, {}, {}>".format(67/255, 70/255, 75/255) # black
+        self.edge_color = "rgb <0, 0, 0>"
         self.edge_radius= 0.03
         self.vert_color = self.edge_color
         self.vert_radius= 0.03
@@ -788,6 +791,45 @@ class Mite(Polyhedron):
 
         self.edges = self._distill()
         
+class Amod(Polyhedron):
+    """
+    A = A module in Synergetics
+    """
+
+    def __init__(self):
+        # POV-Ray
+        self.edge_color = "rgb <1, 0, 0>"
+        self.edge_radius= 0.03
+        self.vert_color = "rgb <1, 0, 0>"
+        self.vert_radius= 0.03
+        self.face_color = "rgb <1, 0, 0>"
+
+        self.name = "Amod"
+        self.nick = "A"
+        self.volume = sy.Rational(1,24)  
+        self.center = ORIGIN
+        
+        # 4 vertices
+        # a = Qvector((one,0,0,0))
+        b = Qvector((0,one,0,0))
+        c = Qvector((0,0,one,0))
+        d = Qvector((0,0,0,one))
+        
+        # vertexes
+        amod_E  = Qvector((0,0,0,0))    # origin = center of home base tetrahedron
+        amod_C  = b                     # to vertex (C), choose Qvector b
+        amod_D  = (b + c)/two           # to mid-edge D of CC on tetra base 
+        amod_F  = (b + c + d)/three     # to face-center of base F
+        
+        self.vertexes = dict(E=amod_E, F=amod_F, C=amod_C, D=amod_D)
+        
+        # 4 faces
+        self.faces = (('E', 'F', 'C'),
+                      ('E', 'C', 'D'),
+                      ('E', 'D', 'F'),
+                      ('C', 'D', 'E'))
+
+        self.edges = self._distill()
         
 class Struts(Polyhedron):
     
@@ -912,16 +954,15 @@ pov_header = \
 // include "stones1.inc"    // Great stone-textures created by Mike Miller
 // include "stones2.inc"    // More, done by Dan Farmer and Paul Novak
 // include "woodmaps.inc"   // Basic wooden colormaps
-// include "woods.inc"      // Great wooden textures created by Dan Farmer and Paul Novak
+#include "woods.inc"      // Great wooden textures created by Dan Farmer and Paul Novak
 
 global_settings {assumed_gamma 1.0}
 global_settings {ambient_light rgb<1, 1, 1> }
 
 // perspective (default) camera
 camera {
-  location  <4.5, 0.1, 0.2>
-//  rotate    <35, 35, 10.0>
-  rotate    <35, 55, 20.0>
+  location  <6, 0.1, 0.2>
+  rotate    <35, 35, 10.0>
   look_at   <0.0, 0.0,  0.0>
   right     x*image_width/image_height
 }
@@ -940,7 +981,7 @@ light_source {
   translate <20, -15, -10>
 }
 
-sky_sphere { S_Cloud2 scale 2 translate -1}
+// sky_sphere { S_Cloud2 scale 2 translate -1}
 
 background { color rgb <1.0, 1.0, 1.0> }
 """
