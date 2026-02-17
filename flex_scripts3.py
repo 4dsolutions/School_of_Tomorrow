@@ -32,14 +32,39 @@ Evol = (rt2(2)/8) * (PHI ** -3)
 
 sfactor = Svol/Evol
 
-CLOSEUP = \
+CLOSEUP1 = \
 """
    
 // perspective (default) camera
 camera {
-  location  <3, 0.1, 0.2>
-  rotate    <35, 20, 33.0>
-  look_at   <0.0, 0.0,  0.0>
+  location  <3.0, 3.0, 3.1>
+  rotate    <0, 0, 0>
+  look_at   <0.0, 0.0,  0.2>
+  right     x*image_width/image_height
+}
+
+"""
+
+CLOSEUP2 = \
+"""
+
+// perspective (default) camera
+camera {
+  location  <2.0, 2.6, 2.1>
+  rotate    <10, 20, 0>
+  look_at   <0.0, 0.0,  0.2>
+  right     x*image_width/image_height
+}
+
+"""
+
+CLOSEUP = \
+"""
+// perspective (default) camera
+camera {
+  location  <0.1, 3.6, 0.1>
+  rotate    <20, 0, 20>
+  look_at   <0.0, 0.0,  0.2>
   right     x*image_width/image_height
 }
 
@@ -216,7 +241,7 @@ def test4():
 
     green   = "rgb <0, 1, 0>"
     orange  = "rgb <{}, {}, {}>".format(1, 128/255, 0)
-    black   = "rgb <0, 0, 0>"
+
     red     = "rgb <1, 0, 0>"
     blue    = "rgb <0, 0, 1>"
     yellow  = "rgb <1, 1, 0>"
@@ -477,7 +502,57 @@ def test8():
         draw_poly(cu3, T)
         draw_poly(hbt, T)
         draw_poly(amod, T)
+
+def test9():
+
+    black   = "rgb <0, 0, 0>"
+
+    big_size = half
+    sml_size = 0.04
+
+    green   = "rgb <0, 1, 0>"
+    blue    = "rgb <0, 0, 1>"
+    yellow  = "rgb <1, 1, 0>"
+    red     = "rgb <1, 0, 0>"
+    magenta = "rgb <{}, {}, {}>".format(1, 0, 1)
+    orange  = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    
+    OX = Edge(Vector((0, 0, 0)), Vector(( 1, 0, 0)))
+    Ox = Edge(Vector((0, 0, 0)), Vector((-1, 0, 0)))
+
+    OY = Edge(Vector((0, 0, 0)), Vector(( 0, 1, 0)))
+    Oy = Edge(Vector((0, 0, 0)), Vector(( 0,-1, 0)))
+    
+    OZ = Edge(Vector((0, 0, 0)), Vector(( 0, 0, 1)))
+    Oz = Edge(Vector((0, 0, 0)), Vector(( 0, 0,-1)))
+
+    cu3    = Cube()            # face diagonals = D
+    cu3.edge_radius = 0.03
+
+    BRYG  = Tetrahedron()      # not drawn
+    BRYG.edge_radius = 0.03
+    
+    with open("xyz_ivm.pov", "w") as T:
         
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        
+        draw_edge(OX, magenta, 0.03, T)
+        draw_edge(Ox, magenta, 0.03, T)
+
+        draw_edge(OY, orange, 0.03, T)
+        draw_edge(Oy, orange, 0.03, T)
+
+        draw_edge(OZ, black, 0.03, T)
+        draw_edge(Oz, black, 0.03, T)
+        
+        draw_poly(cu3, T)
+
+        draw_vert(A, red, big_size, T)
+        draw_vert(B, green, big_size, T)
+        draw_vert(C, blue, big_size, T)
+        draw_vert(D, yellow, big_size, T)
+            
 if __name__ == "__main__":
-    test8()
+    test9()
                         
