@@ -505,11 +505,10 @@ def test8():
 
 def test9():
 
-    black   = "rgb <0, 0, 0>"
-
     big_size = half
     sml_size = 0.04
 
+    black   = "rgb <0, 0, 0>"
     green   = "rgb <0, 1, 0>"
     blue    = "rgb <0, 0, 1>"
     yellow  = "rgb <1, 1, 0>"
@@ -552,7 +551,136 @@ def test9():
         draw_vert(B, green, big_size, T)
         draw_vert(C, blue, big_size, T)
         draw_vert(D, yellow, big_size, T)
-            
+
+def test10():
+
+    big_size = 0.10
+    sml_size = 0.05
+    
+    black   = "rgb <0, 0, 0>"
+    green   = "rgb <0, 1, 0>"
+    blue    = "rgb <0, 0, 1>"
+    yellow  = "rgb <1, 1, 0>"
+    red     = "rgb <1, 0, 0>"
+    magenta = "rgb <{}, {}, {}>".format(1, 0, 1)
+    orange  = "rgb <{}, {}, {}>".format(1, 128/255, 0)
+    
+    OX = Edge(Vector((0, 0, 0)), Vector(( 1, 0, 0)))
+    Ox = Edge(Vector((0, 0, 0)), Vector((-1, 0, 0)))
+
+    OY = Edge(Vector((0, 0, 0)), Vector(( 0, 1, 0)))
+    Oy = Edge(Vector((0, 0, 0)), Vector(( 0,-1, 0)))
+    
+    OZ = Edge(Vector((0, 0, 0)), Vector(( 0, 0, 1)))
+    Oz = Edge(Vector((0, 0, 0)), Vector(( 0, 0,-1)))
+
+    OA = Edge(ORIGIN, A)
+    OB = Edge(ORIGIN, B)
+    OC = Edge(ORIGIN, C)
+    OD = Edge(ORIGIN, D)        
+
+    cu3    = Cube()            # face diagonals = D
+    cu3.edge_radius = 0.03
+
+    with open("ivm_xyz_spokes_0.pov", "w") as T:
+        
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        
+        draw_edge(OX, black, 0.03, T)
+        draw_edge(Ox, black, 0.03, T)
+
+        draw_edge(OY, black, 0.03, T)
+        draw_edge(Oy, black, 0.03, T)
+
+        draw_edge(OZ, black, 0.03, T)
+        draw_edge(Oz, black, 0.03, T)
+        
+        draw_poly(cu3, T)
+
+        draw_edge(OA, red, 0.03, T)
+        draw_edge(OB, green, 0.03, T)
+        draw_edge(OC, blue, 0.03, T)
+        draw_edge(OD, yellow, 0.03, T)
+
+        draw_vert(ORIGIN, orange, 0.10, T)   
+        
+        draw_vert(A, red, big_size, T)
+        draw_vert(B, green, big_size, T)
+        draw_vert(C, blue, big_size, T)
+        draw_vert(D, yellow, big_size, T)
+        
+        draw_vert(-A, red, sml_size, T)
+        draw_vert(-B, green, sml_size, T)
+        draw_vert(-C, blue, sml_size, T)
+        draw_vert(-D, yellow, sml_size, T)
+
+    with open("ivm_xyz_spokes_1.pov", "w") as T:
+        
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        
+        draw_edge(OX, black, 0.03, T)
+        draw_edge(Ox, black, 0.03, T)
+
+        draw_edge(OY, black, 0.03, T)
+        draw_edge(Oy, black, 0.03, T)
+
+        draw_edge(OZ, black, 0.03, T)
+        draw_edge(Oz, black, 0.03, T)
+        
+        draw_poly(cu3, T)
+
+        draw_edge(OA, red, 0.03, T)
+        draw_edge(OB, green, 0.03, T)
+        draw_edge(OC, blue, 0.03, T)
+        draw_edge(OD, yellow, 0.03, T)
+
+        draw_vert(ORIGIN, orange, 0.10, T)   
+        
+        draw_vert(A, red, half, T)
+        draw_vert(B, green, half, T)
+        draw_vert(C, blue, half, T)
+        draw_vert(D, yellow, half, T)
+        
+        draw_vert(-A, red, sml_size, T)
+        draw_vert(-B, green, sml_size, T)
+        draw_vert(-C, blue, sml_size, T)
+        draw_vert(-D, yellow, sml_size, T)
+
+    with open("ivm_xyz_spokes_2.pov", "w") as T:
+        
+        T.write(pov_header) 
+        T.write(CLOSEUP)
+        
+        draw_edge(OX, black, 0.03, T)
+        draw_edge(Ox, black, 0.03, T)
+
+        draw_edge(OY, black, 0.03, T)
+        draw_edge(Oy, black, 0.03, T)
+
+        draw_edge(OZ, black, 0.03, T)
+        draw_edge(Oz, black, 0.03, T)
+        
+        draw_poly(cu3, T)
+
+        draw_edge(OA, red, 0.03, T)
+        draw_edge(OB, green, 0.03, T)
+        draw_edge(OC, blue, 0.03, T)
+        draw_edge(OD, yellow, 0.03, T)
+
+        draw_vert(ORIGIN, orange, half, T)   
+        
+        draw_vert(A, red, big_size, T)
+        draw_vert(B, green, big_size, T)
+        draw_vert(C, blue, big_size, T)
+        draw_vert(D, yellow, big_size, T)
+        
+        draw_vert(-A, red, sml_size, T)
+        draw_vert(-B, green, sml_size, T)
+        draw_vert(-C, blue, sml_size, T)
+        draw_vert(-D, yellow, sml_size, T)        
+    
 if __name__ == "__main__":
-    test9()
+    test10()
                         
