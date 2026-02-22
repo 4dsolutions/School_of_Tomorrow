@@ -505,8 +505,8 @@ def test8():
 
 def test9():
 
-    big_size = half
-    sml_size = 0.04
+    big_size = 0.10
+    sml_size = 0.05
 
     black   = "rgb <0, 0, 0>"
     green   = "rgb <0, 1, 0>"
@@ -531,10 +531,10 @@ def test9():
     BRYG  = Tetrahedron()      # not drawn
     BRYG.edge_radius = 0.03
     
-    with open("xyz_ivm.pov", "w") as T:
+    with open("test9_closeup_3.pov", "w") as T:
         
         T.write(pov_header) 
-        T.write(CLOSEUP)
+        T.write(CLOSEUP1)
         
         draw_edge(OX, magenta, 0.03, T)
         draw_edge(Ox, magenta, 0.03, T)
@@ -551,7 +551,17 @@ def test9():
         draw_vert(B, green, big_size, T)
         draw_vert(C, blue, big_size, T)
         draw_vert(D, yellow, big_size, T)
-
+          
+        draw_vert(A, red, big_size, T)
+        draw_vert(B, green, big_size, T)
+        draw_vert(C, blue, big_size, T)
+        draw_vert(D, yellow, big_size, T)
+        
+        draw_vert(-A, red, sml_size, T)
+        draw_vert(-B, green, sml_size, T)
+        draw_vert(-C, blue, sml_size, T)
+        draw_vert(-D, yellow, sml_size, T)
+        
 def test10():
 
     big_size = 0.10
@@ -682,5 +692,5 @@ def test10():
         draw_vert(-D, yellow, sml_size, T)        
     
 if __name__ == "__main__":
-    test10()
+    test9()
                         
