@@ -29,6 +29,7 @@ the edges (vector pairs, connecting endpoints).
 
 self.edges = self._distill()
 
+Feb  24, 2026:  add omnitriangulation for a STL -> 3D printer pipeline
 Feb   7, 2026:  add Amod as a Polyhedron
 Apr  29, 2025:  prettify, shorten E,F,G,H to -A,-B,-C,-D
 Apr   8, 2025:  refactor to split off remaining testnn() functions
@@ -46,6 +47,8 @@ Sept 19, 2021:  altered to work with new qray.py
 from qrays import Qvector, Vector
 import sympy as sy  
 from sympy import sqrt as rt2
+import json
+from itertools import permutations, cycle
 
 three = sy.Integer(3)
 two   = sy.Integer(2)
@@ -99,6 +102,10 @@ class Polyhedron:
     Designed to be subclassed, not used directly
     """
     
+    def __init__(self, omni=False):
+        self.omni = omni # omnitriangulate if True
+        self.edges = self._distill()
+    
     def scale(self, scalefactor):
         if hasattr(self, "volume"):
             new_volume = self.volume * scalefactor ** 3
@@ -136,6 +143,9 @@ class Polyhedron:
         edges = []
         unique = set()
         
+        if self.omni:
+            self._omni()
+            
         for f in self.faces:
             for pair in zip(f , f[1:] + (f[0],)):
                 unique.add( tuple(sorted(pair)) )
@@ -146,7 +156,35 @@ class Polyhedron:
             
         self.unique = unique # hack to keep edges as symbolic pairs
         return edges 
+    
+    def make_json(self):
+        with open("verts_{}.json".format(self.name)) as T:
+            json.dumps(self.vertices, T)
+        with open("faces_{}.json".format(self.name)) as T:            
+            json.dumps(self.faces, T)
+            
+    def _omni(self):
+        """
+        omnitriangulate faces pre distillation
+        """
+        newfaces = []
+        for f in self.faces:
+            if len(f) < 4:
+                newfaces.append(f)
+                continue
 
+            face = cycle(f)
+            anchor = next(face)
+            last   = next(face)
+            while True:
+                term = next(face)
+                if term == anchor:
+                    break
+                newfaces.append((anchor, last, term))
+                last = term
+                
+        self.faces = newfaces
+            
 class Edge:
 
     """
@@ -330,7 +368,7 @@ class Tetrahedron(Polyhedron):
     Tetrahedron
     """
     
-    def __init__(self):
+    def __init__(self, omni=False):
         # POV-Ray
         self.edge_color = "rgb <{}, {}, {}>".format(1, 140/255, 0) # orange
         self.edge_radius= 0.03
@@ -355,14 +393,15 @@ class Tetrahedron(Polyhedron):
         self.faces = (('a','b','c'),('a','c','d'),
                       ('a','d','b'),('b','d','c'))
 
-        self.edges = self._distill()
+        super().__init__(omni)
+
 
 class InvTetrahedron(Polyhedron):
     """
     Inverse Tetrahedron
     """
     
-    def __init__(self):
+    def __init__(self, omni = False):
         # POV-Ray
         # self.edge_color = "rgb <{}, {}, {}>".format(67/255, 70/255, 75/255) # black
         self.edge_color = "rgb <0, 0, 0>"
@@ -389,14 +428,14 @@ class InvTetrahedron(Polyhedron):
         self.faces = (('e','f','g'),('e','g','h'),
                       ('e','h','f'),('f','h','g'))
 
-        self.edges = self._distill()
+        super().__init__(omni)
         
 class Cube (Polyhedron):
     """
     Cube
     """
 
-    def __init__(self):
+    def __init__(self, omni = False):
         # POV-Ray
         self.edge_color = "rgb <0, 1, 0>"
         self.edge_radius= 0.03
@@ -422,14 +461,14 @@ class Cube (Polyhedron):
                       ('b','e','d','g'),('g','d','f','a'),
                       ('c','f','d','e'),('a','h','b','g'))
 
-        self.edges = self._distill()
+        super().__init__(omni)
         
 class Cuboid (Polyhedron):
     """
     Cuboid with height, width, depth = sqrt(1), sqrt(2), sqrt(4)
     """
 
-    def __init__(self):
+    def __init__(self, omni = False):
         # POV-Ray
         self.edge_color = "rgb <255/255, 20/255, 147/255>"
         self.edge_radius= 0.03
@@ -459,14 +498,14 @@ class Cuboid (Polyhedron):
                       ('A','E','F','B'),('D','H','G','C'),
                       ('A','E','H','D'),('B','F','G','C'))
 
-        self.edges = self._distill()
+        super().__init__(omni)
         
 class Octahedron (Polyhedron):
     """
     Octahedron
     """
 
-    def __init__(self):
+    def __init__(self, omni=False):
         # POV-Ray
         self.edge_color = "rgb <1, 0, 0>"
         self.edge_radius= 0.03
@@ -491,45 +530,45 @@ class Octahedron (Polyhedron):
         self.faces = (('j','k','i'),('j','i','l'),('j','l','n'),('j','n','k'),                      
                       ('m','k','i'),('m','i','l'),('m','l','n'),('m','n','k'))
 
-        self.edges = self._distill()
+        super().__init__(omni)
         
 class RD (Polyhedron):
-        """
-        Rhombic Dodecahedron
-        """
+    """
+    Rhombic Dodecahedron
+    """
 
-        def __init__(self):
-            self.edge_color = "rgb <0, 0, 1>"
-            self.edge_radius= 0.03
-            self.vert_color = "rgb <0, 0, 1>"
-            self.vert_radius= 0.03
-            self.face_color = self.edge_color 
+    def __init__(self, omni=False):
+        self.edge_color = "rgb <0, 0, 1>"
+        self.edge_radius= 0.03
+        self.vert_color = "rgb <0, 0, 1>"
+        self.vert_radius= 0.03
+        self.face_color = self.edge_color 
 
-            verts = {}
-            for vert_label in "abcdefghijklmn":
-                # keep the uppercase A-Z universe unobstructed
-                verts[vert_label] = eval(vert_label.upper())
+        verts = {}
+        for vert_label in "abcdefghijklmn":
+            # keep the uppercase A-Z universe unobstructed
+            verts[vert_label] = eval(vert_label.upper())
 
-            self.name = "Rhombic Dodecahedron"
-            self.nick = "RD"
-            self.volume = 6  # per Concentric Hierarchy
-            self.center = ORIGIN
-            
-            # 14 vertices
-            self.vertexes = verts
+        self.name = "Rhombic Dodecahedron"
+        self.nick = "RD"
+        self.volume = 6  # per Concentric Hierarchy
+        self.center = ORIGIN
+        
+        # 14 vertices
+        self.vertexes = verts
 
-            # 12 faces
-            # I,J,K,L,M,N = A+B, A+C, A+D, B+C, B+D, C+D
-            self.faces = (('j','f','k','a'),('j','f','n','c'),('j','c','l','h'),
-                          ('j','h','i','a'),('m','d','k','g'),('m','d','n','e'),
-                          ('m','e','l','b'),('m','b','i','g'),('k','d','n','f'),
-                          ('n','c','l','e'),('l','h','i','b'),('i','a','k','g'))
+        # 12 faces
+        # I,J,K,L,M,N = A+B, A+C, A+D, B+C, B+D, C+D
+        self.faces = (('j','f','k','a'),('j','f','n','c'),('j','c','l','h'),
+                      ('j','h','i','a'),('m','d','k','g'),('m','d','n','e'),
+                      ('m','e','l','b'),('m','b','i','g'),('k','d','n','f'),
+                      ('n','c','l','e'),('l','h','i','b'),('i','a','k','g'))
 
-            self.edges = self._distill()
+        super().__init__(omni)
 
 class Icosahedron (Polyhedron):
 
-    def __init__(self):
+    def __init__(self, omni=False):
         # 20 vertices
         self.edge_color = "rgb <0, 1, 1>"
         self.edge_radius= 0.03
@@ -570,12 +609,12 @@ class Icosahedron (Polyhedron):
                       ('x','u','v'),('u','s','w'),
                       ('w','q','o'),('o','z','p'))
 
-        self.edges = self._distill()
+        super().__init__(omni)
 
 class PD (Polyhedron):  
 # Pentagonal Dodecahedron
 
-    def __init__(self):
+    def __init__(self, omni=False):
         # Sienna Brown rgb(160,82,45)
         self.edge_color = "rgb <%s, %s, %s>" % (160/255, 82/255, 45/255)
         self.edge_radius= 0.03
@@ -629,12 +668,12 @@ class PD (Polyhedron):
                       )
         
 
-        self.edges = self._distill()
+        super().__init__(omni)
 
 class RT (Polyhedron):
     # Rhombic Triacontahedron
 
-    def __init__(self):
+    def __init__(self, omni = False):
         # Purple Heart rgb(105,53,156)
         self.edge_color = "rgb <%s, %s, %s>" % (105/255, 53/255, 156/255)
         self.edge_radius= 0.03
@@ -718,11 +757,11 @@ class RT (Polyhedron):
                       ('u', 'stu', 't', 'tuv'),
                       )
         
-        self.edges = self._distill()
+        super().__init__(omni)
 
 class Cuboctahedron (Polyhedron):
 
-    def __init__(self):
+    def __init__(self, omni=False):
         # 8 vertices
         self.edge_color = "rgb <1, 1, 0>"
         self.edge_radius= 0.03
@@ -757,14 +796,14 @@ class Cuboctahedron (Polyhedron):
                       ('x','u','v'),('u','s','w'),
                       ('w','q','o'),('o','z','p'))
 
-        self.edges = self._distill()
+        super().__init__(omni)
 
 class Mite(Polyhedron):
     """
     MITE = minimum tetrahedron
     """
 
-    def __init__(self):
+    def __init__(self, omni=False):
         # POV-Ray
         self.edge_color = "rgb <1, 0, 0>"
         self.edge_radius= 0.03
@@ -789,14 +828,14 @@ class Mite(Polyhedron):
                       ('origin', 'a', 'h'),
                       ('ab', 'a', 'h'))
 
-        self.edges = self._distill()
+        super().__init__(omni)
         
 class Amod(Polyhedron):
     """
     A = A module in Synergetics
     """
 
-    def __init__(self):
+    def __init__(self, omni=False):
         # POV-Ray
         self.edge_color = "rgb <1, 0, 0>"
         self.edge_radius= 0.03
@@ -829,7 +868,7 @@ class Amod(Polyhedron):
                       ('E', 'D', 'F'),
                       ('C', 'D', 'E'))
 
-        self.edges = self._distill()
+        super().__init__(omni)
         
 class Struts(Polyhedron):
     
@@ -912,7 +951,6 @@ class Struts(Polyhedron):
                 # print("Not found")
         return keep     
         
-from itertools import permutations
 g = permutations((2,1,1,0))
 unique = {p for p in g}  # set comprehension
 
