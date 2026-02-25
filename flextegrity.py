@@ -156,13 +156,7 @@ class Polyhedron:
             
         self.unique = unique # hack to keep edges as symbolic pairs
         return edges 
-    
-    def make_json(self):
-        with open("verts_{}.json".format(self.name)) as T:
-            json.dumps(self.vertices, T)
-        with open("faces_{}.json".format(self.name)) as T:            
-            json.dumps(self.faces, T)
-            
+
     def _omni(self):
         """
         omnitriangulate faces pre distillation
