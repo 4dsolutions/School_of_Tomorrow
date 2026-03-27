@@ -34,11 +34,11 @@ sfactor = Svol/Evol
 
 CLOSEUP1 = \
 """
-   
+
 // perspective (default) camera
 camera {
-  location  <3.0, 3.0, 3.1>
-  rotate    <0, 0, 0>
+  location  <2.0, 2.6, 2.1>
+  rotate    <-90, 180, -80>
   look_at   <0.0, 0.0,  0.2>
   right     x*image_width/image_height
 }
@@ -690,7 +690,50 @@ def test10():
         draw_vert(-B, green, sml_size, T)
         draw_vert(-C, blue, sml_size, T)
         draw_vert(-D, yellow, sml_size, T)        
+
+def test11():
+    """
+    The Platonics as three dual pairs 
+    in the context of the Synergetics
+    Concentric Hierarchy
+
+    Returns
+    -------
+    None.
     
+    Outputs
+    -------
+    .pov file suitable for rendering
+    in POV-Ray or other compatible engine
+
+    """
+    
+    # dual pair
+    orange_guy = Tetrahedron()
+    black_guy = InvTetrahedron()
+    
+    # dual pair
+    green_guy = Cube()
+    red_guy = Octahedron()
+    
+    # dual pair
+    cyan_guy = Icosahedron()
+    brown_guy = PD()
+    
+    # write out
+    with open("platonics.pov", "w") as T:
+        T.write(pov_header) 
+        T.write(CLOSEUP1)
+        
+        for shape in (orange_guy, black_guy, 
+                      green_guy, red_guy, 
+                      cyan_guy, brown_guy):
+        
+            shape.edge_radius = 0.03
+            shape.vert_radius = 0.03
+            
+            draw_poly(shape, T)
+            
 if __name__ == "__main__":
-    test9()
+    test11()
                         
