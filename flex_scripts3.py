@@ -5,6 +5,7 @@ Created on Thurs Feb 13 2025
 
 @author: K. Urner
 
+Mar 27 2026: add Platonics (test11)
 Feb  7 2026: add A module
 Feb  5 2026: new tests
 Apr  8 2025: make this 2nd of 2 files, flex_scripts1.py being the first
