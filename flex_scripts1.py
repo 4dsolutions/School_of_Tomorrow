@@ -10,9 +10,9 @@ Apr 8, 2025: slice this off from the end of flextegrity.py, make standalone
 """
 from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron, RT
 from flextegrity import Tetrahedron, InvTetrahedron, RD, PD, Icosahedron
-from flextegrity import draw_poly, draw_vert, half, ORIGIN, PHI
+from flextegrity import draw_poly, draw_vert, half, ORIGIN, PHI, rt2, one
 
-from math import sqrt as rt2
+import sympy as sy
 
 from itertools import permutations
 g = permutations((2,1,1,0))
@@ -220,10 +220,19 @@ def test9():
     out.close()
 
 def test10():
+    """
+    RT starts out SuperRT. 
+    RT() * 1/phi shrinks it to RT_E
+    RT_E * (2/3)^(1/3)*(phi/sqrt(2)) shrinks it to RT_T
+    Combining the two steps:
+    Simplify (1/phi)*(2/3)^(1/3)*(phi/sqrt(2)) 
+                   where phi = (1 + sqrt(5))/2
+    Answer: 1/pow(18, 1/6) i.e. 1 over 6th root of 18.
+    """
     out = open("ball_in_rt_t.pov", "w")
     out.write(pov_header) 
     draw_vert(ORIGIN, "rgb <1, 0, 0>", half, out)
-    rt = RT() * (1/(3*rt2(2)))**(1/3)  # RT_T
+    rt = RT() * (one/(sy.Integer(18) ** (one/6))) # RT_T
     rt.face_color = "T_Stone17"
     draw_poly(rt, out, v=False, e=False, f=True, texture=True)
     out.close()

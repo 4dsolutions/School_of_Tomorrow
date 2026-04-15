@@ -1420,10 +1420,12 @@ def test40():
 def test41():
     with open("testing41.pov", "w") as f:
         f.write(pov_header)
+        f.write(BRYG)
+        
         cu = Cube()
         cu.vert_radius = 0.01
         cu.edge_radius = 0.01
-        cu2 = Cube() * 2
+        cu2 = Cube() * 2 * rt2(2)
         cu2.vert_radius = 0.01
         cu2.edge_radius = 0.01
         oc = Octahedron() 
@@ -1475,6 +1477,17 @@ def test41():
         draw_edge(c, brown, 0.02, f)
         draw_edge(d, brown, 0.02, f)
 
+        # 8 cube corners
+        draw_vert(Vector(( 1,  1,  1)), orange, 0.03, f)
+        draw_vert(Vector(( 1, -1,  1)), orange, 0.03, f)
+        draw_vert(Vector(( 1,  1, -1)), orange, 0.03, f)        
+        draw_vert(Vector(( 1, -1, -1)), orange, 0.03, f)
+        
+        draw_vert(Vector((-1, -1, -1)), orange, 0.03, f)
+        draw_vert(Vector((-1, -1,  1)), orange, 0.03, f)          
+        draw_vert(Vector((-1,  1, -1)), orange, 0.03, f)
+        draw_vert(Vector((-1,  1,  1)), orange, 0.03, f)
+        
         draw_poly(cu, f)
         draw_poly(cu2, f)
         # draw_poly(oc, f)
@@ -1752,4 +1765,4 @@ def test47():
         # draw_S3()
         
 if __name__ == "__main__":
-    test47()
+    test41()
