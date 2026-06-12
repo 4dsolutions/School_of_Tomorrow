@@ -13,12 +13,14 @@ Feb 19 2025: import PHI as sympy object vs using math.sqrt
 """
 
 from flextegrity import pov_header, Cuboctahedron, Cube, Octahedron, RT, Amod
-from flextegrity import Tetrahedron, InvTetrahedron, RD, PD, Icosahedron, Mite
+from flextegrity import Tetrahedron, InvTetrahedron, RD, PD, Icosahedron
 from flextegrity import Edge, draw_edge, draw_poly, draw_vert, half, ORIGIN, PHI
 from qrays import Qvector, Vector, A, B, C, D
 
-import numpy as np
-import sympy as sy
+# might become necessary
+# import numpy as np
+# import sympy as sy
+
 from sympy import sqrt as rt2, sin, cos
 from mpmath import radians
 
@@ -734,7 +736,46 @@ def test11():
             shape.vert_radius = 0.03
             
             draw_poly(shape, T)
+
+def test12():
+    
+    with open("RT_in_Cube.pov", "w") as T:
+        T.write(pov_header)
+        
+        IW = Icosahedron() * half * sfactor
+        octa = Octahedron()
+        cube = Cube()
+        rt = RT() * 0.540181513475453
+        print(rt.volume.evalf())
+    
+        for shape in (IW, octa, cube, rt):
+        
+            shape.edge_radius = 0.01
+            shape.vert_radius = 0.01
             
+            draw_poly(shape, T)
+
+            
+def test13():
+    
+    with open("RT_in_Cube.pov", "w") as T:
+        T.write(pov_header)
+        
+        IW = Icosahedron() * half * sfactor
+        octa = Octahedron()
+        cube = Cube()
+        rt = RT() * 0.540181513475453
+        rd = RD() * (rt2(2)/PHI)
+        print(rt.volume.evalf())
+        print(rd.volume.evalf())
+    
+        for shape in (IW, octa, cube, rt, rd):
+        
+            shape.edge_radius = 0.01
+            shape.vert_radius = 0.01
+            
+            draw_poly(shape, T)
+             
 if __name__ == "__main__":
-    test11()
-                        
+    test12()
+                    
