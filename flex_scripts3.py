@@ -234,7 +234,7 @@ def test3():
 
 def test4():
     """
-    [(0, 'sin', 'cos', 0),
+    ((0, 'sin', 'cos', 0),
      ('sin', 0, 'cos', 0),
      (0, 'sin', 0, 'cos'),
      ('sin', 'cos', 0, 0),
@@ -575,7 +575,7 @@ def test10():
     blue    = "rgb <0, 0, 1>"
     yellow  = "rgb <1, 1, 0>"
     red     = "rgb <1, 0, 0>"
-    magenta = "rgb <{}, {}, {}>".format(1, 0, 1)
+    # magenta = "rgb <{}, {}, {}>".format(1, 0, 1)
     orange  = "rgb <{}, {}, {}>".format(1, 128/255, 0)
     
     OX = Edge(Vector((0, 0, 0)), Vector(( 1, 0, 0)))
@@ -775,7 +775,131 @@ def test13():
             shape.vert_radius = 0.01
             
             draw_poly(shape, T)
-             
+
+def test14():
+    # coords for PD and Icosa from Johnny Tri Goode 
+    
+    from tetravolume import root5
+    
+    𝛟  = PHI
+    PD_coords = {'a':(0 , 𝛟 , 1/𝛟 , root5), 
+                 'b':(𝛟 , 0 , root5 , 1/𝛟), 
+                 'c':(1/𝛟 , root5 , 0 , 𝛟),
+                 'd':(root5 , 1/𝛟, 𝛟 , 0), 
+                 
+                 'e':(𝛟 , 1/𝛟 , 0 , root5),
+                 'f':(0 , root5 , 𝛟 , 1/𝛟),
+                 'g':(root5 , 0 , 1/𝛟 , 𝛟),
+                 'h':(1/𝛟 , 𝛟 , root5 , 0), 
+                 
+                 'i':(1/𝛟 , 0 , 𝛟 , root5),
+                 'j':(root5 , 𝛟 , 0 , 1/𝛟), 
+                 'k':(0 , 1/𝛟 , root5 , 𝛟),
+                 'l':(𝛟 , root5 , 1/𝛟 , 0),
+                 
+                 'm':(1 , 1 , 1 , 0),
+                 'n':(1 , 1 , 0 , 1),
+                 'o':(1 , 0 , 1 , 1),
+                 'p':(0 , 1 , 1 , 1),
+
+                 'q':(0 , 0 , 0 , 1),
+                 'r':(0 , 0 , 1 , 0),
+                 's':(0 , 1 , 0 , 0),
+                 't':(1 , 0 , 0 , 0)}
+    
+    vertexes = {}
+    for k, v in PD_coords.items():
+        vertexes[k] = Qvector(v)
+    
+    class NewPD(PD):
+        pass
+    
+    pd = NewPD()
+    pd.vertexes = vertexes
+    pd.faces = (('c', 'j', 'e'),
+                ('k', 'i', 'b'),
+                ('a', 'i', 'e'),
+                ('a', 'c', 'e'),
+                ('a', 'k', 'i'),
+                ('a', 'c', 'f'),
+                ('a', 'k', 'f'),
+                ('l', 'd', 'j'),
+                ('l', 'c', 'f'),
+                ('l', 'c', 'j'),
+                ('g', 'j', 'e'),
+                ('g', 'd', 'j'),
+                ('g', 'd', 'b'),
+                ('g', 'i', 'e'),
+                ('g', 'i', 'b'),
+                ('h', 'l', 'f'),
+                ('h', 'l', 'd'),
+                ('h', 'd', 'b'),
+                ('h', 'k', 'f'),
+                ('h', 'k', 'b'))
+    
+    pd.edges = pd._distill() 
+
+    
+    IC_coords =  {'a':(0 , 1 , 𝛟 , 𝛟**2),
+                  'b':(1 , 0 , 𝛟**2 , 𝛟),
+                  'c':(𝛟 , 𝛟**2 , 0 , 1),
+                  'd':(𝛟**2 , 𝛟, 1 , 0 ),
+                  'e':(1 , 𝛟 , 0 , 𝛟**2),
+                  'f':(0, 𝛟**2 , 1 , 𝛟 ),
+                  'g':(𝛟**2 , 0 , 𝛟 , 1),
+                  'h':(𝛟 , 1 , 𝛟**2 , 0),
+                  'i':(𝛟 , 0 , 1 , 𝛟**2),
+                  'j':(𝛟**2 , 1 , 0 , 𝛟),
+                  'k':(0 , 𝛟 , 𝛟**2 , 1),
+                  'l':(1 , 𝛟**2 , 𝛟 , 0)}
+    
+    vertexes = {}
+    for k, v in IC_coords.items():
+        vertexes[k] = Qvector(v)
+        
+    class NewIcosa(Icosahedron):
+        pass
+    
+    magenta = "rgb <{}, {}, {}>".format(1, 0, 1)    
+    ic = NewIcosa()
+    ic.edge_radius = 0.03
+    ic.edge_color  = magenta
+    ic.vert_color  = magenta
+    
+    ic.vertexes = vertexes    
+    ic.faces = (('a', 'e', 'i'),
+                ('b', 'g', 'i'),
+                ('b', 'a', 'k'),
+                ('b', 'a', 'i'),
+                ('j', 'e', 'i'),
+                ('j', 'g', 'i'),
+                ('f', 'a', 'e'),
+                ('f', 'l', 'k'),
+                ('f', 'a', 'k'),
+                ('h', 'b', 'g'),
+                ('h', 'l', 'k'),
+                ('h', 'b', 'k'),
+                ('c', 'j', 'e'),
+                ('c', 'f', 'l'),
+                ('c', 'f', 'e'),
+                ('d', 'j', 'g'),
+                ('d', 'h', 'l'),
+                ('d', 'h', 'g'),
+                ('d', 'c', 'l'),
+                ('d', 'c', 'j'))
+        
+    ic.edges = ic._distill()
+    
+    ch_ic = Icosahedron()
+    
+    # write out
+    with open("pd.pov", "w") as T:
+        T.write(pov_header)   
+
+        draw_poly(ic, T)
+        draw_poly(ch_ic, T)
+
+    
 if __name__ == "__main__":
-    test12()
+    test14()
                     
